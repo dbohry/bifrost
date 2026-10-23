@@ -13,9 +13,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/dbohry/bifrost/internal/auth"
 	"github.com/dbohry/bifrost/internal/config"
 	"github.com/dbohry/bifrost/internal/db"
 	"github.com/dbohry/bifrost/internal/server"
+	"github.com/dbohry/bifrost/internal/store"
 	"github.com/dbohry/bifrost/internal/webui"
 )
 
@@ -25,9 +27,10 @@ var version = "dev"
 const usage = `Usage: bifrost [command]
 
 Commands:
-  serve        Run the server (default)
-  healthcheck  Exit 0 if a running server is healthy, 1 if not
-  version      Print the version
+  serve                    Run the server (default)
+  reset-password <user>    Give a user a temporary password and sign them out
+  healthcheck              Exit 0 if a running server is healthy, 1 if not
+  version                  Print the version
 
 Environment:
   BIFROST_ADDR       Listen address (default ":8080")
@@ -44,6 +47,8 @@ func main() {
 	switch cmd {
 	case "serve":
 		err = serve(config.Load())
+	case "reset-password":
+		err = resetPassword(config.Load(), os.Args[2:])
 	case "healthcheck":
 		err = healthcheck(config.Load())
 	case "version":
@@ -75,6 +80,10 @@ func serve(cfg config.Config) error {
 		return err
 	}
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	go purgeSessions(ctx, store.New(conn), log)
+
 	srv := &http.Server{
 		Addr:              cfg.Addr,
 		Handler:           server.New(conn, webui.Assets(), version),
@@ -83,9 +92,6 @@ func serve(cfg config.Config) error {
 		WriteTimeout:      30 * time.Second,
 		IdleTimeout:       60 * time.Second,
 	}
-
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
 
 	errc := make(chan error, 1)
 	go func() { errc <- srv.ListenAndServe() }()
@@ -103,6 +109,65 @@ func serve(cfg config.Config) error {
 	if err := srv.Shutdown(shutdownCtx); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
+	return nil
+}
+
+// purgeSessions deletes expired sessions once at start-up and then hourly.
+func purgeSessions(ctx context.Context, st *store.Store, log *slog.Logger) {
+	run := func() {
+		n, err := st.PurgeExpiredSessions(ctx, time.Now())
+		switch {
+		case err != nil && ctx.Err() == nil:
+			log.Error("purge expired sessions", "err", err)
+		case n > 0:
+			log.Info("purged expired sessions", "count", n)
+		}
+	}
+
+	run()
+	tick := time.NewTicker(time.Hour)
+	defer tick.Stop()
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-tick.C:
+			run()
+		}
+	}
+}
+
+// resetPassword is the way back in for someone who is locked out. It runs on
+// the machine that hosts Bifrost, so it needs access to the data directory.
+func resetPassword(cfg config.Config, args []string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("usage: bifrost reset-password <username>")
+	}
+	username := args[0]
+
+	// Do not create an empty database by accident if the data directory is wrong.
+	if _, err := os.Stat(cfg.DBPath()); err != nil {
+		return fmt.Errorf("no Bifrost database at %s (is BIFROST_DATA_DIR right?)", cfg.DBPath())
+	}
+	conn, err := db.Open(cfg.DBPath())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	if err := db.Migrate(conn); err != nil {
+		return err
+	}
+
+	temp, err := auth.ResetPassword(context.Background(), store.New(conn), username)
+	if errors.Is(err, store.ErrNotFound) {
+		return fmt.Errorf("there is no user named %q", username)
+	}
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Temporary password for %s: %s\n\n", username, temp)
+	fmt.Println("They have been signed out everywhere and must choose a new password the next time they sign in.")
 	return nil
 }
 

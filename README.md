@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestone 0 (skeleton and pipeline) is in place: the server starts, applies database migrations, serves a placeholder page and answers health checks. There are no accounts or dashboard yet. See the build order below.
+Milestones 0 and 1 are in place: the server runs, and accounts work (first-run setup, sign in and out, sessions, password reset from the host). After signing in you see a placeholder page. The dashboard comes next. See the build order below.
 
 ## Running it
 
@@ -15,7 +15,24 @@ docker build -t bifrost .
 docker run -d --name bifrost -p 8080:8080 -v bifrost-data:/data bifrost
 ```
 
-Then open http://localhost:8080. Everything Bifrost stores lives in the `/data` volume.
+Then open http://localhost:8080. The first visit asks you to create the administrator account. Whoever opens the page first creates it, so do this before exposing Bifrost to anyone else. Everything Bifrost stores lives in the `/data` volume.
+
+### Locked out?
+
+There is no password reset on the sign-in page. Reset it from the machine that runs Bifrost:
+
+```sh
+docker exec bifrost /bifrost reset-password <username>
+```
+
+It prints a temporary password and signs that user out everywhere. They must choose a new password the next time they sign in.
+
+### Sessions and passwords
+
+- Passwords are hashed with argon2id. Browsers get a random session token in an `HttpOnly`, `SameSite=Lax` cookie, and only a hash of the token is stored.
+- Without "Keep me signed in", a session ends 12 hours after its last use. With it, 30 days.
+- The cookie is marked `Secure` when the request arrives over HTTPS (directly, or through a reverse proxy that sends `X-Forwarded-Proto: https`). Plain HTTP on a home network works too.
+- Sign-in attempts are rate limited per address and per username. The limits are kept in memory, so a restart clears them. Behind a reverse proxy every request appears to come from the proxy's address, so the per-address limit is shared.
 
 Settings, all optional:
 
@@ -39,8 +56,8 @@ You need Go 1.26 and Node 22. `make help` lists the targets:
 
 Project layout:
 
-- `cmd/bifrost`: the binary and its subcommands (`serve`, `healthcheck`, `version`)
-- `internal/config`, `internal/db`, `internal/server`: configuration, SQLite with migrations, HTTP handlers
+- `cmd/bifrost`: the binary and its subcommands (`serve`, `reset-password`, `healthcheck`, `version`)
+- `internal/config`, `internal/db`, `internal/store`, `internal/auth`, `internal/server`: configuration, SQLite with migrations, data access, passwords and rate limiting, HTTP handlers
 - `internal/webui`: embeds the built frontend
 - `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
 - Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up
@@ -156,4 +173,4 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 ## Open decisions
 
 - How status checks and widgets should run once they are added (proposal: a plain HTTP request every 60 seconds, configurable per app).
-- Exact command and flag names for the operations subcommands.
+- Exact flag names for the operations subcommands (`reset-password` takes only a username for now).

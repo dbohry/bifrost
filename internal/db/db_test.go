@@ -55,12 +55,16 @@ func TestMigrateAppliesOnceAndIsIdempotent(t *testing.T) {
 		}
 	}
 
+	embedded, err := load(migrationFiles)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var n int
 	if err := conn.QueryRow(`SELECT COUNT(*) FROM schema_migrations`).Scan(&n); err != nil {
 		t.Fatal(err)
 	}
-	if n != 1 {
-		t.Errorf("schema_migrations has %d rows, want 1", n)
+	if n != len(embedded) {
+		t.Errorf("schema_migrations has %d rows, want %d", n, len(embedded))
 	}
 	if _, err := conn.Exec(`INSERT INTO meta (key, value) VALUES ('k', 'v')`); err != nil {
 		t.Errorf("meta table missing: %v", err)
