@@ -117,10 +117,6 @@
         </label>
       {/each}
     </div>
-    <p class="hint">
-      Shown in your top bar and as your browser tab icon. App icon and Arches use your theme's accent colour.
-      Spectrum keeps its own colours.
-    </p>
   </fieldset>
 </section>
 
