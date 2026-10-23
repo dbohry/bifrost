@@ -66,19 +66,20 @@
     </ul>
   {/if}
 
-  <aside class="locked-out">
-    <h2>Locked out, or forgot a password?</h2>
+  <section class="locked-out" aria-labelledby="locked-out-title">
+    <h2 id="locked-out-title">Locked out, or forgot a password?</h2>
     <p>
       Anyone can be given a new temporary password above. If the administrator is the one locked out, there is no
       reset on the sign-in page. Reset it from the machine that runs Bifrost instead. This needs access to that
       machine, so only the person who runs it can do it.
     </p>
-    <pre><code>docker exec bifrost /bifrost reset-password &lt;username&gt;</code></pre>
+    <!-- svelte-ignore a11y_no_noninteractive_tabindex: a scrollable block must be reachable by keyboard -->
+    <pre tabindex="0"><code>docker exec bifrost /bifrost reset-password &lt;username&gt;</code></pre>
     <ul>
       <li>It prints a temporary password. The user must choose a new one the next time they sign in.</li>
       <li>Sessions on all devices are signed out after a reset.</li>
     </ul>
-  </aside>
+  </section>
 </section>
 
 {#if dialog?.kind === 'add'}

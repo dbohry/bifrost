@@ -28,7 +28,7 @@
 
     {@render children()}
   </main>
-  <p class="footer">Bifrost{session.version ? ` v${session.version}` : ''}</p>
+  <footer class="footer">Bifrost{session.version ? ` v${session.version}` : ''}</footer>
 </div>
 
 <style>

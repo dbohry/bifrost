@@ -6,3 +6,4 @@ data
 frontend/node_modules
 internal/webui/dist
 README.md
+e2e
