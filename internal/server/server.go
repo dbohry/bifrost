@@ -54,6 +54,7 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.Handle("PUT /api/apps/{id}", s.authed(false, s.updateApp))
 	mux.Handle("DELETE /api/apps/{id}", s.authed(false, s.deleteApp))
 	mux.Handle("GET /api/status", s.authed(false, s.getStatus))
+	mux.Handle("GET /api/status/{id}/history", s.authed(false, s.statusHistory))
 	mux.Handle("GET /api/status/settings", s.authed(false, s.getStatusSettings))
 	mux.Handle("PUT /api/status/settings", s.authed(false, s.setStatusSettings))
 	mux.Handle("POST /api/status/test", s.authed(false, s.testStatus))

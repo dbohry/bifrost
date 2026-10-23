@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status checks: 24-hour history</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 1000px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; padding: 40px 32px 64px">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Status checks: the last 24 hours</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: {{c.muted}}; max-width: 70ch">The status card gets one thin bar per hour, oldest on the left. A bar is green when every check that hour passed. The more checks failed, the more of the bar fills red from the bottom. Hours with no data are empty.</p>
+    </div>
+
+    <!-- option A: the cards -->
+    <section style="display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Option A · one bar per hour (24 bars)</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; align-items: start">
+        <sc-for list="{{cards}}" as="k" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; box-sizing: border-box; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.25); font-size: 12px">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{k.dot}}"></span>{{k.title}}</div>
+              <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; color: {{c.muted}}">
+                <sc-for list="{{k.rows}}" as="r" hint-placeholder-count="3"><span>{{r.a}}</span><span style="color: {{c.text}}">{{r.b}}</span></sc-for>
+              </div>
+              <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 10px; border-top: 1px solid {{c.border}}">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 8px; color: {{c.muted}}"><span>Last 24 hours</span><span style="color: {{c.text}}; font-weight: 600">{{k.uptime}}</span></div>
+                <div role="img" aria-label="{{k.alt}}" style="display: flex; align-items: stretch; gap: 2px; height: 28px">
+                  <sc-for list="{{k.bars}}" as="b" hint-placeholder-count="24">
+                    <div style="flex: 1; min-width: 0; position: relative; border-radius: 2px; background: {{b.bg}}; outline: {{b.outline}}; overflow: hidden">
+                      <div style="position: absolute; left: 0; right: 0; bottom: 0; height: {{b.fail}}; background: {{c.bad}}"></div>
+                    </div>
+                  </sc-for>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: {{c.muted}}"><span>24 h ago</span><span>{{k.foot}}</span><span>now</span></div>
+              </div>
+            </div>
+            <div style="font-size: 12px; line-height: 1.5; color: {{c.muted}}"><strong style="color: {{c.text}}">{{k.name}}.</strong> {{k.note}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- hovering a bar -->
+    <section style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+      <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Pointing at one bar</h2>
+        <div style="position: relative; padding: 46px 16px 14px; box-sizing: border-box; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 12px">
+          <div style="display: flex; align-items: stretch; gap: 2px; height: 28px">
+            <sc-for list="{{hoverBars}}" as="b" hint-placeholder-count="24">
+              <div style="flex: 1; min-width: 0; position: relative; border-radius: 2px; background: {{b.bg}}; outline: {{b.outline}}; overflow: hidden">
+                <div style="position: absolute; left: 0; right: 0; bottom: 0; height: {{b.fail}}; background: {{c.bad}}"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="position: absolute; top: 10px; left: {{hoverLeft}}; transform: translateX(-50%); padding: 6px 10px; border-radius: 8px; background: {{c.text}}; color: {{c.bg}}; font-size: 12px; white-space: nowrap">14:00 to 15:00 · 12 of 60 checks failed</div>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.5; color: {{c.muted}}">Shows on hover or keyboard focus. The bars are in the page's accessibility text too: "Online for 23 of the last 24 hours, with failures between 14:00 and 15:00".</p>
+      </div>
+
+      <!-- option B -->
+      <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Option B · 15-minute slices (96 bars)</h2>
+        <div style="padding: 14px 16px; box-sizing: border-box; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 12px; display: flex; flex-direction: column; gap: 6px; font-size: 12px">
+          <div style="display: flex; justify-content: space-between; color: {{c.muted}}"><span>Last 24 hours</span><span style="color: {{c.text}}; font-weight: 600">99.7% online</span></div>
+          <div style="display: flex; align-items: stretch; gap: 1px; height: 28px">
+            <sc-for list="{{fine}}" as="b" hint-placeholder-count="96">
+              <div style="flex: 1; min-width: 0; position: relative; background: {{b.bg}}; overflow: hidden">
+                <div style="position: absolute; left: 0; right: 0; bottom: 0; height: {{b.fail}}; background: {{c.bad}}"></div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 11px; color: {{c.muted}}"><span>24 h ago</span><span>now</span></div>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.5; color: {{c.muted}}">More detail, like the picture you sent, but each bar is about 3 px wide in a 320 px card and too thin to point at. Hourly is easier to read and to hover. Storage is four times larger and still tiny.</p>
+      </div>
+    </section>
+
+    <!-- how it is kept -->
+    <section style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px dashed {{c.border}}; border-radius: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">What it costs</h2>
+      <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.5">
+        <sc-for list="{{costs}}" as="q" hint-placeholder-count="5">
+          <li><strong>{{q.h}}</strong> <span style="color: {{c.muted}}">{{q.t}}</span></li>
+        </sc-for>
+      </ul>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"dark","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light: { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', ok:'#2f9e63', bad:'#d9480f' },
+      dark:  { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', ok:'#4cc38a', bad:'#ff7a59' },
+      dracula: { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', ok:'#50fa7b', bad:'#ff5555' }
+    };
+    const c = P[this.props.theme] || P.dark;
+    // failure share per bar, or null for no data. Oldest first.
+    const bar = (v) => v === null
+      ? { bg: 'transparent', outline: '1px dashed ' + c.border, fail: '0%' }
+      : { bg: c.ok, outline: 'none', fail: Math.round(v * 100) + '%' };
+    const make = (n, f) => Array.from({ length: n }, (_, i) => bar(f(i)));
+
+    const healthy = make(24, (i) => (i === 14 ? 0.2 : 0));
+    const down = make(24, (i) => (i < 9 ? 0 : i === 9 ? 0.08 : i >= 21 ? 1 : i === 16 ? 0.35 : 0));
+    const fresh = make(24, (i) => (i < 22 ? null : 0));
+    const fine = make(96, (i) => (i >= 56 && i < 59 ? [0.3, 1, 0.4][i - 56] : 0));
+    const hoverBars = make(24, (i) => (i === 14 ? 0.2 : 0));
+
+    return {
+      c, fine, hoverBars, hoverLeft: 'calc(16px + (100% - 32px) * 14.5 / 24)',
+      cards: [
+        { name: 'Healthy', dot: c.ok, title: 'boards is online', uptime: '99.7% online', foot: '12 h ago', bars: healthy,
+          alt: 'Online for 23 of the last 24 hours, with failures between 14:00 and 15:00',
+          rows: [{ a: 'Last check', b: '2 min ago' }, { a: 'Answered in', b: '70 ms' }, { a: 'Checked', b: 'https://boards.blacktilde.com' }],
+          note: 'One bad hour shows as a short red fill, not a red bar. A single dropped check never turns a bar red on its own.' },
+        { name: 'Down now', dot: c.bad, title: 'Asustor is offline', uptime: '86.1% online', foot: '12 h ago', bars: down,
+          alt: 'Offline for the last 3 hours, with some failures earlier',
+          rows: [{ a: 'Since', b: '3 hours ago' }, { a: 'Last check', b: '12 seconds ago' }, { a: 'Reason', b: 'Connection refused' }, { a: 'Checked', b: 'http://192.168.1.20:8000' }],
+          note: 'The recent outage is solid red on the right, so you can see at a glance how long, and whether it kept happening before.' },
+        { name: 'New app', dot: c.ok, title: 'Immich is online', uptime: '100% online', foot: 'collecting history', bars: fresh,
+          alt: 'Only the last 2 hours have been recorded',
+          rows: [{ a: 'Last check', b: '20 seconds ago' }, { a: 'Answered in', b: '41 ms' }, { a: 'Checked', b: 'http://192.168.1.30:2283' }],
+          note: 'Hours before the check was switched on stay empty, and the percentage counts only hours with data.' }
+      ],
+      costs: [
+        { h: 'Space.', t: 'One row per app per hour holding two numbers: checks made and checks failed. 24 hours of 100 apps is 2,400 rows, about 100 KB. A week would be under 1 MB.' },
+        { h: 'Writes.', t: 'Counts are kept in memory and saved every 5 minutes in one batch, and again on shutdown. That is a few small writes a minute, never one per check.' },
+        { h: 'Clean-up.', t: 'Rows older than 24 hours (or 7 days, if you want a longer view later) are deleted as part of the same batch.' },
+        { h: 'Restarts.', t: 'History survives them. So can the "Offline since" time, which today starts again after a restart.' },
+        { h: 'Needs a decision.', t: 'Hourly or 15-minute bars, and whether the card also shows the percentage. The card grows by about 60 px, so it opens beside the tile when there is room.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

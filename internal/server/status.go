@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"strconv"
 	"time"
@@ -114,4 +115,64 @@ func (s *server) testStatus(w http.ResponseWriter, r *http.Request, user store.U
 		"up": o.Up, "latencyMs": o.Latency.Milliseconds(), "code": o.Code, "reason": o.Reason,
 		"address": address, "timeout": fmt.Sprintf("%d", int(settings.Timeout/time.Second)),
 	})
+}
+
+// historyBars is how many hours the card shows, oldest first, ending with the current hour.
+const historyBars = 24
+
+type hourJSON struct {
+	Start    int64 `json:"start"` // Unix time the hour began
+	Checks   int64 `json:"checks"`
+	Failures int64 `json:"failures"`
+}
+
+// statusHistory returns the last 24 hours of checks for one app, as 24 hourly counts
+// and the share of checks that passed. An app that is not the user's has no history.
+func (s *server) statusHistory(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
+	id, ok := appID(w, r)
+	if !ok {
+		return
+	}
+	current := s.now().Unix() / 3600
+	first := current - historyBars + 1
+
+	saved, err := s.store.StatusHours(r.Context(), user.ID, id, first)
+	if err != nil {
+		serverError(w, err)
+		return
+	}
+	byHour := map[int64]*hourJSON{}
+	for h := first; h <= current; h++ {
+		byHour[h] = &hourJSON{Start: h * 3600}
+	}
+	add := func(c store.HourCount) {
+		if b := byHour[c.Hour]; b != nil {
+			b.Checks += c.Checks
+			b.Failures += c.Failures
+		}
+	}
+	for _, c := range saved {
+		add(c)
+	}
+	// Counts waiting to be saved belong to the latest hours. Only apps the user owns get this far:
+	// the monitor's results are per user.
+	if len(saved) > 0 || s.monitor.Owns(user.ID, id) {
+		for _, c := range s.monitor.Pending(id) {
+			add(c)
+		}
+	}
+
+	out := make([]hourJSON, 0, historyBars)
+	var checks, failures int64
+	for h := first; h <= current; h++ {
+		out = append(out, *byHour[h])
+		checks += byHour[h].Checks
+		failures += byHour[h].Failures
+	}
+	var uptime *float64
+	if checks > 0 {
+		v := math.Round(float64(checks-failures)/float64(checks)*1000) / 10
+		uptime = &v
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"hours": out, "uptime": uptime})
 }

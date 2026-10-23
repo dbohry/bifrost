@@ -83,3 +83,65 @@ func (s *Store) CheckTargets(ctx context.Context) ([]CheckTarget, error) {
 	}
 	return out, rows.Err()
 }
+
+// HourCount is how many checks were made for one app in one hour, and how many failed.
+type HourCount struct {
+	AppID    int64
+	Hour     int64 // Unix time divided by 3600
+	Checks   int64
+	Failures int64
+}
+
+// AddStatusCounts adds counts to the hours they belong to, in one transaction. An app that
+// has been deleted since is skipped.
+func (s *Store) AddStatusCounts(ctx context.Context, counts []HourCount) error {
+	if len(counts) == 0 {
+		return nil
+	}
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	for _, c := range counts {
+		_, err := tx.ExecContext(ctx,
+			`INSERT INTO status_hours (app_id, hour, checks, failures)
+			 SELECT id, ?, ?, ? FROM apps WHERE id = ?
+			 ON CONFLICT (app_id, hour) DO UPDATE SET
+			   checks = checks + excluded.checks, failures = failures + excluded.failures`,
+			c.Hour, c.Checks, c.Failures, c.AppID)
+		if err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
+// StatusHours returns the saved counts for one of a user's apps from hour `since` on. An app
+// that is not the user's gives nothing.
+func (s *Store) StatusHours(ctx context.Context, userID, appID, since int64) ([]HourCount, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT h.app_id, h.hour, h.checks, h.failures
+		   FROM status_hours h JOIN apps a ON a.id = h.app_id
+		  WHERE a.id = ? AND a.user_id = ? AND h.hour >= ? ORDER BY h.hour`,
+		appID, userID, since)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var out []HourCount
+	for rows.Next() {
+		var c HourCount
+		if err := rows.Scan(&c.AppID, &c.Hour, &c.Checks, &c.Failures); err != nil {
+			return nil, err
+		}
+		out = append(out, c)
+	}
+	return out, rows.Err()
+}
+
+// PruneStatusHours deletes counts for hours before `before`.
+func (s *Store) PruneStatusHours(ctx context.Context, before int64) error {
+	_, err := s.db.ExecContext(ctx, `DELETE FROM status_hours WHERE hour < ?`, before)
+	return err
+}

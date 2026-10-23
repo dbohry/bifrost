@@ -84,8 +84,10 @@ func newServer(conn *sql.DB, version string) *server {
 		panic(err) // built into the binary, and a test checks it
 	}
 	st := store.New(conn)
+	mon := status.NewMonitor(st, slog.Default())
+	mon.SetHistory(st)
 	return &server{
-		monitor:      status.NewMonitor(st, slog.Default()),
+		monitor:      mon,
 		testByUser:   auth.NewLimiter(30, time.Minute),
 		themes:       bundled,
 		catalog:      apps,

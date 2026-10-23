@@ -83,6 +83,11 @@ export type StatusResult = {
 /** How often apps are checked and how long to wait, both in seconds. */
 export type StatusSettings = { interval: number; timeout: number };
 
+/** Checks made in one hour: when it began (Unix seconds), how many, and how many failed. */
+export type HourBar = { start: number; checks: number; failures: number };
+/** The last 24 hours of an app, oldest first, and the share of checks that passed (null before any). */
+export type StatusHistory = { hours: HourBar[]; uptime: number | null };
+
 export type TestResult = { up: boolean; latencyMs: number; code: number; reason: string; address: string };
 
 /** An error response from the server. `message` is safe to show to the user. */
@@ -167,6 +172,7 @@ export const api = {
   /** Saves the dashboard order. `ids` must list every one of the user's apps. */
   reorderApps: (ids: number[]) => request<void>('PUT', '/api/apps/order', { ids }),
   status: () => request<{ statuses: Record<string, StatusResult> }>('GET', '/api/status'),
+  statusHistory: (id: number) => request<StatusHistory>('GET', `/api/status/${id}/history`),
   statusSettings: () => request<{ settings: StatusSettings }>('GET', '/api/status/settings'),
   saveStatusSettings: (v: StatusSettings) => request<{ settings: StatusSettings }>('PUT', '/api/status/settings', v),
   testStatus: (url: string, strict: boolean, insecure: boolean) =>
