@@ -60,6 +60,23 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   await page.keyboard.type('gam');
   check('search narrows to Gamma', (await names()).join() === 'Gamma', (await names()).join());
 
+  // the tab icon follows the chosen logo
+  const icon = () => page.evaluate(() => decodeURIComponent(document.querySelector('link[rel=icon]').href.replace('data:image/svg+xml,', '')));
+  const choose = async (logo) => {
+    await page.evaluate((l) => fetch('/api/preferences', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ mode: 'light', lightTheme: 'bifrost-light', darkTheme: 'bifrost-dark', logo: l }) }), logo);
+    await page.reload();
+    await page.waitForSelector('text=3 apps');
+    await page.waitForTimeout(300);
+    return icon();
+  };
+  const tabApp = await choose('app');
+  check('tab icon, app icon logo: the arches on a tile', tabApp.includes('<rect') && tabApp.includes('M20 63A28'), tabApp);
+  const tabArches = await choose('arches');
+  check('tab icon, arches logo: three bare arches, no tile', tabArches.includes('M10 76A38') && !tabArches.includes('<rect'), tabArches);
+  const tabSpectrum = await choose('spectrum');
+  check('tab icon, spectrum logo: the five colours', ['#e5484d', '#f59f00', '#2f9e63', '#3b9ddd', '#7048e8'].every((c) => tabSpectrum.includes(c)), tabSpectrum);
+  check('the three tab icons differ', new Set([tabApp, tabArches, tabSpectrum]).size === 3);
+
   await browser.close();
   check('no page errors', errors.length === 0, errors.join(' | '));
   console.log(failed ? `\n${failed} FAILED` : '\nALL PASSED');
