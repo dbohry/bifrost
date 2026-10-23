@@ -54,7 +54,7 @@ func TestIconsStayReasonablySmall(t *testing.T) {
 		svg, _ := c.Icon(e.ID)
 		total += len(svg)
 	}
-	if total > 1536<<10 {
+	if total > 3072<<10 {
 		t.Errorf("icons add up to %d KB, which is a lot to carry in the binary", total>>10)
 	}
 }

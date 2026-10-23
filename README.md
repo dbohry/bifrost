@@ -23,7 +23,7 @@
 
 ## Features
 
-- **About 390 apps ready to add**, with their logos: Jellyfin, Sonarr, Home Assistant, Immich, Nextcloud and many more. Or add any address yourself.
+- **About 580 apps ready to add**, with their logos: Jellyfin, Sonarr, Home Assistant, Immich, Nextcloud and many more. Or add any address yourself.
 - **Private dashboards.** Every user has their own apps, favourites and look.
 - **Themes.** Light, dark or follow the device. Bifrost, Dracula, Nord, Gruvbox and Solarized are built in.
 - **Works on phones, tablets and desktops**, in either orientation.
