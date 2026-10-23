@@ -6,7 +6,7 @@
 
 <p align="center">
   A small, fast, self-hosted start page for your apps and services.<br>
-  One page that links to everything you run. A lightweight take on <a href="https://github.com/linuxserver/Heimdall">Heimdall</a>.
+  One lightweight page that links to everything you run.
 </p>
 
 <p align="center">
