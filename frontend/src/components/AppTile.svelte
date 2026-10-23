@@ -39,7 +39,7 @@
   }
 </script>
 
-<div class="tile" class:editing class:down data-sortable-item data-app-id={app.id} onmouseenter={keepInView} onfocusin={keepInView} role="presentation">
+<div class="tile" class:editing class:down data-sortable-item data-app-id={app.id}>
   <a
     class="open"
     href={app.url}
@@ -47,11 +47,12 @@
     target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
     onclick={open}
+    onfocus={keepInView}
   >
     <span class="icon-wrap">
       <AppIcon name={app.name} seed={app.id} icon={app.icon} />
       {#if result}
-        <span class="status {result.state}" role="img" aria-label={label}>{down ? '×' : ''}</span>
+        <span class="status {result.state}" role="img" aria-label={label} onmouseenter={keepInView}>{down ? '×' : ''}</span>
       {/if}
     </span>
     <span class="name">{app.name}</span>
@@ -61,7 +62,7 @@
   </a>
 
   {#if result}
-    <!-- Hover or keyboard focus on the tile shows the details. It is decoration for the mouse; the badge and note carry the meaning. -->
+    <!-- Hovering the badge, or focusing the tile with the keyboard, shows the details. It is decoration for the mouse; the badge and note carry the meaning. -->
     <div class="card" bind:this={card} aria-hidden="true" data-nav-skip>
       <div class="card-title"><span class="status-dot {result.state}"></span>{app.name} is {label.toLowerCase()}</div>
       <dl>
@@ -188,7 +189,9 @@
     top: calc(100% + 8px);
     left: 50%;
     transform: translateX(calc(-50% + var(--shift, 0px)));
-    width: 232px;
+    width: max-content;
+    min-width: 200px;
+    max-width: min(320px, calc(100vw - 16px));
     box-sizing: border-box;
     padding: 12px 14px;
     background: var(--surface);
@@ -199,8 +202,8 @@
     pointer-events: none;
   }
   @media (hover: hover) {
-    .tile:hover .card,
-    .tile:focus-within .card {
+    .open:has(.status:hover) ~ .card,
+    .open:focus-visible ~ .card {
       display: block;
     }
   }
