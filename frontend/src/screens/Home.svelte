@@ -7,8 +7,11 @@
   import Topbar from '../components/Topbar.svelte';
   import type { AppInput, AppItem, CatalogEntry } from '../lib/api';
   import { apps, groupByCategory } from '../lib/apps.svelte';
+  import { play, snapshot } from '../lib/flip';
   import { greeting } from '../lib/tile';
   import { ui } from '../lib/ui.svelte';
+  import { view, type View } from '../lib/view.svelte';
+  import { tick } from 'svelte';
 
   // What is open, if anything. Adding is two steps: pick a preset (or a custom app), then
   // check the details. Editing goes straight to the details.
@@ -81,6 +84,19 @@
     searchInput?.focus();
   }
 
+  // --- layout: split by category, or one list in the saved order ---
+  let main = $state<HTMLElement>();
+  const flat = $derived(view.current === 'flat');
+
+  /** Switches layout, with the tiles gliding from their old places to the new ones. */
+  async function choose(next: View) {
+    if (next === view.current) return;
+    const before = main ? snapshot(main) : null;
+    view.set(next);
+    await tick();
+    if (main && before) play(main, before);
+  }
+
   // --- category tabs ---
   // If the chosen category no longer exists (its last app was moved or deleted), show everything.
   const activeTab = $derived(tab !== 'All' && apps.categories.includes(tab) ? tab : 'All');
@@ -95,10 +111,14 @@
   // Dragging changes the order of a whole category, so it is off while a search hides some of its apps.
   const reorderable = $derived(!searching);
 
-  // Where the app being edited sits among the apps of its category.
+  // Where the app being edited sits: among the apps of its category, or in the whole list.
   const order = $derived.by(() => {
     const app = details?.app;
     if (!app) return null;
+    if (flat) {
+      const index = apps.items.findIndex((a) => a.id === app.id);
+      return index >= 0 ? { index, count: apps.items.length } : null;
+    }
     const group = apps.groups.find((g) => g.name === app.category);
     const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
     return group && index >= 0 ? { index, count: group.apps.length } : null;
@@ -116,7 +136,7 @@
   </button>
 </Topbar>
 
-<main>
+<main bind:this={main}>
   <div class="hello">
     <div>
       <h1>{greeting()}</h1>
@@ -125,8 +145,20 @@
       {/if}
     </div>
     <div class="controls">
-      {#if apps.loaded && apps.categories.length > 1 && !searching}
+      {#if apps.loaded && apps.categories.length > 1 && !searching && !flat}
         <CategoryTabs categories={apps.categories} selected={activeTab} onselect={(name) => (tab = name)} />
+      {/if}
+      {#if apps.loaded && count > 1}
+        <div class="views" role="group" aria-label="Layout">
+          <button type="button" aria-pressed={!flat} onclick={() => choose('grouped')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h7M4 12h7M4 18h7M15 6h5M15 12h5M15 18h5" /></svg>
+            By category
+          </button>
+          <button type="button" aria-pressed={flat} onclick={() => choose('flat')}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="4" y="4" width="6" height="6" rx="1" /><rect x="14" y="4" width="6" height="6" rx="1" /><rect x="4" y="14" width="6" height="6" rx="1" /><rect x="14" y="14" width="6" height="6" rx="1" /></svg>
+            All apps
+          </button>
+        </div>
       {/if}
       {#if apps.loaded && count > 0}
         <button class="button secondary edit-toggle" type="button" aria-pressed={editMode} onclick={() => (editMode = !editMode)}>
@@ -162,8 +194,21 @@
       <button class="button" onclick={enter}>Search the web</button>
     </section>
   {:else}
+    {#if flat}
+      <section aria-label={searching ? 'Matching apps' : 'All apps'}>
+        <AppGrid
+          apps={searching ? matches : apps.items}
+          reorderable={!searching}
+          editing={editMode}
+          onedit={editing}
+          onfavourite={(app) => apps.toggleFavourite(app)}
+          onmove={(from, to) => apps.moveAll(from, to)}
+          onadd={!searching ? () => adding() : undefined}
+        />
+      </section>
+    {:else}
     {#if !searching && activeTab === 'All' && apps.favourites.length > 0}
-      <section aria-labelledby="favourites">
+      <section aria-labelledby="favourites" data-flip-skip data-flip-fade>
         <h2 id="favourites">Favourites</h2>
         <AppGrid
           apps={apps.favourites}
@@ -176,7 +221,7 @@
 
     {#each groups as group, i (group.name)}
       <section aria-labelledby="group-{i}">
-        <h2 id="group-{i}">{searching ? `${group.name} (${group.apps.length})` : group.name}</h2>
+        <h2 id="group-{i}" data-flip-fade>{searching ? `${group.name} (${group.apps.length})` : group.name}</h2>
         <AppGrid
           apps={group.apps}
           {reorderable}
@@ -188,6 +233,7 @@
         />
       </section>
     {/each}
+    {/if}
   {/if}
 </main>
 
@@ -205,7 +251,7 @@
       onback={details.app ? undefined : adding}
       categories={apps.categories}
       {order}
-      onmove={(delta) => details.app && apps.moveBy(details.app, delta)}
+      onmove={(delta) => details.app && (flat ? apps.moveAll(order?.index ?? 0, (order?.index ?? 0) + delta) : apps.moveBy(details.app, delta))}
       onsave={save}
       ondelete={(id) => apps.remove(id)}
       onclose={() => (dialog = null)}
@@ -270,6 +316,57 @@
   @media (hover: hover) {
     .edit-toggle {
       display: none;
+    }
+  }
+
+  .views {
+    display: flex;
+    flex-shrink: 0;
+    padding: 3px;
+    gap: 2px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+  .views button {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    height: 38px;
+    padding: 0 12px;
+    border: 0;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .views button:hover {
+    color: var(--text);
+  }
+  .views button[aria-pressed='true'] {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .views button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  /* On a phone the icons say enough, and the tabs need the room. */
+  @media (max-width: 599px) {
+    .views button {
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      justify-content: center;
+      font-size: 0;
+      gap: 0;
+    }
+    .views {
+      padding: 0;
+      border-radius: 12px;
     }
   }
 

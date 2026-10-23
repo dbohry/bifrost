@@ -64,21 +64,36 @@
   <p class="intro">Keep a copy of your apps and appearance, or move them to another Bifrost.</p>
 
   <div class="card">
-    <h2>Export</h2>
-    <p>
-      Downloads a file with your apps, their order and your appearance. It holds no passwords, and nothing about other
-      users.
-    </p>
-    <a class="button" href="/api/export" download="bifrost-export.json">Download export</a>
+    <div class="head">
+      <span class="badge" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 11l5 5 5-5M5 20h14" /></svg>
+      </span>
+      <div>
+        <h2>Export</h2>
+        <p>Downloads a file with your apps, their order and your appearance. It holds no passwords, and nothing about other users.</p>
+      </div>
+    </div>
+    <a class="button action" href="/api/export" download="bifrost-export.json">Download export</a>
   </div>
 
   <form class="card" onsubmit={submit}>
-    <h2>Import</h2>
-    <p>Load a file you exported from Bifrost. Only your own dashboard is changed.</p>
+    <div class="head">
+      <span class="badge" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M7 9l5-5 5 5M5 20h14" /></svg>
+      </span>
+      <div>
+        <h2>Import</h2>
+        <p>Load a file you exported from Bifrost. Only your own dashboard is changed.</p>
+      </div>
+    </div>
 
-    <label class="file">
-      <span>Export file</span>
+    <label class="drop" class:filled={picked}>
       <input bind:this={input} type="file" accept=".json,application/json" onchange={choose} />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" /><path d="M14 3v5h5" /></svg>
+      <span class="drop-text">
+        <strong>{picked ? picked.name : 'Choose an export file'}</strong>
+        <span>{picked ? `${plural(count)}${picked.file.preferences ? ' and an appearance' : ''}. Click to choose another.` : 'A .json file from Settings → Backup'}</span>
+      </span>
     </label>
 
     {#if readError}
@@ -86,9 +101,7 @@
     {/if}
 
     {#if picked}
-      <p class="found" role="status">
-        <strong>{picked.name}</strong> holds {plural(count)}{picked.file.preferences ? ' and an appearance' : ''}.
-      </p>
+      <p class="sr-only" role="status">{picked.name} holds {plural(count)}{picked.file.preferences ? ' and an appearance' : ''}.</p>
 
       <fieldset>
         <legend>What should happen to the apps you have now?</legend>
@@ -145,7 +158,7 @@
 
 <style>
   section {
-    max-width: 520px;
+    max-width: 560px;
   }
   h1 {
     margin: 0;
@@ -159,48 +172,110 @@
   .card {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
+    align-items: stretch;
+    gap: 18px;
     padding: 20px;
     margin-bottom: 20px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 14px;
   }
-  .card > * {
-    margin: 0;
+  .head {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
   }
-  h2 {
+  .badge {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--icon-bg);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+  }
+  .head h2 {
+    margin: 0;
     font-size: 16px;
   }
-  .card p {
+  .head p {
+    margin: 4px 0 0;
     font-size: 14px;
     line-height: 1.5;
     color: var(--muted);
   }
-  .card a.button {
+  .button.action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    height: 44px;
     text-decoration: none;
+    align-self: flex-start;
   }
-  .file {
+
+  /* The real file input stays for keyboards and screen readers, and the label is what you see. */
+  .drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 72px;
+    padding: 14px 16px;
+    border: 2px dashed var(--border);
+    border-radius: 12px;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .drop:hover {
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .drop:focus-within {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  .drop.filled {
+    border-style: solid;
+    border-color: var(--accent);
+    color: var(--text);
+  }
+  .drop input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .drop svg {
+    flex-shrink: 0;
+  }
+  .drop-text {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 2px;
+    min-width: 0;
     font-size: 13px;
-    font-weight: 600;
-    max-width: 100%;
+    line-height: 1.4;
   }
-  .file input {
-    font: inherit;
+  .drop-text strong {
+    color: var(--text);
     font-size: 14px;
-    font-weight: 400;
-    color: var(--text);
-    max-width: 100%;
+    overflow-wrap: anywhere;
   }
-  .found {
-    color: var(--text);
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
+
   fieldset {
-    align-self: stretch;
     margin: 0;
     padding: 0;
     border: 0;
@@ -236,7 +311,8 @@
     outline: 1px solid var(--accent);
   }
   .choice input {
-    margin-top: 3px;
+    margin: 3px 0 0;
+    accent-color: var(--accent);
   }
   .check {
     display: flex;
@@ -245,12 +321,26 @@
     min-height: 44px;
     font-size: 14px;
   }
+  .check input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    accent-color: var(--accent);
+  }
   .buttons {
-    align-self: flex-end;
+    display: flex;
+    justify-content: flex-end;
+  }
+  @media (max-width: 480px) {
+    .buttons .button,
+    .button.action {
+      box-sizing: border-box;
+      width: 100%;
+      align-self: stretch;
+    }
   }
   .alert,
   .done {
-    align-self: stretch;
     display: flex;
     align-items: center;
     gap: 10px;
