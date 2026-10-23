@@ -45,7 +45,7 @@ Project layout:
 - `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
 - Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up
 
-CI (`.github/workflows/ci.yml`) runs the Go checks and tests, the frontend type check, build and size budget, and builds the image for `amd64` and `arm64`.
+CI (`.github/workflows/ci.yml`) runs the Go checks and tests, and the frontend type check, build and size budget. It does not build the Docker image, so run `make image` before changing the Dockerfile.
 
 ## Goals
 
