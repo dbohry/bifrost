@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+  import { appearance } from '../lib/appearance.svelte';
   import { link } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
   import Logo from './Logo.svelte';
@@ -13,7 +14,7 @@
 
 <header class="bar">
   <a class="brand" href="/" use:link aria-label="Bifrost, back to your apps">
-    <Logo size={28} /> Bifrost
+    <Logo size={28} kind={appearance.prefs.logo} /> Bifrost
   </a>
   {#if center}
     <div class="center">{@render center()}</div>
@@ -28,9 +29,9 @@
       aria-label="Settings"
       aria-current={current === 'settings' ? 'page' : undefined}
     >
+      <!-- Sliders: unlike a sun, nobody mistakes it for a theme switch. -->
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="3" />
-        <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
+        <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
       </svg>
     </a>
     <button

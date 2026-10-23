@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 4 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. Themes, the app catalogue and the rest are still to come. See the build order below.
+Milestones 0 to 5 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo. The app catalogue and the rest are still to come. See the build order below.
 
 ## Running it
 
@@ -45,6 +45,14 @@ It prints a temporary password and signs that user out everywhere. They must cho
 - The search box filters your apps by name, category or address as you type. Press `/` to jump to it and Escape to clear it. Enter opens the best match, or searches the web with DuckDuckGo when nothing matches.
 - Drag a tile to change its place within its category. On a touch screen, press and hold first, so the page can still scroll. To move an app without dragging, open it with the pencil and use **Move earlier** or **Move later**. Dragging is off while a search is showing, and your order is saved.
 
+### Appearance
+
+- **Settings > Appearance** sets how Bifrost looks. It is saved per user and follows you to every device you sign in on.
+- **Mode** is Light, Dark or System. System follows the device and switches with it, including at sunset.
+- Light and dark each remember their own theme. Seven are built in: Bifrost Light and Bifrost Dark, Dracula, Nord, Gruvbox Dark, Solarized Light and Solarized Dark.
+- **Logo**: the app icon (default), bare arches, or the five-colour spectrum. It shows in your top bar and as your browser tab icon. App icon and Arches take your theme's accent colour. The tab icon is always the arches on a tile, because the other two do not read well at 16 px.
+- The sign-in screen has no user yet, so it always uses the default Bifrost look for the device. Signing out forgets your theme in that browser.
+
 ### Sessions and passwords
 
 - Passwords are hashed with argon2id. Browsers get a random session token in an `HttpOnly`, `SameSite=Lax` cookie, and only a hash of the token is stored.
@@ -76,6 +84,8 @@ Project layout:
 
 - `cmd/bifrost`: the binary and its subcommands (`serve`, `reset-password`, `healthcheck`, `version`)
 - `internal/config`, `internal/db`, `internal/store`, `internal/auth`, `internal/server`: configuration, SQLite with migrations, data access, passwords and rate limiting, HTTP handlers
+- `internal/themes`: the colour themes. Each is a small JSON file in `internal/themes/bundled`, and a test fails if any theme is hard to read (text and secondary text 4.5:1, accent and status colours 3:1)
+- `frontend/src/theme.css` holds the two Bifrost themes for painting the page before a user's theme arrives. A test keeps it identical to the theme files, so change them together
 - `internal/webui`: embeds the built frontend
 - `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
 - Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up

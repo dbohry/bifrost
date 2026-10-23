@@ -1,0 +1,17 @@
+{
+  "id": "dracula",
+  "name": "Dracula",
+  "mode": "dark",
+  "colors": {
+    "bg": "#282a36",
+    "surface": "#343746",
+    "border": "#44475a",
+    "text": "#f8f8f2",
+    "muted": "#a9b3d9",
+    "accent": "#bd93f9",
+    "onAccent": "#282a36",
+    "ok": "#50fa7b",
+    "bad": "#ff5555",
+    "iconBg": "#44475a"
+  }
+}

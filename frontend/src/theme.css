@@ -1,9 +1,15 @@
 /*
  * Theme tokens. Components read only these ten variables, never raw colours.
- * A theme is a set of values for them. Bifrost Light and Bifrost Dark are the
- * defaults; the system setting picks one until the user chooses a theme.
+ * A theme is a set of values for them.
+ *
+ * The two blocks below are the Bifrost Light and Bifrost Dark themes, used to
+ * paint the page before the user's own theme has been fetched (and on the
+ * sign-in screen). A Go test keeps them identical to the bundled theme files in
+ * internal/themes/bundled, so edit both together. Once a user's theme is known,
+ * the app sets the same variables on <html> itself.
  */
 :root {
+  /* theme:bifrost-light */
   --bg: #f6f7f9;
   --surface: #ffffff;
   --border: #d5d9e0;
@@ -19,6 +25,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
+    /* theme:bifrost-dark */
     --bg: #0f1117;
     --surface: #171a22;
     --border: #2a2f3c;

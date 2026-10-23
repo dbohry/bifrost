@@ -1,0 +1,17 @@
+{
+  "id": "nord",
+  "name": "Nord",
+  "mode": "dark",
+  "colors": {
+    "bg": "#2e3440",
+    "surface": "#3b4252",
+    "border": "#4c566a",
+    "text": "#eceff4",
+    "muted": "#b4bdcf",
+    "accent": "#88c0d0",
+    "onAccent": "#2e3440",
+    "ok": "#a3be8c",
+    "bad": "#e5808b",
+    "iconBg": "#434c5e"
+  }
+}

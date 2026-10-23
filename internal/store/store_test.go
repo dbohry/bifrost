@@ -267,3 +267,55 @@ func TestDeleteUserRemovesTheirAppsAndSessions(t *testing.T) {
 		t.Errorf("second delete: err = %v", err)
 	}
 }
+
+func TestPreferences(t *testing.T) {
+	st := newStore(t)
+	alex, _ := st.CreateFirstAdmin(ctx, "alex", "h", now)
+	sam, _ := st.CreateUser(ctx, "sam", "h", false, false, now)
+
+	if _, err := st.GetPreferences(ctx, alex.ID); err != ErrNotFound {
+		t.Fatalf("new user: err = %v, want ErrNotFound", err)
+	}
+
+	p := Preferences{Mode: "dark", LightTheme: "solarized-light", DarkTheme: "dracula", Logo: "spectrum"}
+	if err := st.SetPreferences(ctx, alex.ID, p); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := st.GetPreferences(ctx, alex.ID); err != nil || got != p {
+		t.Errorf("got %+v, %v; want %+v", got, err, p)
+	}
+
+	// Saving again replaces, and other users are untouched.
+	p2 := Preferences{Mode: "system", LightTheme: "bifrost-light", DarkTheme: "nord", Logo: "arches"}
+	if err := st.SetPreferences(ctx, alex.ID, p2); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := st.GetPreferences(ctx, alex.ID); got != p2 {
+		t.Errorf("after replace: %+v", got)
+	}
+	if _, err := st.GetPreferences(ctx, sam.ID); err != ErrNotFound {
+		t.Errorf("sam's preferences appeared: %v", err)
+	}
+
+	// They go when the user goes.
+	st.SetPreferences(ctx, sam.ID, p)
+	st.DeleteUser(ctx, sam.ID)
+	var n int
+	st.db.QueryRow(`SELECT COUNT(*) FROM preferences`).Scan(&n)
+	if n != 1 {
+		t.Errorf("%d preference rows, want 1", n)
+	}
+}
+
+func TestPreferencesRefuseValuesOutsideTheirSets(t *testing.T) {
+	st := newStore(t)
+	u, _ := st.CreateFirstAdmin(ctx, "alex", "h", now)
+	for name, p := range map[string]Preferences{
+		"mode": {Mode: "sepia", LightTheme: "a", DarkTheme: "b", Logo: "app"},
+		"logo": {Mode: "dark", LightTheme: "a", DarkTheme: "b", Logo: "star"},
+	} {
+		if err := st.SetPreferences(ctx, u.ID, p); err == nil {
+			t.Errorf("%s: expected the database to refuse it", name)
+		}
+	}
+}

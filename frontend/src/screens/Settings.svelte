@@ -3,13 +3,20 @@
   import { link, router } from '../lib/router.svelte';
   import { session } from '../lib/session.svelte';
   import AccountSection from './AccountSection.svelte';
+  import AppearanceSection from './AppearanceSection.svelte';
   import UsersSection from './UsersSection.svelte';
 
   const isAdmin = $derived(session.user?.isAdmin ?? false);
 
   // Only administrators see the Users section. Anyone else who opens its
-  // address is sent to their account page.
-  const section = $derived(router.path === '/settings/users' && isAdmin ? 'users' : 'account');
+  // address is sent to their account page, as is any address that is not a section.
+  const section = $derived(
+    router.path === '/settings/appearance'
+      ? 'appearance'
+      : router.path === '/settings/users' && isAdmin
+        ? 'users'
+        : 'account',
+  );
 
   $effect(() => {
     if (router.path !== '/settings' && section === 'account') router.navigate('/settings', { replace: true });
@@ -21,6 +28,7 @@
 <div class="layout">
   <nav aria-label="Settings sections">
     <a href="/settings" use:link aria-current={section === 'account' ? 'page' : undefined}>Account</a>
+    <a href="/settings/appearance" use:link aria-current={section === 'appearance' ? 'page' : undefined}>Appearance</a>
     {#if isAdmin}
       <a href="/settings/users" use:link aria-current={section === 'users' ? 'page' : undefined}>Users</a>
     {/if}
@@ -29,6 +37,8 @@
   <main>
     {#if section === 'users'}
       <UsersSection />
+    {:else if section === 'appearance'}
+      <AppearanceSection />
     {:else}
       <AccountSection />
     {/if}
