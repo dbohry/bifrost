@@ -48,7 +48,7 @@
     </div>
 
     {#if catalog.loaded}
-      <CategoryTabs wrap label="App categories" categories={catalog.categories} selected={tab} onselect={(name) => (tab = name)} />
+      <CategoryTabs label="App categories" categories={catalog.categories} selected={tab} onselect={(name) => (tab = name)} />
     {/if}
 
     {#if catalog.error}

@@ -45,6 +45,8 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.Handle("PUT /api/apps/order", s.authed(false, s.reorderApps))
 	mux.Handle("PUT /api/apps/{id}", s.authed(false, s.updateApp))
 	mux.Handle("DELETE /api/apps/{id}", s.authed(false, s.deleteApp))
+	mux.Handle("GET /api/export", s.authed(false, s.exportData))
+	mux.Handle("POST /api/import", s.authed(false, s.importData))
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})
 	})

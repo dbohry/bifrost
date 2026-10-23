@@ -162,3 +162,58 @@ func (s *Store) DeleteApp(ctx context.Context, userID, id int64) error {
 	}
 	return nil
 }
+
+// ImportResult says what ImportApps did.
+type ImportResult struct {
+	Added   int
+	Skipped int
+	Removed int
+}
+
+// ImportApps adds apps to the end of a user's dashboard, in the order given.
+// With replace, the user's existing apps are deleted first. Otherwise an app
+// whose name (in any case) and address are already on the dashboard, or earlier
+// in the same list, is skipped. The whole import happens or none of it.
+func (s *Store) ImportApps(ctx context.Context, userID int64, apps []AppInput, replace bool, now time.Time) (ImportResult, error) {
+	var res ImportResult
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return res, err
+	}
+	defer tx.Rollback()
+
+	if replace {
+		r, err := tx.ExecContext(ctx, `DELETE FROM apps WHERE user_id = ?`, userID)
+		if err != nil {
+			return res, err
+		}
+		n, _ := r.RowsAffected()
+		res.Removed = int(n)
+	}
+
+	for _, in := range apps {
+		var exists bool
+		err := tx.QueryRowContext(ctx,
+			`SELECT EXISTS(SELECT 1 FROM apps WHERE user_id = ? AND name = ? COLLATE NOCASE AND url = ?)`,
+			userID, in.Name, in.URL).Scan(&exists)
+		if err != nil {
+			return res, err
+		}
+		if exists {
+			res.Skipped++
+			continue
+		}
+		_, err = tx.ExecContext(ctx,
+			`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at)
+			 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?,
+			         (SELECT COALESCE(MAX(position), 0) + 1 FROM apps WHERE user_id = ?), ?, ?)`,
+			userID, in.Name, in.URL,
+			userID, in.Category, 0, in.Category,
+			in.Favourite, in.NewTab, in.Icon, userID, now.Unix(), now.Unix())
+		if err != nil {
+			return res, err
+		}
+		res.Added++
+	}
+	return res, tx.Commit()
+}

@@ -12,6 +12,6 @@ those projects.
 
 Each file is named after the catalogue entry it belongs to (`jellyfin.svg` for
 `jellyfin` in `../catalog.json`). To add an app, add its icon here and an entry
-to `catalog.json`. A test checks that the two lists match and that every icon
+to `catalog.json`. Icons over 50 KB are skipped to keep the binary small, and the whole set is capped at 1.5 MB. A test checks that the two lists match and that every icon
 is a plain, inert SVG: no scripts, event handlers, external links or embedded
 images.

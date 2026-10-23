@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"sync"
 	"unicode/utf8"
 )
 
@@ -19,7 +20,7 @@ import (
 var files embed.FS
 
 // Categories are the groups the presets are sorted into, in display order.
-var Categories = []string{"Media", "Productivity", "Network", "Monitoring", "Development"}
+var Categories = []string{"Media", "Downloads", "Productivity", "Home", "Communication", "Network", "Security", "Monitoring", "Development", "Infrastructure", "Finance"}
 
 // Entry is one preset app.
 type Entry struct {
@@ -44,7 +45,21 @@ type Catalog struct {
 
 // Load reads and checks the built-in catalogue. It fails on anything wrong, so a
 // bad entry or icon is found by the tests rather than by a user.
+//
+// The catalogue is embedded and never changes while the program runs, so it is
+// checked once and the result is shared.
 func Load() (*Catalog, error) {
+	loadOnce.Do(func() { loaded, loadErr = read() })
+	return loaded, loadErr
+}
+
+var (
+	loadOnce sync.Once
+	loaded   *Catalog
+	loadErr  error
+)
+
+func read() (*Catalog, error) {
 	raw, err := files.ReadFile("catalog.json")
 	if err != nil {
 		return nil, err

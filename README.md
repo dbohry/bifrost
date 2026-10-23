@@ -46,7 +46,7 @@ It prints a temporary password and signs that user out everywhere. They must cho
 ### Your dashboard
 
 - Each user has their own apps. Nothing is shared between users.
-- **Add app** is two steps. Step 1 offers 30 popular self-hosted apps, each with its logo, which you can search or filter by category. Pick one and step 2 fills in its name and category, with a hint of the port it usually uses. You only add the address you open it at. Or choose **Custom app** to start from a blank form. Editing an app skips step 1.
+- **Add app** is two steps. Step 1 offers about 390 popular self-hosted apps in 11 categories, each with its logo, which you can search or filter by category. Pick one and step 2 fills in its name and category, with a hint of the port it usually uses. You only add the address you open it at. Or choose **Custom app** to start from a blank form. Editing an app skips step 1.
 - A custom app has no preset to take a name from, so it starts blank. Add an app with a name, an address and a category. Type a new category name to create one, or leave it empty for "Other". A category typed in a different case from an existing one joins it.
 - Addresses without a scheme get `http://`. Only `http` and `https` are accepted, and addresses with a username or password in them are refused.
 - Starred apps also appear in a Favourites row at the top.
@@ -58,6 +58,12 @@ It prints a temporary password and signs that user out everywhere. They must cho
 - On a touch screen the pencil and star buttons are tucked away. Press **Edit** above the apps to show them, tap a tile to open its details, then press **Done**. Pinned apps show a small star.
 - Escape leaves Settings and returns to your apps.
 - On a computer, the arrow keys move between tiles. The pages respect notches and rounded corners, and animations are off if your system asks for reduced motion.
+
+### Backup
+
+**Settings > Backup** exports your apps (with their order, favourites and icons) and your theme and logo to a file, and imports such a file again. Use it to move to another Bifrost, or to keep a copy. The file holds no passwords and nothing about other users, and everyone exports and imports only their own dashboard.
+
+When importing you choose **Add to my dashboard**, which skips apps you already have with the same name and address, or **Replace my dashboard**, which asks first and deletes your current apps. A file with a bad address or too many apps (the limit is 2000) is refused as a whole and changes nothing. To back up the whole server, including every user and their password, copy the `/data` volume.
 
 ### Appearance
 
@@ -101,7 +107,7 @@ Project layout:
 
 - `cmd/bifrost`: the binary and its subcommands (`serve`, `reset-password`, `healthcheck`, `version`)
 - `internal/config`, `internal/db`, `internal/store`, `internal/auth`, `internal/server`: configuration, SQLite with migrations, data access, passwords and rate limiting, HTTP handlers
-- `internal/catalog`: the built-in list of 30 apps (`catalog.json`) and their icons. A test checks that every entry has an icon and every icon is a plain, inert SVG with no scripts, event handlers or external links. The icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See `internal/catalog/icons/NOTICE.md`
+- `internal/catalog`: the built-in list of about 390 apps (`catalog.json`) and their icons. A test checks that every entry has an icon and every icon is a plain, inert SVG with no scripts, event handlers or external links. The icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See `internal/catalog/icons/NOTICE.md`
 - `internal/themes`: the colour themes. Each is a small JSON file in `internal/themes/bundled`, and a test fails if any theme is hard to read (text and secondary text 4.5:1, accent and status colours 3:1)
 - `frontend/src/theme.css` holds the two Bifrost themes for painting the page before a user's theme arrives. A test keeps it identical to the theme files, so change them together
 - `internal/webui`: embeds the built frontend
@@ -168,7 +174,7 @@ CI (`.github/workflows/ci.yml`) runs the Go checks and tests and the frontend ty
 **Dashboard**
 - Tiles grouped by category, a Favourites row and category tabs.
 - Add, edit and delete an app: name, URL, category and icon.
-- A small starter catalogue of about 30 popular apps with icons. The full catalogue comes later.
+- A catalogue of about 390 popular apps with icons. It will keep growing.
 - Categories are created on the fly when adding an app. There is no screen to manage them.
 - Apps without a preset or uploaded icon show their first letter on a coloured tile.
 - Drag-to-reorder tiles.
@@ -186,12 +192,10 @@ CI (`.github/workflows/ci.yml`) runs the Go checks and tests and the frontend ty
 
 - Status checks (the online/offline dot and its text on tiles). The wireframes show them, but they are deferred.
 - Widgets (live per-app stats such as Jellyfin streams or Sonarr queue size). They depend on the same background worker, so they wait with status checks.
-- The full preset catalogue (300+ apps).
 - Importing your own theme files, and custom CSS.
 - Settings sections for General, Search (including the search provider) and Integrations.
 - Installing Bifrost as an app (PWA) with the per-user icon.
 - Uploading custom icons and fetching favicons.
-- Export and import. Until then, back up by copying the `/data` volume.
 
 ## Build order
 
@@ -205,7 +209,7 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 | 3 | Users screen | Add a user, change a password, remove a user. Needed to test that dashboards are private. |
 | 4 | Organise and search | Drag-to-reorder with the order saved, category tabs, search over apps and the DuckDuckGo fallback. |
 | 5 | Themes and logo | Mode switch, six bundled themes, logo choice and per-user preferences. A test checks the contrast rule on every bundled theme. |
-| 6 | Starter catalogue | Embedded list of about 30 apps with icons, and the two-step add flow. |
+| 6 | Starter catalogue | Embedded list of apps with icons (30 at first, about 390 now), and the two-step add flow. |
 | 7 | Responsive and touch polish | Review at every breakpoint and orientation, a bottom bar and sheets on phones, touch behaviour for edit and reorder. Done. |
 | 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. Done. |
 

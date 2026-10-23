@@ -16,8 +16,8 @@ func load(t *testing.T) *Catalog {
 
 func TestTheCatalogueLoads(t *testing.T) {
 	c := load(t)
-	if n := len(c.Entries); n != 30 {
-		t.Errorf("%d entries, want 30", n)
+	if n := len(c.Entries); n < 300 {
+		t.Errorf("%d entries, want at least 300", n)
 	}
 
 	perCategory := map[string]int{}
@@ -54,7 +54,7 @@ func TestIconsStayReasonablySmall(t *testing.T) {
 		svg, _ := c.Icon(e.ID)
 		total += len(svg)
 	}
-	if total > 250<<10 {
+	if total > 1536<<10 {
 		t.Errorf("icons add up to %d KB, which is a lot to carry in the binary", total>>10)
 	}
 }

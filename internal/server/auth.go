@@ -428,11 +428,16 @@ func sameOrigin(next http.Handler) http.Handler {
 // decode reads a small JSON body into v. It writes the error response itself
 // and returns false when the body is unusable.
 func decode(w http.ResponseWriter, r *http.Request, v any) bool {
+	return decodeLimit(w, r, v, maxBody)
+}
+
+// decodeLimit is decode for the few requests that may be larger than usual.
+func decodeLimit(w http.ResponseWriter, r *http.Request, v any, limit int64) bool {
 	if mt, _, err := mime.ParseMediaType(r.Header.Get("Content-Type")); err != nil || mt != "application/json" {
 		writeError(w, http.StatusUnsupportedMediaType, "Send the request as JSON.")
 		return false
 	}
-	r.Body = http.MaxBytesReader(w, r.Body, maxBody)
+	r.Body = http.MaxBytesReader(w, r.Body, limit)
 	if err := json.NewDecoder(r.Body).Decode(v); err != nil {
 		writeError(w, http.StatusBadRequest, "That request could not be read.")
 		return false
