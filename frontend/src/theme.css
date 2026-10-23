@@ -1,0 +1,41 @@
+/*
+ * Theme tokens. Components read only these ten variables, never raw colours.
+ * A theme is a set of values for them. Bifrost Light and Bifrost Dark are the
+ * defaults; the system setting picks one until the user chooses a theme.
+ */
+:root {
+  --bg: #f6f7f9;
+  --surface: #ffffff;
+  --border: #d5d9e0;
+  --text: #1f2430;
+  --muted: #5b6272;
+  --accent: #3b5bdb;
+  --on-accent: #ffffff;
+  --ok: #2f9e63;
+  --bad: #d9480f;
+  --icon-bg: #e3e6ec;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1117;
+    --surface: #171a22;
+    --border: #2a2f3c;
+    --text: #e8eaf0;
+    --muted: #9aa1b2;
+    --accent: #7c93ff;
+    --on-accent: #0f1117;
+    --ok: #4cc38a;
+    --bad: #ff7a59;
+    --icon-bg: #232836;
+    color-scheme: dark;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
