@@ -1,13 +1,24 @@
 name: Release
 
-# Builds the image for amd64 and arm64 and publishes it to Docker Hub. It runs when a version tag such as v0.1.0 is pushed, or by hand.
+# Every merge to main builds the image for amd64 and arm64 and publishes it to
+# Docker Hub as dbohry/bifrost:latest. It can also be started by hand. Changes
+# that cannot affect the image (docs, browser checks) are skipped.
 on:
   push:
-    tags: ['v*']
+    branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'e2e/**'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# One publish at a time, and a newer merge waits instead of cancelling a running push.
+concurrency:
+  group: release
+  cancel-in-progress: false
 
 jobs:
   image:
@@ -22,22 +33,17 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: dbohry/bifrost
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') }}
-            type=sha
+      # The version shown in the app: the commit this image was built from.
+      - run: echo "VERSION=main-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
       - uses: docker/build-push-action@v6
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: VERSION=${{ github.ref_name }}
+          tags: dbohry/bifrost:latest
+          build-args: VERSION=${{ env.VERSION }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
