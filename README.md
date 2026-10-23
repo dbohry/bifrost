@@ -27,7 +27,7 @@ Design phase. No application code yet.
 
 - One Go binary serves the JSON API and the built frontend, which is embedded in the binary.
 - SQLite holds users, sessions, apps and preferences. Nothing else runs next to it.
-- A small background worker checks whether each app is up, only for apps with status checks turned on. Widgets (for example Jellyfin streams or Sonarr queue size) are small per-app fetchers that run only when configured.
+- Every user has a private dashboard. Apps belong to one user and are never shared between users.
 - Passwords are hashed with argon2id. Sessions are stored in SQLite.
 - The same binary has subcommands for operations: `healthcheck` (no `curl` in the image) and `reset-password <username>`. Because the sign-in page has no reset, a locked-out user is helped from the host with `docker exec`.
 - The preset app catalogue is embedded in the binary. Custom icons and user-added themes live under `/data`.
@@ -36,7 +36,7 @@ Design phase. No application code yet.
 
 - Built with Vite and embedded into the Go binary at image build time. Node is needed only to build, never to run.
 - The API is JSON from the start, so screens can be added or replaced one at a time.
-- Drag-to-reorder tiles, bottom sheets, dialogs, live theme and logo preview, and live status updates are client-side.
+- Drag-to-reorder tiles, bottom sheets, dialogs, and live theme and logo preview are client-side.
 - A bundle-size budget (target under 100 KB gzipped) is checked in CI to protect the lightweight goal.
 
 ### Theming
@@ -53,8 +53,12 @@ Design phase. No application code yet.
 - One exposed port and one volume at `/data`.
 - Configuration through environment variables.
 
+## Out of scope for the MVP
+
+- Status checks (the online/offline dot and its text on tiles). The wireframes show them, but they are deferred.
+- Widgets (live per-app stats such as Jellyfin streams or Sonarr queue size). They depend on the same background worker, so they wait with status checks.
+
 ## Open decisions
 
-- How status checks run by default (proposal: a plain HTTP request every 60 seconds, configurable per app).
-- Whether all users share one set of apps, with an optional "hide from others" flag, or each user has a private dashboard. The current screens assume a shared set.
+- How status checks and widgets should run once they are added (proposal: a plain HTTP request every 60 seconds, configurable per app).
 - Exact command and flag names for the operations subcommands.
