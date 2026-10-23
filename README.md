@@ -53,7 +53,7 @@ Then open <http://localhost:8080>. The first visit asks you to create the admini
 
 Everything Bifrost stores lives in the `/data` volume.
 
-> The first release is not published yet. Until then, build the image yourself with `docker build -t bifrost .` and use `bifrost` instead of `dbohry/bifrost:latest` above.
+> `latest` is rebuilt from `main` on every merge. To build the image yourself, run `docker build -t bifrost .` and use `bifrost` instead of `dbohry/bifrost:latest` above.
 
 ### Settings
 
