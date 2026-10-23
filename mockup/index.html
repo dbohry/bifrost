@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bifrost</title>
+<style>
+:root{
+  --bg:#0e1020; --bg2:#151833; --panel:rgba(255,255,255,.06); --panel-h:rgba(255,255,255,.11);
+  --border:rgba(255,255,255,.10); --text:#eef0ff; --muted:#9aa0c8; --accent:#8b7bff;
+  --rainbow:linear-gradient(90deg,#ff5f6d,#ffc371,#7bed9f,#4fc3f7,#8b7bff,#e07bff);
+  --ok:#4ade80; --bad:#f87171; --shadow:0 10px 30px rgba(0,0,0,.35);
+}
+:root[data-theme=light]{
+  --bg:#f3f4fb; --bg2:#e6e8f8; --panel:#fff; --panel-h:#f7f7ff; --border:rgba(20,20,60,.10);
+  --text:#1b1d3a; --muted:#666b94; --accent:#6a58f0; --shadow:0 8px 24px rgba(40,40,100,.12);
+}
+*{box-sizing:border-box;margin:0}
+body{font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);min-height:100vh;
+  background:radial-gradient(1200px 600px at 80% -10%,var(--bg2),transparent),var(--bg)}
+.bar{height:4px;background:var(--rainbow)}
+header{display:flex;align-items:center;gap:16px;padding:16px 24px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:.3px}
+.logo svg{width:32px;height:32px}
+.search{flex:1;min-width:200px;max-width:520px;margin:0 auto;position:relative}
+.search input{width:100%;padding:10px 14px 10px 40px;border-radius:12px;border:1px solid var(--border);
+  background:var(--panel);color:var(--text);font:inherit;outline:none}
+.search input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+.search span{position:absolute;left:14px;top:9px;color:var(--muted)}
+.search kbd{position:absolute;right:10px;top:9px;font-size:11px;color:var(--muted);border:1px solid var(--border);border-radius:5px;padding:1px 6px}
+.actions{display:flex;gap:8px}
+button{font:inherit;color:var(--text);cursor:pointer}
+.btn{padding:9px 14px;border-radius:10px;border:1px solid var(--border);background:var(--panel)}
+.btn:hover{background:var(--panel-h)}
+.btn.primary{background:var(--accent);border-color:transparent;color:#fff}
+main{max-width:1200px;margin:0 auto;padding:8px 24px 80px}
+.hello{display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin:12px 0 24px}
+.hello h1{font-size:28px}
+.hello p{color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tab{padding:6px 14px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--muted)}
+.tab.on{background:var(--accent);color:#fff;border-color:transparent}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:28px}
+.stat{padding:14px 16px;border-radius:14px;background:var(--panel);border:1px solid var(--border)}
+.stat b{display:block;font-size:22px}
+.stat small{color:var(--muted)}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin:26px 0 12px;display:flex;align-items:center;gap:8px}
+h2::after{content:"";flex:1;height:1px;background:var(--border)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px}
+.tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:10px;padding:20px 12px 14px;
+  border-radius:16px;background:var(--panel);border:1px solid var(--border);text-decoration:none;color:inherit;
+  transition:transform .15s,background .15s,box-shadow .15s;cursor:pointer}
+.tile:hover{transform:translateY(-3px);background:var(--panel-h);box-shadow:var(--shadow)}
+.icon{width:58px;height:58px;border-radius:15px;display:grid;place-items:center;font-weight:700;font-size:24px;color:#fff;
+  box-shadow:inset 0 -3px 0 rgba(0,0,0,.18)}
+.name{font-weight:600}
+.meta{font-size:12px;color:var(--muted);min-height:18px;display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.dot.down{background:var(--bad);box-shadow:0 0 6px var(--bad)}
+.pin{position:absolute;top:8px;right:10px;font-size:13px;opacity:.5;background:none;border:0}
+.pin.on{opacity:1;color:#ffc371}
+.tile .edit{position:absolute;top:8px;left:10px;opacity:0;background:none;border:0;color:var(--muted)}
+.tile:hover .edit{opacity:1}
+.tile.add{border-style:dashed;background:transparent;color:var(--muted);justify-content:center;min-height:132px}
+.tile.add .plus{font-size:30px;line-height:1}
+.empty{display:none;text-align:center;color:var(--muted);padding:60px 0}
+dialog{border:1px solid var(--border);border-radius:18px;background:var(--bg2);color:var(--text);padding:0;width:min(460px,92vw);box-shadow:var(--shadow)}
+dialog::backdrop{background:rgba(5,5,20,.6);backdrop-filter:blur(3px)}
+.dlg{padding:22px;display:grid;gap:14px}
+.dlg h3{font-size:18px}
+label{display:grid;gap:5px;font-size:12px;color:var(--muted)}
+.dlg input,.dlg select{padding:9px 12px;border-radius:10px;border:1px solid var(--border);background:var(--panel);color:var(--text);font:inherit}
+.row{display:flex;gap:10px;justify-content:flex-end}
+.swatches{display:flex;gap:8px}
+.swatches i{width:26px;height:26px;border-radius:8px;cursor:pointer;border:2px solid transparent}
+.swatches i.on{border-color:var(--text)}
+.sw{display:flex;justify-content:space-between;align-items:center;color:var(--text);font-size:14px}
+footer{position:fixed;bottom:0;left:0;right:0;padding:8px 24px;background:color-mix(in srgb,var(--bg) 85%,transparent);
+  backdrop-filter:blur(8px);border-top:1px solid var(--border);display:flex;justify-content:space-between;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 32 32" fill="none" stroke-width="3" stroke-linecap="round">
+      <path d="M3 24C3 9 29 9 29 24" stroke="url(#g)"/><path d="M8 24c0-8 16-8 16 0" stroke="#4fc3f7"/>
+      <defs><linearGradient id="g"><stop offset="0" stop-color="#ff5f6d"/><stop offset=".5" stop-color="#7bed9f"/><stop offset="1" stop-color="#8b7bff"/></linearGradient></defs>
+    </svg>
+    Bifrost
+  </div>
+  <div class="search"><span>⌕</span><input id="q" placeholder="Search apps, or type to search the web…" autocomplete="off"><kbd>/</kbd></div>
+  <div class="actions">
+    <button class="btn" id="theme" title="Toggle theme">◐</button>
+    <button class="btn" id="settings">⚙ Settings</button>
+    <button class="btn primary" id="addBtn">+ Add app</button>
+  </div>
+</header>
+
+<main>
+  <div class="hello">
+    <div><h1 id="greet">Welcome back</h1><p>Your Bifrost links all your self-hosted apps in one place.</p></div>
+    <div class="tabs" id="tabs"></div>
+  </div>
+
+  <section class="stats">
+    <div class="stat"><b id="sApps">0</b><small>Apps</small></div>
+    <div class="stat"><b id="sUp">0</b><small>Online</small></div>
+    <div class="stat"><b>1.8 TB</b><small>Storage used (Nextcloud)</small></div>
+    <div class="stat"><b>42 ms</b><small>Avg. response</small></div>
+  </section>
+
+  <div id="sections"></div>
+  <div class="empty" id="empty">No apps match your search.</div>
+</main>
+
+<dialog id="dlg">
+  <form class="dlg" method="dialog" id="form">
+    <h3 id="dTitle">Add application</h3>
+    <label>Name<input name="name" required placeholder="e.g. Jellyfin"></label>
+    <label>URL<input name="url" required placeholder="https://jellyfin.home.lan"></label>
+    <label>Category<select name="cat"></select></label>
+    <label>Colour<div class="swatches" id="sw"></div></label>
+    <div class="sw"><span>Show status check</span><input type="checkbox" name="status" checked></div>
+    <div class="row"><button class="btn" value="cancel" formnovalidate>Cancel</button><button class="btn primary" value="ok">Save</button></div>
+  </form>
+</dialog>
+
+<dialog id="sdlg">
+  <form class="dlg" method="dialog">
+    <h3>Settings</h3>
+    <label>Dashboard title<input value="Bifrost"></label>
+    <label>Default search provider<select><option>DuckDuckGo</option><option>Google</option><option>Kagi</option><option>SearXNG (self-hosted)</option></select></label>
+    <div class="sw"><span>Open links in new tab</span><input type="checkbox" checked></div>
+    <div class="sw"><span>Live status checks</span><input type="checkbox" checked></div>
+    <div class="sw"><span>Require login</span><input type="checkbox"></div>
+    <div class="row"><button class="btn primary" value="ok">Done</button></div>
+  </form>
+</dialog>
+
+<footer><span>Bifrost v0.1 · UI mockup</span><span id="clock"></span></footer>
+
+<script>
+const COLORS=['#ef5350','#ff9800','#26a69a','#29b6f6','#7c6bff','#ec407a','#66bb6a','#8d6e63'];
+const CATS=['Media','Productivity','Network','Monitoring','Development'];
+let apps=[
+ {n:'Jellyfin',u:'https://jellyfin.home.lan',c:'Media',k:COLORS[4],p:1,up:1,m:'3 streams'},
+ {n:'Sonarr',u:'#',c:'Media',k:COLORS[3],up:1,m:'12 queued'},
+ {n:'Radarr',u:'#',c:'Media',k:COLORS[1],up:1,m:'2 queued'},
+ {n:'Navidrome',u:'#',c:'Media',k:COLORS[5],up:1},
+ {n:'Nextcloud',u:'#',c:'Productivity',k:COLORS[3],p:1,up:1,m:'v29.0'},
+ {n:'Paperless',u:'#',c:'Productivity',k:COLORS[6],up:1,m:'8 inbox'},
+ {n:'Vaultwarden',u:'#',c:'Productivity',k:COLORS[2],up:1},
+ {n:'Pi-hole',u:'#',c:'Network',k:COLORS[0],p:1,up:1,m:'18% blocked'},
+ {n:'Traefik',u:'#',c:'Network',k:COLORS[2],up:1,m:'24 routes'},
+ {n:'WireGuard',u:'#',c:'Network',k:COLORS[7],up:0,m:'offline'},
+ {n:'Grafana',u:'#',c:'Monitoring',k:COLORS[1],up:1},
+ {n:'Uptime Kuma',u:'#',c:'Monitoring',k:COLORS[6],up:1,m:'31/32 up'},
+ {n:'Portainer',u:'#',c:'Monitoring',k:COLORS[3],up:1,m:'19 containers'},
+ {n:'Gitea',u:'#',c:'Development',k:COLORS[6],up:1},
+ {n:'Woodpecker',u:'#',c:'Development',k:COLORS[4],up:1,m:'build #214'}
+];
+let tab='All', q='', editing=null, color=COLORS[4];
+const $=s=>document.querySelector(s);
+
+function render(){
+  const tabs=['All','Favourites',...CATS];
+  $('#tabs').innerHTML=tabs.map(t=>`<button class="tab ${t===tab?'on':''}" data-t="${t}">${t}</button>`).join('');
+  const match=a=>(!q||a.n.toLowerCase().includes(q))&&(tab==='All'||(tab==='Favourites'?a.p:a.c===tab));
+  const list=apps.filter(match);
+  const groups=tab==='All'||tab==='Favourites'?(tab==='All'?['★ Favourites',...CATS]:['★ Favourites']):[tab];
+  let html='';
+  for(const g of groups){
+    const items=list.filter(a=>g==='★ Favourites'?a.p:(a.c===g));
+    if(!items.length)continue;
+    html+=`<h2>${g}</h2><div class="grid">${items.map(tile).join('')}${g===groups[groups.length-1]&&!q?addTile():''}</div>`;
+  }
+  $('#sections').innerHTML=html;
+  $('#empty').style.display=list.length?'none':'block';
+  $('#sApps').textContent=apps.length;
+  $('#sUp').textContent=apps.filter(a=>a.up).length+' / '+apps.length;
+}
+const tile=a=>{const i=apps.indexOf(a);return `<div class="tile" data-i="${i}">
+  <button class="edit" data-e="${i}" title="Edit">✎</button>
+  <button class="pin ${a.p?'on':''}" data-p="${i}" title="Favourite">★</button>
+  <div class="icon" style="background:${a.k}">${a.n[0]}</div>
+  <div class="name">${a.n}</div>
+  <div class="meta"><span class="dot ${a.up?'':'down'}"></span>${a.m||(a.up?'online':'offline')}</div></div>`};
+const addTile=()=>`<div class="tile add" data-add><span class="plus">+</span>Add app</div>`;
+
+document.addEventListener('click',e=>{
+  const t=e.target;
+  if(t.dataset.t){tab=t.dataset.t;render();return}
+  if(t.dataset.p){apps[t.dataset.p].p=!apps[t.dataset.p].p;render();return}
+  if(t.dataset.e){openDlg(+t.dataset.e);return}
+  if(t.closest('[data-add]')){openDlg(null);return}
+  const tl=t.closest('.tile[data-i]'); if(tl){const a=apps[tl.dataset.i];if(a.u!=='#')window.open(a.u,'_blank')}
+});
+$('#q').oninput=e=>{q=e.target.value.toLowerCase().trim();render()};
+$('#q').onkeydown=e=>{if(e.key==='Enter'){const f=apps.filter(a=>a.n.toLowerCase().includes(q));
+  if(!f.length&&q)window.open('https://duckduckgo.com/?q='+encodeURIComponent(q),'_blank')}};
+addEventListener('keydown',e=>{if(e.key==='/'&&document.activeElement.tagName!=='INPUT'){e.preventDefault();$('#q').focus()}});
+
+function openDlg(i){
+  editing=i; const f=$('#form'), a=i==null?{n:'',u:'',c:CATS[0],k:COLORS[4]}:apps[i];
+  $('#dTitle').textContent=i==null?'Add application':'Edit '+a.n;
+  f.cat.innerHTML=CATS.map(c=>`<option ${c===a.c?'selected':''}>${c}</option>`).join('');
+  f.name.value=a.n; f.url.value=a.u==='#'?'':a.u; color=a.k; drawSw(); $('#dlg').showModal();
+}
+function drawSw(){$('#sw').innerHTML=COLORS.map(c=>`<i data-c="${c}" class="${c===color?'on':''}" style="background:${c}"></i>`).join('')}
+$('#sw').onclick=e=>{if(e.target.dataset.c){color=e.target.dataset.c;drawSw()}};
+$('#dlg').addEventListener('close',()=>{
+  if($('#dlg').returnValue!=='ok')return;
+  const f=$('#form'), a={n:f.name.value,u:f.url.value||'#',c:f.cat.value,k:color,up:1};
+  if(editing==null)apps.push(a);else apps[editing]={...apps[editing],...a};
+  render();
+});
+$('#addBtn').onclick=()=>openDlg(null);
+$('#settings').onclick=()=>$('#sdlg').showModal();
+$('#theme').onclick=()=>{const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'};
+
+function tick(){const d=new Date(),h=d.getHours();
+  $('#greet').textContent=(h<12?'Good morning':h<18?'Good afternoon':'Good evening')+', Odin';
+  $('#clock').textContent=d.toLocaleString([], {weekday:'long',hour:'2-digit',minute:'2-digit'})}
+tick();setInterval(tick,30000);render();
+</script>
+</body>
+</html>
