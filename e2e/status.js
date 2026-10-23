@@ -120,14 +120,24 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
   check('an offline tile has a cross on its badge', (await badge('Fussy').textContent()).includes('×'));
 
   // hover card
-  await tile('Fussy').hover();
   const card = tile('Fussy').locator('.card');
+  await tile('Fussy').locator('.name').hover();
+  await page.waitForTimeout(250);
+  check('hovering the tile itself does not show the card', !(await card.isVisible()));
+  await badge('Fussy').hover();
   await card.waitFor({ state: 'visible' });
   const text = await card.textContent();
   check('the card is drawn above the tiles that follow it', await tile('Fussy').evaluate((el) => getComputedStyle(el).zIndex !== 'auto' && Number(getComputedStyle(el).zIndex) > 0));
   const box = await card.boundingBox();
   check('the card stays inside the page', box.x >= 0 && box.x + box.width <= 1280, JSON.stringify(box));
-  check('hovering shows why and what was checked', text.includes('Answered with HTTP 500') && text.includes('http://127.0.0.1:19182'), text);
+  check('hovering the badge shows why and what was checked', text.includes('Answered with HTTP 500') && text.includes('http://127.0.0.1:19182'), text);
+
+  // keyboard focus shows it too, since a keyboard has no hover
+  await page.mouse.move(5, 5);
+  await tile('Fussy').locator('a.open').focus();
+  await page.waitForTimeout(250);
+  check('focusing the tile with the keyboard shows the card', await card.isVisible());
+  await tile('Fussy').locator('a.open').blur();
 
   // the offline filter
   const filter = page.getByRole('button', { name: /^Offline · 1$/ });
