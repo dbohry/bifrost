@@ -214,6 +214,9 @@
           onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
           onmove={(from, to) => apps.move(group.name, from, to)}
+          group="categories"
+          list={group.name}
+          onmoveout={(fromList, toList, from, to) => apps.moveToCategory(fromList, toList, from, to)}
           onadd={!searching && i === groups.length - 1 ? () => adding() : undefined}
         />
       </section>

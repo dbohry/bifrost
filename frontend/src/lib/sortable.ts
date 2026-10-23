@@ -5,6 +5,13 @@ export type SortableOptions = {
   enabled: boolean;
   /** Called with the dragged item's old and new place among the draggable items. */
   onmove: (from: number, to: number) => void;
+  /**
+   * Lists that share a group let an item be dragged from one to another. The
+   * lists name themselves with `data-list`, and this is called with the two
+   * names and the item's old place in the first and new place in the second.
+   */
+  group?: string;
+  onmoveout?: (fromList: string, toList: string, from: number, to: number) => void;
 };
 
 /**
@@ -24,6 +31,7 @@ export function sortable(node: HTMLElement, options: SortableOptions) {
 
   const instance = Sortable.create(node, {
     draggable: '[data-sortable-item]',
+    group: options.group,
     animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 150,
     forceFallback: true,
     fallbackTolerance: 4,
@@ -42,11 +50,16 @@ export function sortable(node: HTMLElement, options: SortableOptions) {
 
       const { item, from, oldIndex, oldDraggableIndex, newDraggableIndex } = evt;
       if (oldIndex === undefined || oldDraggableIndex === undefined || newDraggableIndex === undefined) return;
-      if (oldDraggableIndex === newDraggableIndex) return;
+      if (evt.to === from && oldDraggableIndex === newDraggableIndex) return;
 
-      from.removeChild(item);
+      // Put the element back where Svelte left it, in the list it came from.
+      item.parentElement?.removeChild(item);
       from.insertBefore(item, from.children[oldIndex] ?? null);
-      current.onmove(oldDraggableIndex, newDraggableIndex);
+      if (evt.to !== from) {
+        current.onmoveout?.(from.dataset.list ?? '', evt.to.dataset.list ?? '', oldDraggableIndex, newDraggableIndex);
+      } else {
+        current.onmove(oldDraggableIndex, newDraggableIndex);
+      }
     },
   });
 

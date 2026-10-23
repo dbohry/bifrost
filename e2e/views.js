@@ -67,6 +67,22 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   check('back to categories, following the new order', (await names()).join() === 'Echo,Alpha,Charlie,Bravo,Delta', (await names()).join());
   check('headings and tabs are back', await page.getByRole('heading', { name: 'X' }).isVisible() && await page.getByRole('button', { name: 'Y', exact: true }).isVisible());
 
+  // drag a tile into another category
+  const grid = (n) => page.locator('section', { has: page.getByRole('heading', { name: n, exact: true }) });
+  const bravo = await tile('Bravo').boundingBox();
+  const target = await grid('X').locator('.tile', { hasText: 'Alpha' }).boundingBox();
+  await page.mouse.move(bravo.x + bravo.width / 2, bravo.y + bravo.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 15; i++) await page.mouse.move(bravo.x + bravo.width / 2 + ((target.x + 20 - bravo.x - bravo.width / 2) * i) / 15, bravo.y + bravo.height / 2 + ((target.y + 20 - bravo.y - bravo.height / 2) * i) / 15);
+  await page.mouse.up();
+  await page.waitForTimeout(500);
+  const where = async () => page.evaluate(async () => (await (await fetch('/api/apps')).json()).apps.map((a) => a.name + ':' + a.category).join());
+  check('dropping a tile in another category moves the app there', /Bravo:X/.test(await where()) && (await grid('X').locator('.tile').count()) === 4, await where());
+  check('the old category keeps the rest', (await grid('Y').locator('.tile').count()) === 1);
+  await page.reload();
+  await page.waitForSelector('text=5 apps');
+  check('and it stays after a reload', /Bravo:X/.test(await where()) && (await grid('X').locator('.tile').count()) === 4);
+
   // reduced motion: no animation
   const quiet = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
   await quiet.addCookies(await ctx.cookies());

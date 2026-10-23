@@ -12,11 +12,15 @@
     onedit: (app: AppItem) => void;
     onfavourite: (app: AppItem) => void;
     onmove?: (from: number, to: number) => void;
+    /** Grids with the same `group` let a tile be dragged from one to another; `list` names this one. */
+    group?: string;
+    list?: string;
+    onmoveout?: (fromList: string, toList: string, from: number, to: number) => void;
     /** Shows a dashed "Add app" tile after the last one. */
     onadd?: () => void;
   };
 
-  let { apps, reorderable = false, editing = false, onedit, onfavourite, onmove, onadd }: Props = $props();
+  let { apps, reorderable = false, editing = false, onedit, onfavourite, onmove, group, list, onmoveout, onadd }: Props = $props();
 
   let grid = $state<HTMLElement>();
 
@@ -62,7 +66,8 @@
   bind:this={grid}
   onkeydown={arrows}
   role="presentation"
-  use:sortable={{ enabled: reorderable, onmove: (from, to) => onmove?.(from, to) }}
+  data-list={list}
+  use:sortable={{ enabled: reorderable, group, onmove: (from, to) => onmove?.(from, to), onmoveout }}
 >
   {#each apps as app (app.id)}
     <AppTile {app} {editing} onedit={() => onedit(app)} onfavourite={() => onfavourite(app)} />
