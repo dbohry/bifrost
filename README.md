@@ -89,6 +89,29 @@ Design phase. No application code yet.
 - Uploading custom icons and fetching favicons.
 - Export and import. Until then, back up by copying the `/data` volume.
 
+## Build order
+
+Each step ends with something that can be run and tried. Layouts are built mobile-first from step 2, so step 7 is a review, not a rewrite.
+
+| # | Milestone | Result |
+|---|---|---|
+| 0 | Skeleton and pipeline | Go server with an embedded Svelte page, SQLite with migrations, multi-stage Dockerfile, `/data` volume, `healthcheck` subcommand, and CI that lints, tests, builds the image and checks the bundle size. |
+| 1 | Accounts | First-run setup, sign in and sign out, sessions and the `reset-password` command. Also the Svelte shell, router and API client. |
+| 2 | Dashboard core | Add, edit and delete custom apps, grouped by category, with a Favourites row and first-letter icons. Each app belongs to one user. |
+| 3 | Users screen | Add a user, change a password, remove a user. Needed to test that dashboards are private. |
+| 4 | Organise and search | Drag-to-reorder with the order saved, category tabs, search over apps and the DuckDuckGo fallback. |
+| 5 | Themes and logo | Mode switch, six bundled themes, logo choice and per-user preferences. A test checks the contrast rule on every bundled theme. |
+| 6 | Starter catalogue | Embedded list of about 30 apps with icons, and the two-step add flow. |
+| 7 | Responsive and touch polish | Review at every breakpoint and orientation, bottom sheets on phones, touch behaviour for edit and reorder. |
+| 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. |
+
+### Risks to watch
+
+- Drag-and-drop on touch screens. Prototype it on a real phone in step 4.
+- SQLite allows one writer at a time. Use WAL mode and a busy timeout from the start.
+- The first-run endpoint must stop working as soon as the first admin exists.
+- Session cookies need the secure flags, requests that change data need protection against cross-site requests, and sign-in attempts should be rate limited.
+
 ## Open decisions
 
 - How status checks and widgets should run once they are added (proposal: a plain HTTP request every 60 seconds, configurable per app).
