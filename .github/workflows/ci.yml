@@ -1,12 +1,12 @@
 name: CI
 
-# Switched off to save GitHub Actions minutes: it only runs when started by hand
-# from the Actions tab. To turn it back on, put the triggers below back:
-#   push:
-#     branches: [main]
-#   pull_request:
-# Until then, run `make lint test size` before opening a pull request.
+# Pull requests run the lint, tests and size budget. Every push to main (a merge)
+# also builds the image for both architectures, without publishing it, so a broken
+# Dockerfile is caught early. Publishing is the Release workflow's job.
 on:
+  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -44,3 +44,20 @@ jobs:
       - run: npm run build
       - name: Bundle size budget
         run: npm run size
+
+  image:
+    # Merges to main (and manual runs) only.
+    if: github.event_name != 'pull_request'
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
