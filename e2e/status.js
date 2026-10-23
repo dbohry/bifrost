@@ -124,6 +124,9 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
   const card = tile('Fussy').locator('.card');
   await card.waitFor({ state: 'visible' });
   const text = await card.textContent();
+  check('the card is drawn above the tiles that follow it', await tile('Fussy').evaluate((el) => getComputedStyle(el).zIndex !== 'auto' && Number(getComputedStyle(el).zIndex) > 0));
+  const box = await card.boundingBox();
+  check('the card stays inside the page', box.x >= 0 && box.x + box.width <= 1280, JSON.stringify(box));
   check('hovering shows why and what was checked', text.includes('Answered with HTTP 500') && text.includes('http://127.0.0.1:19182'), text);
 
   // the offline filter

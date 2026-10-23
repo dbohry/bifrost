@@ -67,6 +67,14 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   check('back to categories, following the new order', (await names()).join() === 'Echo,Alpha,Charlie,Bravo,Delta', (await names()).join());
   check('headings and tabs are back', await page.getByRole('heading', { name: 'X' }).isVisible() && await page.getByRole('button', { name: 'Y', exact: true }).isVisible());
 
+  // the empty star shows only on hover, like the pencil; a filled one stays
+  const star = (n) => tile(n).first().getByRole('button', { name: /favourites/ });
+  await page.mouse.move(5, 5);
+  check('an empty star is hidden until you hover', (await star('Delta').evaluate((el) => getComputedStyle(el).opacity)) === '0');
+  await tile('Delta').first().hover();
+  check('and appears on hover', (await star('Delta').evaluate((el) => getComputedStyle(el).opacity)) === '1');
+  await page.mouse.move(5, 5);
+
   // drag a tile into another category
   const grid = (n) => page.locator('section', { has: page.getByRole('heading', { name: n, exact: true }) });
   const bravo = await tile('Bravo').boundingBox();

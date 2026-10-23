@@ -18,6 +18,19 @@
     result?.state === 'up' ? 'Online' : result?.state === 'down' ? 'Offline' : result ? 'Checking' : '',
   );
 
+  // The card is centred under the tile. For a tile at the edge of the page, slide it back into view.
+  let card = $state<HTMLElement>();
+  function keepInView() {
+    requestAnimationFrame(() => {
+      if (!card) return;
+      card.style.setProperty('--shift', '0px');
+      const r = card.getBoundingClientRect();
+      const margin = 8;
+      const shift = r.left < margin ? margin - r.left : r.right > innerWidth - margin ? innerWidth - margin - r.right : 0;
+      card.style.setProperty('--shift', `${shift}px`);
+    });
+  }
+
   // While editing on a touch screen, a tap changes the app instead of opening it.
   function open(e: MouseEvent) {
     if (!editing) return;
@@ -26,7 +39,7 @@
   }
 </script>
 
-<div class="tile" class:editing class:down data-sortable-item data-app-id={app.id}>
+<div class="tile" class:editing class:down data-sortable-item data-app-id={app.id} onmouseenter={keepInView} onfocusin={keepInView} role="presentation">
   <a
     class="open"
     href={app.url}
@@ -49,7 +62,7 @@
 
   {#if result}
     <!-- Hover or keyboard focus on the tile shows the details. It is decoration for the mouse; the badge and note carry the meaning. -->
-    <div class="card" aria-hidden="true" data-nav-skip>
+    <div class="card" bind:this={card} aria-hidden="true" data-nav-skip>
       <div class="card-title"><span class="status-dot {result.state}"></span>{app.name} is {label.toLowerCase()}</div>
       <dl>
         {#if result.state === 'down'}
@@ -102,6 +115,8 @@
   .tile:hover,
   .tile:focus-within {
     border-color: var(--accent);
+    /* Lift the whole tile, and so its status card, above the tiles after it in the grid. */
+    z-index: 5;
   }
   @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .tile:hover {
@@ -172,7 +187,7 @@
     z-index: 4;
     top: calc(100% + 8px);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(calc(-50% + var(--shift, 0px)));
     width: 232px;
     box-sizing: border-box;
     padding: 12px 14px;
@@ -268,13 +283,19 @@
     left: 0;
   }
 
-  /* With a mouse, the pencil only shows on hover or keyboard focus. */
+  /*
+   * With a mouse, the pencil and an empty star only show on hover or keyboard
+   * focus. A filled star stays, since it says the app is a favourite.
+   */
   @media (hover: hover) {
-    .edit {
+    .edit,
+    .fav:not(.on) {
       opacity: 0;
     }
     .tile:hover .edit,
-    .tile:focus-within .edit {
+    .tile:focus-within .edit,
+    .tile:hover .fav,
+    .tile:focus-within .fav {
       opacity: 1;
     }
   }
