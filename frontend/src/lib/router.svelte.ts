@@ -15,3 +15,18 @@ class Router {
 }
 
 export const router = new Router();
+
+/**
+ * Use on an `<a href>` to move around the app without a page load. The link
+ * still works as a normal link when opened in a new tab or with a modifier key.
+ */
+export function link(node: HTMLAnchorElement) {
+  const onclick = (e: MouseEvent) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    if (node.target && node.target !== '_self') return;
+    e.preventDefault();
+    router.navigate(node.getAttribute('href') ?? '/');
+  };
+  node.addEventListener('click', onclick);
+  return { destroy: () => node.removeEventListener('click', onclick) };
+}

@@ -8,6 +8,8 @@
     invalid?: boolean;
     list?: string;
     placeholder?: string;
+    /** Take focus when the surrounding dialog opens. */
+    focusFirst?: boolean;
     input?: HTMLInputElement;
   };
 
@@ -20,6 +22,7 @@
     invalid = false,
     list,
     placeholder,
+    focusFirst = false,
     input = $bindable(),
   }: Props = $props();
 
@@ -38,6 +41,7 @@
       {autocomplete}
       {list}
       {placeholder}
+      data-autofocus={focusFirst ? '' : undefined}
       aria-invalid={invalid}
       aria-describedby={hint ? `${id}-hint` : undefined}
       autocapitalize="off"

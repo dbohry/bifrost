@@ -1,10 +1,9 @@
 <script lang="ts">
   import AppDialog from '../components/AppDialog.svelte';
   import AppTile from '../components/AppTile.svelte';
-  import Logo from '../components/Logo.svelte';
+  import Topbar from '../components/Topbar.svelte';
   import type { AppInput, AppItem } from '../lib/api';
   import { apps } from '../lib/apps.svelte';
-  import { session } from '../lib/session.svelte';
   import { greeting } from '../lib/tile';
 
   // null: closed. { app: null }: adding. { app }: editing that app.
@@ -21,17 +20,11 @@
   const count = $derived(apps.items.length);
 </script>
 
-<header class="bar">
-  <span class="brand"><Logo size={28} /> Bifrost</span>
-  <span class="actions">
-    <button class="button add" onclick={() => (dialog = { app: null })}>
-      <span aria-hidden="true">+</span> Add app
-    </button>
-    <button class="button secondary" onclick={() => session.logout()}>
-      Sign out<span class="who">&nbsp;({session.user?.username})</span>
-    </button>
-  </span>
-</header>
+<Topbar current="dashboard">
+  <button class="button add" onclick={() => (dialog = { app: null })}>
+    <span aria-hidden="true">+</span> Add app
+  </button>
+</Topbar>
 
 <main>
   <div class="hello">
@@ -98,43 +91,6 @@
 {/if}
 
 <style>
-  .bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 700;
-    font-size: 18px;
-  }
-  .actions {
-    display: flex;
-    gap: 8px;
-  }
-  .actions .button {
-    height: 44px;
-    padding: 0 16px;
-    font-size: 14px;
-  }
-  .who {
-    display: none;
-  }
-  @media (min-width: 640px) {
-    .bar {
-      padding: 12px 32px;
-    }
-    .who {
-      display: inline;
-    }
-  }
-
   main {
     max-width: 1120px;
     margin: 0 auto;

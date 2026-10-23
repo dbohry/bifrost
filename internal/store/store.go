@@ -18,6 +18,8 @@ var (
 	ErrNotFound = errors.New("not found")
 	// ErrSetupClosed means the first account already exists.
 	ErrSetupClosed = errors.New("setup is already done")
+	// ErrUsernameTaken means another account already has that username.
+	ErrUsernameTaken = errors.New("username is taken")
 )
 
 // Store is the data access layer. It is safe for concurrent use.
@@ -36,14 +38,17 @@ type User struct {
 	IsAdmin            bool
 	MustChangePassword bool
 	CreatedAt          time.Time
+	// LastSeenAt is the zero time when the user has never signed in.
+	LastSeenAt time.Time
 }
 
-const userColumns = `id, username, password_hash, is_admin, must_change_password, created_at`
+const userColumns = `id, username, password_hash, is_admin, must_change_password, created_at, last_seen_at`
 
 func scanUser(row interface{ Scan(...any) error }) (User, error) {
 	var u User
 	var created int64
-	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.IsAdmin, &u.MustChangePassword, &created)
+	var seen sql.NullInt64
+	err := row.Scan(&u.ID, &u.Username, &u.PasswordHash, &u.IsAdmin, &u.MustChangePassword, &created, &seen)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, ErrNotFound
 	}
@@ -51,6 +56,9 @@ func scanUser(row interface{ Scan(...any) error }) (User, error) {
 		return User{}, err
 	}
 	u.CreatedAt = time.Unix(created, 0).UTC()
+	if seen.Valid {
+		u.LastSeenAt = time.Unix(seen.Int64, 0).UTC()
+	}
 	return u, nil
 }
 
@@ -80,6 +88,59 @@ func (s *Store) CreateFirstAdmin(ctx context.Context, username, passwordHash str
 		return User{}, ErrSetupClosed
 	}
 	return s.UserByUsername(ctx, username)
+}
+
+// ListUsers returns every account, oldest first.
+func (s *Store) ListUsers(ctx context.Context) ([]User, error) {
+	rows, err := s.db.QueryContext(ctx, `SELECT `+userColumns+` FROM users ORDER BY id`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	users := []User{}
+	for rows.Next() {
+		u, err := scanUser(rows)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+	return users, rows.Err()
+}
+
+// CreateUser adds an account. It returns ErrUsernameTaken when another account
+// already has the username, ignoring case.
+func (s *Store) CreateUser(ctx context.Context, username, passwordHash string, isAdmin, mustChange bool, now time.Time) (User, error) {
+	u, err := scanUser(s.db.QueryRowContext(ctx,
+		`INSERT INTO users (username, password_hash, is_admin, must_change_password, created_at)
+		 VALUES (?, ?, ?, ?, ?) RETURNING `+userColumns,
+		username, passwordHash, isAdmin, mustChange, now.Unix()))
+	if err != nil {
+		if _, lookup := s.UserByUsername(ctx, username); lookup == nil {
+			return User{}, ErrUsernameTaken
+		}
+		return User{}, fmt.Errorf("create user: %w", err)
+	}
+	return u, nil
+}
+
+// DeleteUser removes an account. Its apps and sessions go with it.
+func (s *Store) DeleteUser(ctx context.Context, id int64) error {
+	res, err := s.db.ExecContext(ctx, `DELETE FROM users WHERE id = ?`, id)
+	if err != nil {
+		return err
+	}
+	if n, _ := res.RowsAffected(); n == 0 {
+		return ErrNotFound
+	}
+	return nil
+}
+
+// TouchUser records that the user was just active.
+func (s *Store) TouchUser(ctx context.Context, id int64, now time.Time) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET last_seen_at = ? WHERE id = ?`, now.Unix(), id)
+	return err
 }
 
 // UserByUsername looks an account up ignoring case.
@@ -146,14 +207,15 @@ func (s *Store) SessionUser(ctx context.Context, tokenHash string, now time.Time
 	var expires int64
 	row := s.db.QueryRowContext(ctx,
 		`SELECT s.token_hash, s.user_id, s.persistent, s.expires_at,
-		        u.id, u.username, u.password_hash, u.is_admin, u.must_change_password, u.created_at
+		        u.id, u.username, u.password_hash, u.is_admin, u.must_change_password, u.created_at, u.last_seen_at
 		   FROM sessions s JOIN users u ON u.id = s.user_id
 		  WHERE s.token_hash = ? AND s.expires_at > ?`, tokenHash, now.Unix())
 
 	var u User
 	var created int64
+	var seen sql.NullInt64
 	err := row.Scan(&sess.TokenHash, &sess.UserID, &sess.Persistent, &expires,
-		&u.ID, &u.Username, &u.PasswordHash, &u.IsAdmin, &u.MustChangePassword, &created)
+		&u.ID, &u.Username, &u.PasswordHash, &u.IsAdmin, &u.MustChangePassword, &created, &seen)
 	if errors.Is(err, sql.ErrNoRows) {
 		return Session{}, User{}, ErrNotFound
 	}
@@ -162,6 +224,9 @@ func (s *Store) SessionUser(ctx context.Context, tokenHash string, now time.Time
 	}
 	sess.ExpiresAt = time.Unix(expires, 0).UTC()
 	u.CreatedAt = time.Unix(created, 0).UTC()
+	if seen.Valid {
+		u.LastSeenAt = time.Unix(seen.Int64, 0).UTC()
+	}
 	return sess, u, nil
 }
 

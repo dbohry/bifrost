@@ -367,8 +367,10 @@ func TestChangePassword(t *testing.T) {
 
 	mustStatus(t, e.browser().do("POST", "/api/me/password", m{"current": "x", "new": "y"}), 401)
 
+	// A wrong current password is 403, not 401: the user is still signed in.
 	r := laptop.do("POST", "/api/me/password", m{"current": "not-it", "new": "new-password-2"})
-	mustStatus(t, r, 401)
+	mustStatus(t, r, 403)
+	mustStatus(t, laptop.do("GET", "/api/me", nil), 200)
 	mustStatus(t, laptop.do("POST", "/api/me/password", m{"current": "old-password-1", "new": "short"}), 400)
 	r = laptop.do("POST", "/api/me/password", m{"current": "old-password-1", "new": "old-password-1"})
 	mustStatus(t, r, 400)
@@ -404,7 +406,7 @@ func TestChangePasswordRateLimit(t *testing.T) {
 	b.setup("alex", "correct-password")
 
 	for i := 0; i < 10; i++ {
-		mustStatus(t, b.do("POST", "/api/me/password", m{"current": "guess", "new": "new-password-2"}), 401)
+		mustStatus(t, b.do("POST", "/api/me/password", m{"current": "guess", "new": "new-password-2"}), 403)
 	}
 	mustStatus(t, b.do("POST", "/api/me/password", m{"current": "correct-password", "new": "new-password-2"}), 429)
 }

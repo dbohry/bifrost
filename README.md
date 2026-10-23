@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 2 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, password reset from the host), and you can add, edit, favourite and delete apps on your dashboard. Search, reordering, themes and the rest are still to come. See the build order below.
+Milestones 0 to 3 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite and delete apps on your dashboard. Search, reordering, themes and the rest are still to come. See the build order below.
 
 ## Running it
 
@@ -16,6 +16,13 @@ docker run -d --name bifrost -p 8080:8080 -v bifrost-data:/data bifrost
 ```
 
 Then open http://localhost:8080. The first visit asks you to create the administrator account. Whoever opens the page first creates it, so do this before exposing Bifrost to anyone else. Everything Bifrost stores lives in the `/data` volume.
+
+### Users
+
+- The first account is the administrator. Administrators add and remove users from **Settings > Users**. Everyone can change their own password from **Settings > Account**.
+- Adding a user, or resetting someone's password, makes a random temporary password that is shown once. The person must choose their own the next time they sign in. A reset also signs them out everywhere.
+- Removing a user deletes their account and all of their apps. You cannot remove or reset your own account from the Users screen, which also means there is always at least one administrator.
+- The list shows when each person was last active.
 
 ### Locked out?
 
@@ -70,7 +77,7 @@ Project layout:
 - `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
 - Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up
 
-CI (`.github/workflows/ci.yml`) runs the Go checks and tests, and the frontend type check, build and size budget. It does not build the Docker image, so run `make image` before changing the Dockerfile.
+CI (`.github/workflows/ci.yml`) is switched off to save GitHub Actions minutes, and can be started by hand from the Actions tab. When on, it runs the Go checks and tests, and the frontend type check, build and size budget. It never builds the Docker image. So before opening a pull request, run `make lint test size` yourself, and run `make image` when you change the Dockerfile.
 
 ## Goals
 

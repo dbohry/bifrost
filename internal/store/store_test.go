@@ -183,3 +183,87 @@ func TestPurgeExpiredSessions(t *testing.T) {
 		t.Errorf("valid session was purged: %v", err)
 	}
 }
+
+func TestCreateAndListUsers(t *testing.T) {
+	st := newStore(t)
+	alex, _ := st.CreateFirstAdmin(ctx, "alex", "h1", now)
+
+	sam, err := st.CreateUser(ctx, "Sam", "h2", false, true, now.Add(time.Hour))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if sam.IsAdmin || !sam.MustChangePassword || sam.Username != "Sam" || !sam.LastSeenAt.IsZero() || !sam.CreatedAt.Equal(now.Add(time.Hour)) {
+		t.Errorf("unexpected user: %+v", sam)
+	}
+	jo, err := st.CreateUser(ctx, "jo", "h3", true, false, now)
+	if err != nil || !jo.IsAdmin || jo.MustChangePassword {
+		t.Errorf("admin user: %+v, %v", jo, err)
+	}
+
+	users, err := st.ListUsers(ctx)
+	if err != nil || len(users) != 3 || users[0].ID != alex.ID || users[1].ID != sam.ID || users[2].ID != jo.ID {
+		t.Errorf("users = %+v, err %v", users, err)
+	}
+}
+
+func TestCreateUserRejectsATakenUsernameInAnyCase(t *testing.T) {
+	st := newStore(t)
+	st.CreateFirstAdmin(ctx, "Alex", "h", now)
+
+	for _, name := range []string{"Alex", "alex", "ALEX"} {
+		if _, err := st.CreateUser(ctx, name, "h", false, false, now); err != ErrUsernameTaken {
+			t.Errorf("%q: err = %v, want ErrUsernameTaken", name, err)
+		}
+	}
+	if users, _ := st.ListUsers(ctx); len(users) != 1 {
+		t.Errorf("%d users, want 1", len(users))
+	}
+}
+
+func TestTouchUserSetsLastSeen(t *testing.T) {
+	st := newStore(t)
+	u, _ := st.CreateFirstAdmin(ctx, "alex", "h", now)
+
+	later := now.Add(3 * time.Hour)
+	if err := st.TouchUser(ctx, u.ID, later); err != nil {
+		t.Fatal(err)
+	}
+	got, _ := st.UserByID(ctx, u.ID)
+	if !got.LastSeenAt.Equal(later) {
+		t.Errorf("LastSeenAt = %v, want %v", got.LastSeenAt, later)
+	}
+	// It also comes back from a session lookup and from the list.
+	st.CreateSession(ctx, "tok", u.ID, false, now, now.Add(time.Hour))
+	if _, viaSession, _ := st.SessionUser(ctx, "tok", now); !viaSession.LastSeenAt.Equal(later) {
+		t.Errorf("session user LastSeenAt = %v", viaSession.LastSeenAt)
+	}
+	if users, _ := st.ListUsers(ctx); !users[0].LastSeenAt.Equal(later) {
+		t.Errorf("listed LastSeenAt = %v", users[0].LastSeenAt)
+	}
+}
+
+func TestDeleteUserRemovesTheirAppsAndSessions(t *testing.T) {
+	st := newStore(t)
+	st.CreateFirstAdmin(ctx, "alex", "h", now)
+	sam, _ := st.CreateUser(ctx, "sam", "h", false, false, now)
+	st.CreateSession(ctx, "sams", sam.ID, false, now, now.Add(time.Hour))
+	st.CreateApp(ctx, sam.ID, AppInput{Name: "a", URL: "http://a.lan", Category: "x", NewTab: true}, now)
+
+	if err := st.DeleteUser(ctx, sam.ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := st.UserByID(ctx, sam.ID); err != ErrNotFound {
+		t.Errorf("user still there: %v", err)
+	}
+	if _, _, err := st.SessionUser(ctx, "sams", now); err != ErrNotFound {
+		t.Errorf("session survived: %v", err)
+	}
+	var n int
+	st.db.QueryRow(`SELECT COUNT(*) FROM apps`).Scan(&n)
+	if n != 0 {
+		t.Errorf("%d apps left", n)
+	}
+	if err := st.DeleteUser(ctx, sam.ID); err != ErrNotFound {
+		t.Errorf("second delete: err = %v", err)
+	}
+}
