@@ -60,7 +60,7 @@ Why Bifrost is built the way it is, what is in it, and what comes later.
 **Dashboard**
 - Tiles grouped by category, a Favourites row and category tabs.
 - Add, edit and delete an app: name, URL, category and icon.
-- A catalogue of about 390 popular apps with icons. It will keep growing.
+- A catalogue of about 580 popular apps with icons. It will keep growing.
 - Categories are created on the fly when adding an app. There is no screen to manage them.
 - Apps without a preset or uploaded icon show their first letter on a coloured tile.
 - Drag-to-reorder tiles.
@@ -95,7 +95,7 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 | 3 | Users screen | Add a user, change a password, remove a user. Needed to test that dashboards are private. |
 | 4 | Organise and search | Drag-to-reorder with the order saved, category tabs, search over apps and the DuckDuckGo fallback. |
 | 5 | Themes and logo | Mode switch, six bundled themes, logo choice and per-user preferences. A test checks the contrast rule on every bundled theme. |
-| 6 | Starter catalogue | Embedded list of apps with icons (30 at first, about 390 now), and the two-step add flow. |
+| 6 | Starter catalogue | Embedded list of apps with icons (30 at first, about 580 now), and the two-step add flow. |
 | 7 | Responsive and touch polish | Review at every breakpoint and orientation, a bottom bar and sheets on phones, touch behaviour for edit and reorder. Done. |
 | 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. Done. |
 

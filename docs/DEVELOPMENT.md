@@ -18,7 +18,7 @@ Project layout:
 
 - `cmd/bifrost`: the binary and its subcommands (`serve`, `reset-password`, `healthcheck`, `version`)
 - `internal/config`, `internal/db`, `internal/store`, `internal/auth`, `internal/server`: configuration, SQLite with migrations, data access, passwords and rate limiting, HTTP handlers
-- `internal/catalog`: the built-in list of about 390 apps (`catalog.json`) and their icons. A test checks that every entry has an icon and every icon is a plain, inert SVG with no scripts, event handlers or external links. The icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See `internal/catalog/icons/NOTICE.md`
+- `internal/catalog`: the built-in list of about 580 apps (`catalog.json`) and their icons. A test checks that every entry has an icon and every icon is a plain, inert SVG with no scripts, event handlers or external links. The icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See `internal/catalog/icons/NOTICE.md`
 - `internal/themes`: the colour themes. Each is a small JSON file in `internal/themes/bundled`, and a test fails if any theme is hard to read (text and secondary text 4.5:1, accent and status colours 3:1)
 - `frontend/src/theme.css` holds the two Bifrost themes for painting the page before a user's theme arrives. A test keeps it identical to the theme files, so change them together
 - `internal/webui`: embeds the built frontend

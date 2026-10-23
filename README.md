@@ -23,7 +23,7 @@
 
 ## Features
 
-- **About 390 apps ready to add**, with their logos: Jellyfin, Sonarr, Home Assistant, Immich, Nextcloud and many more. Or add any address yourself.
+- **About 580 apps ready to add**, with their logos: Jellyfin, Sonarr, Home Assistant, Immich, Nextcloud and many more. Or add any address yourself.
 - **Private dashboards.** Every user has their own apps, favourites and look.
 - **Themes.** Light, dark or follow the device. Bifrost, Dracula, Nord, Gruvbox and Solarized are built in.
 - **Works on phones, tablets and desktops**, in either orientation.
@@ -101,7 +101,7 @@ Plain HTTP is fine on a home network. Behind a reverse proxy that serves HTTPS, 
 - **Touch screens.** The edit buttons are hidden until you press **Edit**. On a phone held upright, the main buttons are in a bar at the bottom.
 - **Users.** The first account is the administrator and can add and remove users in Settings → Users. A new user gets a temporary password, shown once, and must choose their own.
 - **Look.** Settings → Appearance sets the mode, a theme for light and one for dark, and the logo. It follows you to every device.
-- **Esc** leaves Settings.
+- **Keyboard only.** Everything works with the arrow keys. Press `/` to reach the search box (or Tab once), then the arrows move to the nearest control in that direction: tiles, category tabs, the layout switch, buttons, dialog fields and settings. Enter opens an app in a new tab. With a tile focused, `E` opens its details, `F` stars it, and **Alt + arrows** move it: left and right one place, up and down one row, and past the first or last row into the neighbouring category. Esc closes a dialog, or leaves Settings.
 
 ## More
 

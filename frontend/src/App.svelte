@@ -1,8 +1,10 @@
 <script lang="ts">
   import BottomNav from './components/BottomNav.svelte';
   import { appearance } from './lib/appearance.svelte';
+  import { arrowNav } from './lib/keynav';
   import { router } from './lib/router.svelte';
   import { session } from './lib/session.svelte';
+  import { ui } from './lib/ui.svelte';
   import ChangePassword from './screens/ChangePassword.svelte';
   import Home from './screens/Home.svelte';
   import Login from './screens/Login.svelte';
@@ -49,6 +51,11 @@
   });
 </script>
 
+<svelte:window onkeydown={arrowNav} />
+
+<!-- Said aloud by screen readers when something changes without a visible message. -->
+<p class="sr-only" role="status" aria-live="polite">{ui.announcement}</p>
+
 {#if failed}
   <p class="status" role="alert">Cannot reach the server.</p>
 {:else if screen === 'setup'}
@@ -71,6 +78,14 @@
 {/if}
 
 <style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
   /* On a phone held upright the bottom bar sits over the page, so leave room for it. */
   @media (max-width: 599px) and (min-height: 480px) {
     .shell {
