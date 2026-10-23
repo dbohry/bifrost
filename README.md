@@ -4,7 +4,48 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Design phase. No application code yet.
+Milestone 0 (skeleton and pipeline) is in place: the server starts, applies database migrations, serves a placeholder page and answers health checks. There are no accounts or dashboard yet. See the build order below.
+
+## Running it
+
+Bifrost is distributed as a Docker image. Until images are published, build one yourself:
+
+```sh
+docker build -t bifrost .
+docker run -d --name bifrost -p 8080:8080 -v bifrost-data:/data bifrost
+```
+
+Then open http://localhost:8080. Everything Bifrost stores lives in the `/data` volume.
+
+Settings, all optional:
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `BIFROST_ADDR` | `:8080` | Address the server listens on |
+| `BIFROST_DATA_DIR` | `/data` | Where the database and uploads are kept |
+
+## Development
+
+You need Go 1.26 and Node 22. `make help` lists the targets:
+
+| Command | What it does |
+|---|---|
+| `make dev` | Go server on :8080 and the Vite dev server on :5173, with hot reload |
+| `make build` | Builds the frontend, then `bin/bifrost` with it embedded |
+| `make test` | Go tests with the race detector |
+| `make lint` | `gofmt`, `go vet` and `svelte-check` |
+| `make size` | Checks the built frontend against the 100 KB gzipped budget |
+| `make image` | Builds the Docker image |
+
+Project layout:
+
+- `cmd/bifrost`: the binary and its subcommands (`serve`, `healthcheck`, `version`)
+- `internal/config`, `internal/db`, `internal/server`: configuration, SQLite with migrations, HTTP handlers
+- `internal/webui`: embeds the built frontend
+- `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
+- Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up
+
+CI (`.github/workflows/ci.yml`) runs the Go checks and tests, the frontend type check, build and size budget, and builds the image for `amd64` and `arm64`.
 
 ## Goals
 
