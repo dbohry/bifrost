@@ -92,7 +92,7 @@ func newServer(conn *sql.DB, version string) *server {
 		themes:       bundled,
 		catalog:      apps,
 		db:           conn,
-		store:        store.New(conn),
+		store:        st,
 		version:      version,
 		now:          time.Now,
 		loginByIP:    auth.NewLimiter(20, 15*time.Minute),
@@ -187,15 +187,13 @@ func (s *server) login(w http.ResponseWriter, r *http.Request) {
 
 	ipKey := clientIP(r)
 	userKey := strings.ToLower(in.Username)
-	for _, l := range []*auth.Limiter{s.loginByIP, s.loginByUser} {
-		key := ipKey
-		if l == s.loginByUser {
-			key = userKey
-		}
-		if ok, retry := l.Allow(key); !ok {
-			tooManyAttempts(w, retry)
-			return
-		}
+	if ok, retry := s.loginByIP.Allow(ipKey); !ok {
+		tooManyAttempts(w, retry)
+		return
+	}
+	if ok, retry := s.loginByUser.Allow(userKey); !ok {
+		tooManyAttempts(w, retry)
+		return
 	}
 
 	user, err := s.store.UserByUsername(r.Context(), in.Username)
@@ -368,15 +366,21 @@ func (s *server) extend(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	setCookie(w, r, token, sess.Persistent)
 }
 
-func setCookie(w http.ResponseWriter, r *http.Request, token string, persistent bool) {
-	c := &http.Cookie{
+// sessionCookieFor returns the session cookie with the attributes every
+// version of it shares.
+func sessionCookieFor(r *http.Request, value string) *http.Cookie {
+	return &http.Cookie{
 		Name:     sessionCookie,
-		Value:    token,
+		Value:    value,
 		Path:     "/",
 		HttpOnly: true,
 		SameSite: http.SameSiteLaxMode,
 		Secure:   isHTTPS(r),
 	}
+}
+
+func setCookie(w http.ResponseWriter, r *http.Request, token string, persistent bool) {
+	c := sessionCookieFor(r, token)
 	if persistent {
 		c.MaxAge = int(persistentTTL.Seconds())
 	}
@@ -384,10 +388,9 @@ func setCookie(w http.ResponseWriter, r *http.Request, token string, persistent 
 }
 
 func clearCookie(w http.ResponseWriter, r *http.Request) {
-	http.SetCookie(w, &http.Cookie{
-		Name: sessionCookie, Value: "", Path: "/", MaxAge: -1,
-		HttpOnly: true, SameSite: http.SameSiteLaxMode, Secure: isHTTPS(r),
-	})
+	c := sessionCookieFor(r, "")
+	c.MaxAge = -1
+	http.SetCookie(w, c)
 }
 
 // isHTTPS is true when the browser reached us over TLS, directly or through a

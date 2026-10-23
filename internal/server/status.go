@@ -1,7 +1,6 @@
 package server
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -113,7 +112,7 @@ func (s *server) testStatus(w http.ResponseWriter, r *http.Request, user store.U
 	o := status.Check(r.Context(), address, settings.Timeout, in.Strict, in.Insecure)
 	writeJSON(w, http.StatusOK, map[string]any{
 		"up": o.Up, "latencyMs": o.Latency.Milliseconds(), "code": o.Code, "reason": o.Reason,
-		"address": address, "timeout": fmt.Sprintf("%d", int(settings.Timeout/time.Second)),
+		"address": address,
 	})
 }
 

@@ -179,7 +179,10 @@ func cleanApp(b appBody) (store.AppInput, string) {
 	if name == "" {
 		return store.AppInput{}, "Enter a name for the app."
 	}
-	if utf8.RuneCountInString(name) > maxNameChars || hasControl(name) {
+	if hasControl(name) {
+		return store.AppInput{}, "The name cannot contain control characters."
+	}
+	if utf8.RuneCountInString(name) > maxNameChars {
 		return store.AppInput{}, "The name must be 40 characters or fewer."
 	}
 
@@ -192,7 +195,10 @@ func cleanApp(b appBody) (store.AppInput, string) {
 	if category == "" {
 		category = defaultCategory
 	}
-	if utf8.RuneCountInString(category) > maxCategoryChars || hasControl(category) {
+	if hasControl(category) {
+		return store.AppInput{}, "The category cannot contain control characters."
+	}
+	if utf8.RuneCountInString(category) > maxCategoryChars {
 		return store.AppInput{}, "The category must be 40 characters or fewer."
 	}
 

@@ -115,4 +115,5 @@ Plain HTTP is fine on a home network. Behind a reverse proxy that serves HTTPS, 
 - [Development](docs/DEVELOPMENT.md): build, test and project layout.
 - [Design notes](docs/DESIGN.md): goals, architecture, scope and what comes next.
 - [Wireframes](docs/wireframes/README.md): the screens as they were designed, including the proposed status checks.
+- [MIT License](LICENSE). Bundled icons keep their own licenses, below.
 - Icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See [`NOTICE.md`](internal/catalog/icons/NOTICE.md).
