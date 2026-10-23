@@ -5,6 +5,20 @@ export type User = {
   mustChangePassword: boolean;
 };
 
+/** An app tile on a user's dashboard. */
+export type AppItem = {
+  id: number;
+  name: string;
+  url: string;
+  category: string;
+  favourite: boolean;
+  newTab: boolean;
+  position: number;
+};
+
+/** What the user fills in to add or change an app. */
+export type AppInput = Omit<AppItem, 'id' | 'position'>;
+
 /** An error response from the server. `message` is safe to show to the user. */
 export class ApiError extends Error {
   constructor(
@@ -15,6 +29,17 @@ export class ApiError extends Error {
     super(message);
   }
 }
+
+let onUnauthorized: () => void = () => {};
+
+/** Called when a request finds that the session is gone (expired or signed out elsewhere). */
+export function setUnauthorizedHandler(fn: () => void) {
+  onUnauthorized = fn;
+}
+
+// Sign-in, setup and the first "who am I" check expect to be told "not signed in".
+const expectsUnauthorized = (path: string) =>
+  path === '/api/me' || path === '/api/login' || path === '/api/setup';
 
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   let res: Response;
@@ -32,6 +57,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   if (res.status === 204) return undefined as T;
 
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && !expectsUnauthorized(path)) onUnauthorized();
   if (!res.ok) {
     throw new ApiError(res.status, data.error ?? 'Something went wrong.', data.code);
   }
@@ -47,6 +73,11 @@ export const api = {
     request<{ user: User }>('POST', '/api/login', { username, password, remember }),
   logout: () => request<void>('POST', '/api/logout'),
   me: () => request<{ user: User }>('GET', '/api/me'),
+  apps: () => request<{ apps: AppItem[] }>('GET', '/api/apps'),
+  createApp: (input: AppInput) => request<{ app: AppItem }>('POST', '/api/apps', input),
+  updateApp: (id: number, input: AppInput) =>
+    request<{ app: AppItem }>('PUT', `/api/apps/${id}`, input),
+  deleteApp: (id: number) => request<void>('DELETE', `/api/apps/${id}`),
   changePassword: (current: string, next: string) =>
     request<void>('POST', '/api/me/password', { current, new: next }),
 };

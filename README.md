@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 and 1 are in place: the server runs, and accounts work (first-run setup, sign in and out, sessions, password reset from the host). After signing in you see a placeholder page. The dashboard comes next. See the build order below.
+Milestones 0 to 2 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, password reset from the host), and you can add, edit, favourite and delete apps on your dashboard. Search, reordering, themes and the rest are still to come. See the build order below.
 
 ## Running it
 
@@ -26,6 +26,14 @@ docker exec bifrost /bifrost reset-password <username>
 ```
 
 It prints a temporary password and signs that user out everywhere. They must choose a new password the next time they sign in.
+
+### Your dashboard
+
+- Each user has their own apps. Nothing is shared between users.
+- Add an app with a name, an address and a category. Type a new category name to create one, or leave it empty for "Other". A category typed in a different case from an existing one joins it.
+- Addresses without a scheme get `http://`. Only `http` and `https` are accepted, and addresses with a username or password in them are refused.
+- Starred apps also appear in a Favourites row at the top.
+- Tiles show the app's first letter on a coloured background.
 
 ### Sessions and passwords
 
