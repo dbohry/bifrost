@@ -7,6 +7,8 @@
     apps: AppItem[];
     /** Whether tiles can be dragged to a new place. */
     reorderable?: boolean;
+    /** Edit mode on a touch screen: tiles show their buttons. */
+    editing?: boolean;
     onedit: (app: AppItem) => void;
     onfavourite: (app: AppItem) => void;
     onmove?: (from: number, to: number) => void;
@@ -14,16 +16,56 @@
     onadd?: () => void;
   };
 
-  let { apps, reorderable = false, onedit, onfavourite, onmove, onadd }: Props = $props();
+  let { apps, reorderable = false, editing = false, onedit, onfavourite, onmove, onadd }: Props = $props();
+
+  let grid = $state<HTMLElement>();
+
+  /**
+   * Arrow keys move between the tiles, the way the eye sees them. Tab still
+   * visits every control. Left and right go to the neighbour in the row, and up
+   * and down to the tile nearest above or below.
+   */
+  function arrows(e: KeyboardEvent) {
+    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const here = (e.target as HTMLElement).closest<HTMLAnchorElement>('a.open');
+    if (!here || !grid) return;
+
+    const links = [...grid.querySelectorAll<HTMLAnchorElement>('a.open')];
+    const at = links.indexOf(here);
+    const box = here.getBoundingClientRect();
+    let next: HTMLAnchorElement | undefined;
+
+    if (e.key === 'ArrowRight') next = links[at + 1];
+    else if (e.key === 'ArrowLeft') next = links[at - 1];
+    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      const down = e.key === 'ArrowDown';
+      const row = links
+        .map((el) => ({ el, r: el.getBoundingClientRect() }))
+        .filter(({ r }) => (down ? r.top > box.bottom - 4 : r.bottom < box.top + 4))
+        // the nearest row first, then the tile whose centre is closest
+        .sort((a, b) => (down ? a.r.top - b.r.top : b.r.top - a.r.top) || Math.abs(a.r.left - box.left) - Math.abs(b.r.left - box.left));
+      const first = row[0];
+      // only tiles in that nearest row count
+      next = first && row.filter(({ r }) => Math.abs(r.top - first.r.top) < 4).sort((a, b) => Math.abs(a.r.left - box.left) - Math.abs(b.r.left - box.left))[0]?.el;
+    }
+
+    if (next) {
+      e.preventDefault();
+      next.focus();
+    }
+  }
 </script>
 
 <div
   class="grid"
   class:reorderable
+  bind:this={grid}
+  onkeydown={arrows}
+  role="presentation"
   use:sortable={{ enabled: reorderable, onmove: (from, to) => onmove?.(from, to) }}
 >
   {#each apps as app (app.id)}
-    <AppTile {app} onedit={() => onedit(app)} onfavourite={() => onfavourite(app)} />
+    <AppTile {app} {editing} onedit={() => onedit(app)} onfavourite={() => onfavourite(app)} />
   {/each}
   {#if onadd}
     <button class="add-tile" onclick={onadd}>

@@ -24,7 +24,7 @@ export function sortable(node: HTMLElement, options: SortableOptions) {
 
   const instance = Sortable.create(node, {
     draggable: '[data-sortable-item]',
-    animation: 150,
+    animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 150,
     forceFallback: true,
     fallbackTolerance: 4,
     delay: 250,

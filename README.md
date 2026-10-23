@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 6 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo, and add popular apps from a built-in list of 30. The rest of the polish is still to come. See the build order below.
+Milestones 0 to 7 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo, and add popular apps from a built-in list of 30. The layout works on phones, tablets and desktops in either orientation. The release work is still to come. See the build order below.
 
 ## Running it
 
@@ -45,6 +45,9 @@ It prints a temporary password and signs that user out everywhere. They must cho
 - Category tabs above the apps show one category at a time. **All** shows everything.
 - The search box filters your apps by name, category or address as you type. Press `/` to jump to it and Escape to clear it. Enter opens the best match, or searches the web with DuckDuckGo when nothing matches.
 - Drag a tile to change its place within its category. On a touch screen, press and hold first, so the page can still scroll. To move an app without dragging, open it with the pencil and use **Move earlier** or **Move later**. Dragging is off while a search is showing, and your order is saved.
+- On a phone held upright, Add app, Search, Settings and Sign out move to a bar at the bottom (Sign out is in Settings → Account). A phone on its side keeps the top bar, since it has room for it.
+- On a touch screen the pencil and star buttons are tucked away. Press **Edit** above the apps to show them, tap a tile to open its details, then press **Done**. Pinned apps show a small star.
+- On a computer, the arrow keys move between tiles. The pages respect notches and rounded corners, and animations are off if your system asks for reduced motion.
 
 ### Appearance
 
@@ -190,7 +193,7 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 | 4 | Organise and search | Drag-to-reorder with the order saved, category tabs, search over apps and the DuckDuckGo fallback. |
 | 5 | Themes and logo | Mode switch, six bundled themes, logo choice and per-user preferences. A test checks the contrast rule on every bundled theme. |
 | 6 | Starter catalogue | Embedded list of about 30 apps with icons, and the two-step add flow. |
-| 7 | Responsive and touch polish | Review at every breakpoint and orientation, bottom sheets on phones, touch behaviour for edit and reorder. |
+| 7 | Responsive and touch polish | Review at every breakpoint and orientation, a bottom bar and sheets on phones, touch behaviour for edit and reorder. Done. |
 | 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. |
 
 ### Risks to watch

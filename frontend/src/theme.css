@@ -40,6 +40,41 @@
   }
 }
 
+/*
+ * Space the notch, the rounded corners and the home bar take up on a phone.
+ * They are 0 everywhere else. The page asks for them with viewport-fit=cover.
+ */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+}
+
+/*
+ * On a touch screen, text boxes use 16px text. Anything smaller makes iPhones
+ * zoom the whole page in when you tap one, and it does not zoom back out.
+ */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* People who ask their device for less motion get none from us. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   margin: 0;
   background: var(--bg);

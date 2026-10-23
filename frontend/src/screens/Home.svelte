@@ -8,6 +8,7 @@
   import type { AppInput, AppItem, CatalogEntry } from '../lib/api';
   import { apps, groupByCategory } from '../lib/apps.svelte';
   import { greeting } from '../lib/tile';
+  import { ui } from '../lib/ui.svelte';
 
   // What is open, if anything. Adding is two steps: pick a preset (or a custom app), then
   // check the details. Editing goes straight to the details.
@@ -21,6 +22,9 @@
   // Narrowed once here, so the template and the handlers below stay simple.
   const details = $derived(dialog?.step === 'details' ? dialog : null);
 
+  // Touch screens have no hover, so the edit and star buttons wait behind this switch.
+  let editMode = $state(false);
+
   let query = $state('');
   let searchInput = $state<HTMLInputElement>();
   let tab = $state('All');
@@ -28,6 +32,19 @@
   $effect(() => {
     apps.load();
     return () => apps.clear();
+  });
+
+  // The bottom bar on a phone asks for search or add. Do it, and clear the request.
+  $effect(() => {
+    const request = ui.request;
+    if (!request) return;
+    ui.request = null;
+    if (request === 'add') {
+      adding();
+    } else {
+      searchInput?.scrollIntoView({ block: 'nearest' });
+      searchInput?.focus();
+    }
   });
 
   const save = (input: AppInput) =>
@@ -107,9 +124,16 @@
         <p>{count === 1 ? '1 app' : `${count} apps`}</p>
       {/if}
     </div>
-    {#if apps.loaded && apps.categories.length > 1 && !searching}
-      <CategoryTabs categories={apps.categories} selected={activeTab} onselect={(name) => (tab = name)} />
-    {/if}
+    <div class="controls">
+      {#if apps.loaded && apps.categories.length > 1 && !searching}
+        <CategoryTabs categories={apps.categories} selected={activeTab} onselect={(name) => (tab = name)} />
+      {/if}
+      {#if apps.loaded && count > 0}
+        <button class="button secondary edit-toggle" type="button" aria-pressed={editMode} onclick={() => (editMode = !editMode)}>
+          {editMode ? 'Done' : 'Edit'}
+        </button>
+      {/if}
+    </div>
   </div>
 
   {#if apps.error}
@@ -143,6 +167,7 @@
         <h2 id="favourites">Favourites</h2>
         <AppGrid
           apps={apps.favourites}
+          editing={editMode}
           onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
         />
@@ -155,6 +180,7 @@
         <AppGrid
           apps={group.apps}
           {reorderable}
+          editing={editMode}
           onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
           onmove={(from, to) => apps.move(group.name, from, to)}
@@ -191,14 +217,14 @@
   main {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 24px 16px 64px;
+    padding: 24px max(16px, var(--safe-right)) 64px max(16px, var(--safe-left));
     display: flex;
     flex-direction: column;
     gap: 28px;
   }
   @media (min-width: 640px) {
     main {
-      padding: 32px 32px 64px;
+      padding: 32px max(32px, var(--safe-right)) 64px max(32px, var(--safe-left));
     }
   }
   .hello {
@@ -218,9 +244,33 @@
     font-size: 14px;
     color: var(--muted);
   }
-  /* The tabs scroll sideways on a phone instead of wrapping. */
-  .hello :global(.tabs) {
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     max-width: 100%;
+  }
+  /* The tabs scroll sideways on a phone instead of wrapping. */
+  .controls :global(.tabs) {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .edit-toggle {
+    flex-shrink: 0;
+    height: 44px;
+    padding: 0 18px;
+    font-size: 14px;
+  }
+  .edit-toggle[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+  /* Only touch screens need it. With a mouse, the buttons show on hover. */
+  @media (hover: hover) {
+    .edit-toggle {
+      display: none;
+    }
   }
 
   section h2 {

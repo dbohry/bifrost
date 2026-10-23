@@ -4,22 +4,34 @@
 
   let {
     app,
+    editing = false,
     onedit,
     onfavourite,
-  }: { app: AppItem; onedit: () => void; onfavourite: () => void } = $props();
+  }: { app: AppItem; editing?: boolean; onedit: () => void; onfavourite: () => void } = $props();
+
+  // While editing on a touch screen, a tap changes the app instead of opening it.
+  function open(e: MouseEvent) {
+    if (!editing) return;
+    e.preventDefault();
+    onedit();
+  }
 </script>
 
-<div class="tile" data-sortable-item>
+<div class="tile" class:editing data-sortable-item>
   <a
     class="open"
     href={app.url}
     draggable="false"
     target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
+    onclick={open}
   >
     <AppIcon name={app.name} seed={app.id} icon={app.icon} />
     <span class="name">{app.name}</span>
   </a>
+
+  <!-- Touch screens: a small star on pinned apps, since the button itself is tucked away until Edit. -->
+  {#if app.favourite}<span class="badge" aria-hidden="true">★</span>{/if}
 
   <button
     class="action fav"
@@ -53,7 +65,7 @@
   .tile:focus-within {
     border-color: var(--accent);
   }
-  @media (hover: hover) {
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
     .tile:hover {
       transform: translateY(-2px);
     }
@@ -118,7 +130,7 @@
     left: 0;
   }
 
-  /* With a mouse, the pencil only shows on hover or keyboard focus. On touch screens it is always there. */
+  /* With a mouse, the pencil only shows on hover or keyboard focus. */
   @media (hover: hover) {
     .edit {
       opacity: 0;
@@ -126,6 +138,34 @@
     .tile:hover .edit,
     .tile:focus-within .edit {
       opacity: 1;
+    }
+  }
+
+  /*
+   * On a touch screen there is no hover, and two buttons on every small tile
+   * would crowd it. They appear when Edit is switched on, and a tap on the tile
+   * then opens its details.
+   */
+  .badge {
+    display: none;
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 14px;
+    line-height: 1;
+    color: #e0a100;
+    pointer-events: none;
+  }
+  @media (hover: none) {
+    .tile:not(.editing) .action {
+      display: none;
+    }
+    .tile:not(.editing) .badge {
+      display: block;
+    }
+    .tile.editing {
+      border-style: dashed;
+      border-color: var(--accent);
     }
   }
 </style>
