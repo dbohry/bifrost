@@ -5,6 +5,8 @@
 class Ui {
   /** Set by the bottom bar. The dashboard does it, then clears it. */
   request = $state<'search' | 'add' | null>(null);
+  /** A sentence for screen readers, such as where a tile was moved to. */
+  announcement = $state('');
 }
 
 export const ui = new Ui();

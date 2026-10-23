@@ -1,5 +1,7 @@
 <script lang="ts">
+  import { tick } from 'svelte';
   import type { AppItem } from '../lib/api';
+  import { ui } from '../lib/ui.svelte';
   import { sortable } from '../lib/sortable';
   import AppTile from './AppTile.svelte';
 
@@ -16,47 +18,62 @@
     group?: string;
     list?: string;
     onmoveout?: (fromList: string, toList: string, from: number, to: number) => void;
+    /** Alt+Up or Alt+Down on the first or last row: move the tile into the category above or below. */
+    onmoveedge?: (index: number, direction: 'up' | 'down') => void;
     /** Shows a dashed "Add app" tile after the last one. */
     onadd?: () => void;
   };
 
-  let { apps, reorderable = false, editing = false, onedit, onfavourite, onmove, group, list, onmoveout, onadd }: Props = $props();
+  let { apps, reorderable = false, editing = false, onedit, onfavourite, onmove, group, list, onmoveout, onmoveedge, onadd }: Props = $props();
 
   let grid = $state<HTMLElement>();
 
   /**
-   * Arrow keys move between the tiles, the way the eye sees them. Tab still
-   * visits every control. Left and right go to the neighbour in the row, and up
-   * and down to the tile nearest above or below.
+   * Keys for the tile that has focus. The arrow keys alone move focus (see keynav).
+   * With Alt held, they move the tile itself: left and right one place, up and down
+   * one row, and past the first or last row into the neighbouring category. E opens
+   * the app's details and F stars it, because the two buttons are for the mouse.
    */
-  function arrows(e: KeyboardEvent) {
-    if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
-    const here = (e.target as HTMLElement).closest<HTMLAnchorElement>('a.open');
-    if (!here || !grid) return;
+  async function keys(e: KeyboardEvent) {
+    const link = (e.target as HTMLElement).closest<HTMLAnchorElement>('a.open');
+    if (!link || !grid || e.ctrlKey || e.metaKey) return;
+    const tile = link.closest<HTMLElement>('[data-sortable-item]');
+    const items = [...grid.querySelectorAll<HTMLElement>('[data-sortable-item]')];
+    const at = tile ? items.indexOf(tile) : -1;
+    const app = apps[at];
+    if (!app) return;
 
-    const links = [...grid.querySelectorAll<HTMLAnchorElement>('a.open')];
-    const at = links.indexOf(here);
-    const box = here.getBoundingClientRect();
-    let next: HTMLAnchorElement | undefined;
-
-    if (e.key === 'ArrowRight') next = links[at + 1];
-    else if (e.key === 'ArrowLeft') next = links[at - 1];
-    else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-      const down = e.key === 'ArrowDown';
-      const row = links
-        .map((el) => ({ el, r: el.getBoundingClientRect() }))
-        .filter(({ r }) => (down ? r.top > box.bottom - 4 : r.bottom < box.top + 4))
-        // the nearest row first, then the tile whose centre is closest
-        .sort((a, b) => (down ? a.r.top - b.r.top : b.r.top - a.r.top) || Math.abs(a.r.left - box.left) - Math.abs(b.r.left - box.left));
-      const first = row[0];
-      // only tiles in that nearest row count
-      next = first && row.filter(({ r }) => Math.abs(r.top - first.r.top) < 4).sort((a, b) => Math.abs(a.r.left - box.left) - Math.abs(b.r.left - box.left))[0]?.el;
-    }
-
-    if (next) {
+    if (!e.altKey && !e.shiftKey && (e.key === 'e' || e.key === 'f')) {
       e.preventDefault();
-      next.focus();
+      if (e.key === 'e') onedit(app);
+      else onfavourite(app);
+      return;
     }
+
+    const arrow = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].indexOf(e.key);
+    if (!e.altKey || e.shiftKey || arrow < 0 || !reorderable) return;
+    e.preventDefault();
+
+    const first = items[0].getBoundingClientRect().top;
+    const columns = Math.max(1, items.filter((el) => Math.abs(el.getBoundingClientRect().top - first) < 4).length);
+    const to = [at - 1, at + 1, at - columns, at + columns][arrow];
+
+    if (to >= 0 && to < items.length) {
+      onmove?.(at, to);
+      say(app.name, to + 1, items.length);
+    } else if (arrow >= 2 && onmoveedge) {
+      onmoveedge(at, arrow === 2 ? 'up' : 'down');
+    } else {
+      return;
+    }
+
+    // The tile may have been rebuilt in its new place, so find it again and keep focus on it.
+    await tick();
+    document.querySelector<HTMLAnchorElement>(`[data-app-id="${app.id}"]:not([data-flip-skip] *) a.open`)?.focus();
+  }
+
+  function say(name: string, place: number, count: number) {
+    ui.announcement = `${name}, place ${place} of ${count}`;
   }
 </script>
 
@@ -64,7 +81,7 @@
   class="grid"
   class:reorderable
   bind:this={grid}
-  onkeydown={arrows}
+  onkeydown={keys}
   role="presentation"
   data-list={list}
   use:sortable={{ enabled: reorderable, group, onmove: (from, to) => onmove?.(from, to), onmoveout }}

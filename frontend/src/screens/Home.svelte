@@ -217,6 +217,12 @@
           group="categories"
           list={group.name}
           onmoveout={(fromList, toList, from, to) => apps.moveToCategory(fromList, toList, from, to)}
+          onmoveedge={(index, direction) => {
+            const next = groups[i + (direction === 'up' ? -1 : 1)];
+            if (!next) return;
+            apps.moveToCategory(group.name, next.name, index, direction === 'up' ? next.apps.length : 0);
+            ui.announcement = `${group.apps[index]?.name ?? 'App'} moved to ${next.name}`;
+          }}
           onadd={!searching && i === groups.length - 1 ? () => adding() : undefined}
         />
       </section>
