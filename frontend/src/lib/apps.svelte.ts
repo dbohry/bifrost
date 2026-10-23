@@ -98,14 +98,6 @@ class Apps {
     await this.commitOrder(next);
   }
 
-  /** Moves an app one place earlier (-1) or later (+1) within its category. */
-  moveBy(app: AppItem, delta: -1 | 1) {
-    const group = this.groups.find((g) => g.name === app.category);
-    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
-    if (index < 0) return Promise.resolve();
-    return this.move(app.category, index, index + delta);
-  }
-
   /** Shows a new order straight away and saves it, putting the old one back if the server refuses. */
   private async commitOrder(next: AppItem[]) {
     const before = this.items;

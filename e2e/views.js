@@ -55,13 +55,6 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   await page.waitForSelector('text=5 apps');
   check('the layout and the order are remembered after a reload', (await names()).join() === 'Echo,Alpha,Bravo,Charlie,Delta', (await names()).join());
 
-  // Move later from the pencil uses the whole list
-  await tile('Echo').hover();
-  await page.getByRole('button', { name: 'Edit Echo' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Move later' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).first().click();
-  check('Move later steps through the whole list', (await names()).join() === 'Alpha,Echo,Bravo,Charlie,Delta', (await names()).join());
-
   // search narrows and turns dragging off
   await page.keyboard.press('/');
   await page.keyboard.type('a');
@@ -71,7 +64,7 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   // back to categories: groups follow first appearance of the new order
   await layout.getByRole('button', { name: 'By category' }).click();
   await page.waitForTimeout(600);
-  check('back to categories, following the new order', (await names()).join() === 'Alpha,Echo,Charlie,Bravo,Delta', (await names()).join());
+  check('back to categories, following the new order', (await names()).join() === 'Echo,Alpha,Charlie,Bravo,Delta', (await names()).join());
   check('headings and tabs are back', await page.getByRole('heading', { name: 'X' }).isVisible() && await page.getByRole('button', { name: 'Y', exact: true }).isVisible());
 
   // reduced motion: no animation

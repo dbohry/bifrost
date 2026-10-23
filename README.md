@@ -95,7 +95,7 @@ Plain HTTP is fine on a home network. Behind a reverse proxy that serves HTTPS, 
 
 - **Add an app.** Press **Add app**. Pick one from the list, enter the address you open it at, and save. Or choose **Custom app**.
 - **Two layouts.** The buttons above the apps switch between **By category** and **All apps**, a single list in the order you left it. The tiles glide to their new places. Drag works in both: in the list you can move an app anywhere. The choice is remembered on that device.
-- **Reorder.** Drag a tile. On a touch screen, press and hold first. Or open the pencil and use **Move earlier** and **Move later**.
+- **Reorder.** Drag a tile. On a touch screen, press and hold first.
 - **Favourites.** Star an app to also show it in a row at the top.
 - **Search.** Press `/` to jump to the search box. Enter opens the best match, or searches DuckDuckGo if nothing matches.
 - **Touch screens.** The edit buttons are hidden until you press **Edit**. On a phone held upright, the main buttons are in a bar at the bottom.

@@ -68,10 +68,8 @@
     const first = matches[0];
     if (!first) {
       window.open(`https://duckduckgo.com/?q=${encodeURIComponent(query.trim())}`, '_blank', 'noopener,noreferrer');
-    } else if (first.newTab) {
-      window.open(first.url, '_blank', 'noopener,noreferrer');
     } else {
-      location.assign(first.url);
+      window.open(first.url, '_blank', 'noopener,noreferrer');
     }
   }
 
@@ -110,19 +108,6 @@
 
   // Dragging changes the order of a whole category, so it is off while a search hides some of its apps.
   const reorderable = $derived(!searching);
-
-  // Where the app being edited sits: among the apps of its category, or in the whole list.
-  const order = $derived.by(() => {
-    const app = details?.app;
-    if (!app) return null;
-    if (flat) {
-      const index = apps.items.findIndex((a) => a.id === app.id);
-      return index >= 0 ? { index, count: apps.items.length } : null;
-    }
-    const group = apps.groups.find((g) => g.name === app.category);
-    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
-    return group && index >= 0 ? { index, count: group.apps.length } : null;
-  });
 </script>
 
 <svelte:window onkeydown={keydown} />
@@ -250,8 +235,6 @@
       preset={details.preset}
       onback={details.app ? undefined : adding}
       categories={apps.categories}
-      {order}
-      onmove={(delta) => details.app && (flat ? apps.moveAll(order?.index ?? 0, (order?.index ?? 0) + delta) : apps.moveBy(details.app, delta))}
       onsave={save}
       ondelete={(id) => apps.remove(id)}
       onclose={() => (dialog = null)}

@@ -42,10 +42,15 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   const names = () => page.locator('a.open .name').allTextContents();
   check('three apps added, in order', (await names()).join() === 'Alpha,Beta,Gamma', (await names()).join());
 
-  await page.getByRole('button', { name: 'Edit Alpha' }).click({ force: true });
-  await page.getByRole('dialog').getByRole('button', { name: 'Move later' }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Close' }).first().click();
-  check('Alpha moves after Beta', (await names()).join() === 'Beta,Alpha,Gamma', (await names()).join());
+  const tile = (n) => page.locator('.tile', { hasText: n });
+  const a = await tile('Alpha').boundingBox();
+  const b = await tile('Beta').boundingBox();
+  await page.mouse.move(a.x + a.width / 2, a.y + a.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 12; i++) await page.mouse.move(a.x + a.width / 2 + ((b.x + b.width - 10 - a.x - a.width / 2) * i) / 12, a.y + a.height / 2);
+  await page.mouse.up();
+  await page.waitForTimeout(400);
+  check('dragging Alpha after Beta works in the category view', (await names()).join() === 'Beta,Alpha,Gamma', (await names()).join());
 
   await page.reload();
   await page.waitForSelector('text=3 apps');
