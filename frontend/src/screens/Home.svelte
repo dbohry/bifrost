@@ -21,10 +21,39 @@
     | { step: 'details'; app: AppItem | null; preset: CatalogEntry | null };
   let dialog = $state<Dialog | null>(null);
 
-  const adding = () => (dialog = { step: 'pick' });
-  const editing = (app: AppItem) => (dialog = { step: 'details', app, preset: null });
+  const adding = () => {
+    remember();
+    dialog = { step: 'pick' };
+  };
+  const editing = (app: AppItem) => {
+    remember();
+    dialog = { step: 'details', app, preset: null };
+  };
   // Narrowed once here, so the template and the handlers below stay simple.
   const details = $derived(dialog?.step === 'details' ? dialog : null);
+
+  // Where focus was when the first dialog opened. Closing a dialog normally gives focus back, but
+  // not when the control is gone (the app was deleted) or the dialog replaced another one (a new
+  // app: picker, then details), and a keyboard user must not be left with nothing focused.
+  let opener: { el: HTMLElement; index: number } | null = null;
+
+  function remember() {
+    if (dialog || !(document.activeElement instanceof HTMLElement)) return;
+    const el = document.activeElement;
+    opener = { el, index: [...(main?.querySelectorAll('a.open') ?? [])].indexOf(el as HTMLAnchorElement) };
+  }
+
+  async function closed() {
+    dialog = null;
+    await tick();
+    const was = opener;
+    opener = null;
+    if (document.activeElement && document.activeElement !== document.body) return;
+    const tiles = [...(main?.querySelectorAll<HTMLElement>('a.open') ?? [])];
+    const near = was && was.index >= 0 ? tiles[Math.min(was.index, tiles.length - 1)] : undefined;
+    const target = was?.el.isConnected ? was.el : (near ?? document.querySelector<HTMLElement>('main .add-tile, main .empty button, .bar .add'));
+    target?.focus();
+  }
 
   // Touch screens have no hover, so the edit and star buttons wait behind this switch.
   let editMode = $state(false);
@@ -197,7 +226,7 @@
     </section>
   {:else}
     {#if flat || showOffline}
-      <section aria-label={searching ? 'Matching apps' : showOffline ? 'Offline apps' : 'All apps'}>
+      <section aria-label={searching ? 'Matching apps' : showOffline ? 'Offline apps' : 'All apps'} data-nav-start>
         <AppGrid
           apps={searching ? matches : showOffline ? offline : apps.items}
           reorderable={!searching && !showOffline}
@@ -210,7 +239,7 @@
       </section>
     {:else}
     {#if !searching && activeTab === 'All' && apps.favourites.length > 0}
-      <section aria-labelledby="favourites" data-flip-skip data-flip-fade>
+      <section aria-labelledby="favourites" data-flip-skip data-flip-fade data-nav-start>
         <h2 id="favourites">Favourites</h2>
         <AppGrid
           apps={apps.favourites}
@@ -222,7 +251,7 @@
     {/if}
 
     {#each groups as group, i (group.name)}
-      <section aria-labelledby="group-{i}">
+      <section aria-labelledby="group-{i}" data-nav-start>
         <h2 id="group-{i}" data-flip-fade>{searching ? `${group.name} (${group.apps.length})` : group.name}</h2>
         <AppGrid
           apps={group.apps}
@@ -252,7 +281,7 @@
   <CatalogPicker
     onpick={(preset) => (dialog = { step: 'details', app: null, preset })}
     oncustom={() => (dialog = { step: 'details', app: null, preset: null })}
-    onclose={() => (dialog = null)}
+    onclose={closed}
   />
 {:else if details}
   {#key `${details.app?.id ?? 'new'}-${details.preset?.id ?? ''}`}
@@ -263,7 +292,7 @@
       categories={apps.categories}
       onsave={save}
       ondelete={(id) => apps.remove(id)}
-      onclose={() => (dialog = null)}
+      onclose={closed}
     />
   {/key}
 {/if}
