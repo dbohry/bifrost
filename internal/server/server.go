@@ -29,6 +29,10 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.Handle("GET /api/me", s.authed(true, s.me))
 	mux.Handle("POST /api/me/password", s.authed(true, s.changePassword))
 
+	mux.HandleFunc("GET /api/themes", s.listThemes)
+	mux.Handle("GET /api/preferences", s.authed(true, s.getPreferences))
+	mux.Handle("PUT /api/preferences", s.authed(true, s.setPreferences))
+
 	mux.Handle("GET /api/users", s.admin(s.listUsers))
 	mux.Handle("POST /api/users", s.admin(s.createUser))
 	mux.Handle("POST /api/users/{id}/reset-password", s.admin(s.resetUserPassword))

@@ -18,6 +18,7 @@ import (
 
 	"github.com/dbohry/bifrost/internal/auth"
 	"github.com/dbohry/bifrost/internal/store"
+	"github.com/dbohry/bifrost/internal/themes"
 )
 
 const (
@@ -53,6 +54,8 @@ type server struct {
 	version string
 	now     func() time.Time
 
+	themes []themes.Theme
+
 	loginByIP    *auth.Limiter
 	loginByUser  *auth.Limiter
 	passwordByID *auth.Limiter
@@ -67,7 +70,12 @@ func newServer(conn *sql.DB, version string) *server {
 	if err != nil {
 		panic(err) // only fails if the system has no random source
 	}
+	bundled, err := themes.Bundled()
+	if err != nil {
+		panic(err) // the themes are built into the binary, and a test checks them
+	}
 	return &server{
+		themes:       bundled,
 		db:           conn,
 		store:        store.New(conn),
 		version:      version,

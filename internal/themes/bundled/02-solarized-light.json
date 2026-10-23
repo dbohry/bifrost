@@ -1,0 +1,17 @@
+{
+  "id": "solarized-light",
+  "name": "Solarized Light",
+  "mode": "light",
+  "colors": {
+    "bg": "#fdf6e3",
+    "surface": "#fffaf0",
+    "border": "#d6cdb3",
+    "text": "#073642",
+    "muted": "#586e75",
+    "accent": "#1f6fb0",
+    "onAccent": "#fdf6e3",
+    "ok": "#6b7d00",
+    "bad": "#c3261f",
+    "iconBg": "#eee8d5"
+  }
+}

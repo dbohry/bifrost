@@ -1,0 +1,17 @@
+{
+  "id": "bifrost-light",
+  "name": "Bifrost Light",
+  "mode": "light",
+  "colors": {
+    "bg": "#f6f7f9",
+    "surface": "#ffffff",
+    "border": "#d5d9e0",
+    "text": "#1f2430",
+    "muted": "#5b6272",
+    "accent": "#3b5bdb",
+    "onAccent": "#ffffff",
+    "ok": "#2f9e63",
+    "bad": "#d9480f",
+    "iconBg": "#e3e6ec"
+  }
+}

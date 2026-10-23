@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { appearance } from './lib/appearance.svelte';
   import { router } from './lib/router.svelte';
   import { session } from './lib/session.svelte';
   import ChangePassword from './screens/ChangePassword.svelte';
@@ -11,6 +12,12 @@
 
   $effect(() => {
     session.init().catch(() => (failed = true));
+  });
+
+  // The look follows the user: theirs once they are signed in, the plain default before that.
+  $effect(() => {
+    if (session.phase === 'authed') appearance.load();
+    else if (session.phase !== 'loading') appearance.reset();
   });
 
   // The screen follows who is using the app. The address bar follows the screen.

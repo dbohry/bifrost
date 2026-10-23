@@ -5,6 +5,25 @@ export type User = {
   mustChangePassword: boolean;
 };
 
+/** A colour theme. `colors` has the ten tokens: bg, surface, border, text, muted, accent, onAccent, ok, bad, iconBg. */
+export type Theme = {
+  id: string;
+  name: string;
+  mode: 'light' | 'dark';
+  colors: Record<string, string>;
+};
+
+export type Mode = 'light' | 'dark' | 'system';
+export type LogoKind = 'app' | 'arches' | 'spectrum';
+
+/** How a user has set up the look of their dashboard. */
+export type Preferences = {
+  mode: Mode;
+  lightTheme: string;
+  darkTheme: string;
+  logo: LogoKind;
+};
+
 /** A row on the Users screen. */
 export type UserSummary = {
   id: number;
@@ -83,6 +102,9 @@ export const api = {
     request<{ user: User }>('POST', '/api/login', { username, password, remember }),
   logout: () => request<void>('POST', '/api/logout'),
   me: () => request<{ user: User }>('GET', '/api/me'),
+  themes: () => request<{ themes: Theme[] }>('GET', '/api/themes'),
+  preferences: () => request<{ preferences: Preferences }>('GET', '/api/preferences'),
+  savePreferences: (p: Preferences) => request<{ preferences: Preferences }>('PUT', '/api/preferences', p),
   users: () => request<{ users: UserSummary[] }>('GET', '/api/users'),
   createUser: (username: string, isAdmin: boolean) =>
     request<{ user: UserSummary; temporaryPassword: string }>('POST', '/api/users', { username, isAdmin }),
