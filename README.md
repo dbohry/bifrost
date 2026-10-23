@@ -14,8 +14,6 @@
   <a href="https://github.com/dbohry/bifrost/actions/workflows/release.yml"><img alt="Release" src="https://github.com/dbohry/bifrost/actions/workflows/release.yml/badge.svg"></a>
   <a href="https://hub.docker.com/r/dbohry/bifrost"><img alt="Docker pulls" src="https://img.shields.io/docker/pulls/dbohry/bifrost"></a>
   <a href="https://hub.docker.com/r/dbohry/bifrost"><img alt="Image size" src="https://img.shields.io/docker/image-size/dbohry/bifrost/latest"></a>
-  <img alt="Go version" src="https://img.shields.io/github/go-mod/go-version/dbohry/bifrost">
-  <a href="https://github.com/dbohry/bifrost/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/dbohry/bifrost"></a>
 </p>
 
 <p align="center">
