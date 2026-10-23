@@ -34,6 +34,18 @@ export type UserSummary = {
   lastSeenAt: number | null;
 };
 
+/** A preset app in the built-in catalogue. */
+export type CatalogEntry = {
+  id: string;
+  name: string;
+  category: string;
+  /** The port the app usually listens on. 80 means the plain web port. */
+  port: number;
+};
+
+/** The address of a catalogue icon. */
+export const iconUrl = (id: string) => `/api/catalog/icons/${encodeURIComponent(id)}.svg`;
+
 /** An app tile on a user's dashboard. */
 export type AppItem = {
   id: number;
@@ -42,6 +54,8 @@ export type AppItem = {
   category: string;
   favourite: boolean;
   newTab: boolean;
+  /** The catalogue id of the icon to show, or "" for the first letter of the name. */
+  icon: string;
   position: number;
 };
 
@@ -102,6 +116,7 @@ export const api = {
     request<{ user: User }>('POST', '/api/login', { username, password, remember }),
   logout: () => request<void>('POST', '/api/logout'),
   me: () => request<{ user: User }>('GET', '/api/me'),
+  catalog: () => request<{ categories: string[]; apps: CatalogEntry[] }>('GET', '/api/catalog'),
   themes: () => request<{ themes: Theme[] }>('GET', '/api/themes'),
   preferences: () => request<{ preferences: Preferences }>('GET', '/api/preferences'),
   savePreferences: (p: Preferences) => request<{ preferences: Preferences }>('PUT', '/api/preferences', p),

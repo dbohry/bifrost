@@ -229,3 +229,30 @@ func TestReorderAppsForAUserWithNoApps(t *testing.T) {
 		t.Errorf("empty list for an empty dashboard: %v", err)
 	}
 }
+
+func TestAppIcons(t *testing.T) {
+	st, alex, _ := newUsers(t)
+
+	in := input("jellyfin", "Media")
+	in.Icon = "jellyfin"
+	a, err := st.CreateApp(ctx, alex.ID, in, now)
+	if err != nil || a.Icon != "jellyfin" {
+		t.Fatalf("created %+v, %v", a, err)
+	}
+	if plain, _ := st.CreateApp(ctx, alex.ID, input("custom", "Media"), now); plain.Icon != "" {
+		t.Errorf("an app with no icon has %q", plain.Icon)
+	}
+
+	// The icon can be changed and removed, and survives a listing.
+	in.Icon = "plex"
+	a, _ = st.UpdateApp(ctx, alex.ID, a.ID, in, now)
+	if a.Icon != "plex" {
+		t.Errorf("after update: %q", a.Icon)
+	}
+	in.Icon = ""
+	a, _ = st.UpdateApp(ctx, alex.ID, a.ID, in, now)
+	list, _ := st.ListApps(ctx, alex.ID)
+	if a.Icon != "" || list[0].Icon != "" {
+		t.Errorf("icon not removed: %q / %q", a.Icon, list[0].Icon)
+	}
+}

@@ -3,12 +3,21 @@
     categories,
     selected,
     onselect,
-  }: { categories: string[]; selected: string; onselect: (name: string) => void } = $props();
+    label = 'Categories',
+    wrap = false,
+  }: {
+    categories: string[];
+    selected: string;
+    onselect: (name: string) => void;
+    label?: string;
+    /** Wrap onto more lines instead of scrolling sideways. */
+    wrap?: boolean;
+  } = $props();
 
   const all = 'All';
 </script>
 
-<nav class="tabs" aria-label="Categories">
+<nav class="tabs" class:wrap aria-label={label}>
   {#each [all, ...categories] as name (name)}
     <button
       type="button"
@@ -29,6 +38,10 @@
     overflow-x: auto;
     padding: 2px;
     margin: -2px;
+  }
+  .tabs.wrap {
+    flex-wrap: wrap;
+    overflow-x: visible;
   }
   .tab {
     flex-shrink: 0;

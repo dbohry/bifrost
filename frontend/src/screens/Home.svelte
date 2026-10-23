@@ -1,15 +1,25 @@
 <script lang="ts">
   import AppDialog from '../components/AppDialog.svelte';
   import AppGrid from '../components/AppGrid.svelte';
+  import CatalogPicker from '../components/CatalogPicker.svelte';
   import CategoryTabs from '../components/CategoryTabs.svelte';
   import SearchBox from '../components/SearchBox.svelte';
   import Topbar from '../components/Topbar.svelte';
-  import type { AppInput, AppItem } from '../lib/api';
+  import type { AppInput, AppItem, CatalogEntry } from '../lib/api';
   import { apps, groupByCategory } from '../lib/apps.svelte';
   import { greeting } from '../lib/tile';
 
-  // null: closed. { app: null }: adding. { app }: editing that app.
-  let dialog = $state<{ app: AppItem | null } | null>(null);
+  // What is open, if anything. Adding is two steps: pick a preset (or a custom app), then
+  // check the details. Editing goes straight to the details.
+  type Dialog =
+    | { step: 'pick' }
+    | { step: 'details'; app: AppItem | null; preset: CatalogEntry | null };
+  let dialog = $state<Dialog | null>(null);
+
+  const adding = () => (dialog = { step: 'pick' });
+  const editing = (app: AppItem) => (dialog = { step: 'details', app, preset: null });
+  // Narrowed once here, so the template and the handlers below stay simple.
+  const details = $derived(dialog?.step === 'details' ? dialog : null);
 
   let query = $state('');
   let searchInput = $state<HTMLInputElement>();
@@ -21,7 +31,7 @@
   });
 
   const save = (input: AppInput) =>
-    dialog?.app ? apps.update(dialog.app.id, input) : apps.create(input);
+    details?.app ? apps.update(details.app.id, input) : apps.create(input);
 
   const count = $derived(apps.items.length);
 
@@ -70,7 +80,7 @@
 
   // Where the app being edited sits among the apps of its category.
   const order = $derived.by(() => {
-    const app = dialog?.app;
+    const app = details?.app;
     if (!app) return null;
     const group = apps.groups.find((g) => g.name === app.category);
     const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
@@ -84,7 +94,7 @@
   {#snippet center()}
     <SearchBox bind:value={query} bind:input={searchInput} onenter={enter} />
   {/snippet}
-  <button class="button add" onclick={() => (dialog = { app: null })}>
+  <button class="button add" onclick={() => adding()}>
     <span aria-hidden="true">+</span> Add app
   </button>
 </Topbar>
@@ -119,7 +129,7 @@
     <section class="empty">
       <h2>No apps yet</h2>
       <p>Add the first app to build your dashboard.</p>
-      <button class="button" onclick={() => (dialog = { app: null })}>Add your first app</button>
+      <button class="button" onclick={() => adding()}>Add your first app</button>
     </section>
   {:else if searching && matches.length === 0}
     <section class="empty" role="status">
@@ -133,7 +143,7 @@
         <h2 id="favourites">Favourites</h2>
         <AppGrid
           apps={apps.favourites}
-          onedit={(app) => (dialog = { app })}
+          onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
         />
       </section>
@@ -145,23 +155,31 @@
         <AppGrid
           apps={group.apps}
           {reorderable}
-          onedit={(app) => (dialog = { app })}
+          onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
           onmove={(from, to) => apps.move(group.name, from, to)}
-          onadd={!searching && i === groups.length - 1 ? () => (dialog = { app: null }) : undefined}
+          onadd={!searching && i === groups.length - 1 ? () => adding() : undefined}
         />
       </section>
     {/each}
   {/if}
 </main>
 
-{#if dialog}
-  {#key dialog.app?.id ?? 'new'}
+{#if dialog?.step === 'pick'}
+  <CatalogPicker
+    onpick={(preset) => (dialog = { step: 'details', app: null, preset })}
+    oncustom={() => (dialog = { step: 'details', app: null, preset: null })}
+    onclose={() => (dialog = null)}
+  />
+{:else if details}
+  {#key `${details.app?.id ?? 'new'}-${details.preset?.id ?? ''}`}
     <AppDialog
-      app={dialog.app}
+      app={details.app}
+      preset={details.preset}
+      onback={details.app ? undefined : adding}
       categories={apps.categories}
       {order}
-      onmove={(delta) => dialog?.app && apps.moveBy(dialog.app, delta)}
+      onmove={(delta) => details.app && apps.moveBy(details.app, delta)}
       onsave={save}
       ondelete={(id) => apps.remove(id)}
       onclose={() => (dialog = null)}

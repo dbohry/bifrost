@@ -16,6 +16,8 @@ type App struct {
 	Category  string
 	Favourite bool
 	NewTab    bool
+	// Icon is the catalogue id of the icon to show, or "" for the first letter of the name.
+	Icon      string
 	Position  int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -29,14 +31,15 @@ type AppInput struct {
 	Category  string
 	Favourite bool
 	NewTab    bool
+	Icon      string
 }
 
-const appColumns = `id, user_id, name, url, category, favourite, new_tab, position, created_at, updated_at`
+const appColumns = `id, user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at`
 
 func scanApp(row interface{ Scan(...any) error }) (App, error) {
 	var a App
 	var created, updated int64
-	err := row.Scan(&a.ID, &a.UserID, &a.Name, &a.URL, &a.Category, &a.Favourite, &a.NewTab, &a.Position, &created, &updated)
+	err := row.Scan(&a.ID, &a.UserID, &a.Name, &a.URL, &a.Category, &a.Favourite, &a.NewTab, &a.Icon, &a.Position, &created, &updated)
 	if errors.Is(err, sql.ErrNoRows) {
 		return App{}, ErrNotFound
 	}
@@ -77,25 +80,25 @@ const reuseCategory = `COALESCE(
 // CreateApp adds an app at the end of the user's dashboard.
 func (s *Store) CreateApp(ctx context.Context, userID int64, in AppInput, now time.Time) (App, error) {
 	return scanApp(s.db.QueryRowContext(ctx,
-		`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, position, created_at, updated_at)
-		 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?,
+		`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at)
+		 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?,
 		         (SELECT COALESCE(MAX(position), 0) + 1 FROM apps WHERE user_id = ?), ?, ?)
 		 RETURNING `+appColumns,
 		userID, in.Name, in.URL,
 		userID, in.Category, 0, in.Category,
-		in.Favourite, in.NewTab, userID, now.Unix(), now.Unix()))
+		in.Favourite, in.NewTab, in.Icon, userID, now.Unix(), now.Unix()))
 }
 
 // UpdateApp replaces an app's details. It returns ErrNotFound when the app
 // does not exist or belongs to someone else.
 func (s *Store) UpdateApp(ctx context.Context, userID, id int64, in AppInput, now time.Time) (App, error) {
 	return scanApp(s.db.QueryRowContext(ctx,
-		`UPDATE apps SET name = ?, url = ?, category = `+reuseCategory+`, favourite = ?, new_tab = ?, updated_at = ?
+		`UPDATE apps SET name = ?, url = ?, category = `+reuseCategory+`, favourite = ?, new_tab = ?, icon = ?, updated_at = ?
 		  WHERE id = ? AND user_id = ?
 		 RETURNING `+appColumns,
 		in.Name, in.URL,
 		userID, in.Category, id, in.Category,
-		in.Favourite, in.NewTab, now.Unix(), id, userID))
+		in.Favourite, in.NewTab, in.Icon, now.Unix(), id, userID))
 }
 
 // ErrOrderMismatch means a new order did not list exactly the user's apps,
