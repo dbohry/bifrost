@@ -34,6 +34,7 @@
 
 <dialog bind:this={dialog} aria-labelledby={titleId} {onclose} onclick={backdrop}>
   <div class="sheet">
+    <span class="handle" aria-hidden="true"></span>
     <header>
       <h2 id={titleId}>{title}</h2>
       <button class="close" type="button" aria-label="Close" onclick={close}>
@@ -90,6 +91,10 @@
     outline: 2px solid var(--accent);
   }
 
+  .handle {
+    display: none;
+  }
+
   /* On a phone the dialog slides up from the bottom edge as a sheet. */
   @media (max-width: 600px) {
     dialog {
@@ -102,6 +107,16 @@
     }
     .sheet {
       padding-bottom: max(24px, env(safe-area-inset-bottom));
+      padding-left: max(24px, var(--safe-left));
+      padding-right: max(24px, var(--safe-right));
+    }
+    .handle {
+      display: block;
+      width: 40px;
+      height: 5px;
+      margin: -8px auto -6px;
+      border-radius: 3px;
+      background: var(--border);
     }
   }
 </style>

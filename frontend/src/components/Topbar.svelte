@@ -55,7 +55,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 8px 12px;
-    padding: 8px 16px;
+    padding: calc(8px + var(--safe-top)) max(16px, var(--safe-right)) 8px max(16px, var(--safe-left));
     background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
@@ -79,6 +79,7 @@
   .center {
     order: 3;
     flex: 1 1 100%;
+    min-width: 0;
     padding-bottom: 6px;
   }
   .actions {
@@ -120,6 +121,12 @@
     padding: 0;
     width: 44px;
   }
+  /* The buttons live in the bottom bar here. BottomNav uses the same query. */
+  @media (max-width: 599px) and (min-height: 480px) {
+    .actions {
+      display: none;
+    }
+  }
   @media (min-width: 640px) {
     .out-icon {
       display: none;
@@ -132,7 +139,7 @@
       width: auto;
     }
     .bar {
-      padding: 12px 32px;
+      padding: calc(12px + var(--safe-top)) max(32px, var(--safe-right)) 12px max(32px, var(--safe-left));
       flex-wrap: nowrap;
     }
     .center {

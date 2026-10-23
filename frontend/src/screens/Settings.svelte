@@ -49,7 +49,7 @@
   .layout {
     max-width: 1120px;
     margin: 0 auto;
-    padding: 24px 16px 64px;
+    padding: 24px max(16px, var(--safe-right)) 64px max(16px, var(--safe-left));
     display: flex;
     flex-direction: column;
     gap: 24px;
@@ -87,7 +87,7 @@
   }
   @media (min-width: 760px) {
     .layout {
-      padding: 32px 32px 64px;
+      padding: 32px max(32px, var(--safe-right)) 64px max(32px, var(--safe-left));
       flex-direction: row;
       align-items: flex-start;
       gap: 32px;

@@ -1,6 +1,7 @@
 <script lang="ts">
   import Field from '../components/Field.svelte';
   import { api, ApiError } from '../lib/api';
+  import { session } from '../lib/session.svelte';
 
   let current = $state('');
   let next = $state('');
@@ -56,6 +57,12 @@
       <button class="button" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Change password'}</button>
     </div>
   </form>
+
+  <div class="signout">
+    <h2>Sign out</h2>
+    <p>Sign out of Bifrost on this device.</p>
+    <button class="button secondary" type="button" onclick={() => session.logout()}>Sign out</button>
+  </div>
 </section>
 
 <style>
@@ -74,6 +81,20 @@
   .buttons {
     display: flex;
     justify-content: flex-end;
+  }
+  .signout {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .signout h2 {
+    margin: 0;
+    font-size: 16px;
+  }
+  .signout p {
+    margin: 4px 0 14px;
+    font-size: 14px;
+    color: var(--muted);
   }
   .alert,
   .done {

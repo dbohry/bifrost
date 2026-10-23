@@ -1,4 +1,5 @@
 <script lang="ts">
+  import BottomNav from './components/BottomNav.svelte';
   import { appearance } from './lib/appearance.svelte';
   import { router } from './lib/router.svelte';
   import { session } from './lib/session.svelte';
@@ -57,16 +58,25 @@
 {:else if screen === 'change-password'}
   <ChangePassword />
 {:else if screen === 'home'}
-  {#if inSettings}
-    <Settings />
-  {:else}
-    <Home />
-  {/if}
+  <div class="shell">
+    {#if inSettings}
+      <Settings />
+    {:else}
+      <Home />
+    {/if}
+  </div>
+  <BottomNav />
 {:else}
   <p class="status" role="status">Loading…</p>
 {/if}
 
 <style>
+  /* On a phone held upright the bottom bar sits over the page, so leave room for it. */
+  @media (max-width: 599px) and (min-height: 480px) {
+    .shell {
+      padding-bottom: calc(68px + var(--safe-bottom));
+    }
+  }
   .status {
     min-height: 100vh;
     display: grid;
