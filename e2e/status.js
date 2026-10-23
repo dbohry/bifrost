@@ -62,7 +62,7 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
     await d.getByLabel('Name', { exact: true }).fill(name);
     await d.getByLabel('Address', { exact: true }).fill(url);
     if (on) {
-      await d.getByLabel('Check if this app is online').check();
+      await d.getByRole('switch', { name: /Check if this app is online/ }).click();
       if (address) await d.getByLabel('Address to check (optional)').fill(address);
       if (strict) await d.getByLabel(/It answers with success/).check();
     }
@@ -70,7 +70,7 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
   };
 
   let d = await add('Plain', 'plain.example.com');
-  check('the status check is off by default', !(await d.getByLabel('Check if this app is online').isChecked()));
+  check('the status check is off by default', (await d.getByRole('switch', { name: /Check if this app is online/ }).getAttribute('aria-checked')) === 'false');
   check('its options are hidden until it is switched on', !(await d.getByLabel('Address to check (optional)').count()));
   await d.getByRole('button', { name: 'Add app' }).click();
   await d.waitFor({ state: 'detached' });
@@ -146,7 +146,7 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
   await tile('Reachable').hover();
   await page.getByRole('button', { name: 'Edit Reachable' }).click();
   d = page.getByRole('dialog');
-  await d.getByLabel('Check if this app is online').uncheck();
+  await d.getByRole('switch', { name: /Check if this app is online/ }).click();
   await d.getByRole('button', { name: 'Save changes' }).click();
   await d.waitFor({ state: 'detached' });
   check('switching the check off removes the badge', await until(async () => (await tile('Reachable').locator('.status').count()) === 0, 20000));

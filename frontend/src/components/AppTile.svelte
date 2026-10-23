@@ -31,7 +31,7 @@
     class="open"
     href={app.url}
     draggable="false"
-    target="_blank"
+    target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
     onclick={open}
   >

@@ -78,8 +78,10 @@
     const first = matches[0];
     if (!first) {
       window.open(`https://duckduckgo.com/?q=${encodeURIComponent(query.trim())}`, '_blank', 'noopener,noreferrer');
-    } else {
+    } else if (first.newTab) {
       window.open(first.url, '_blank', 'noopener,noreferrer');
+    } else {
+      location.assign(first.url);
     }
   }
 

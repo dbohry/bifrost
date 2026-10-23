@@ -79,7 +79,7 @@ async function audit(page, label) {
         await page.getByRole('dialog').getByRole('button', { name: /Custom app/ }).click();
         await page.waitForTimeout(300);
         await audit(page, `${tag}: add app, step 2`);
-        await page.getByRole('dialog').getByLabel('Check if this app is online').check();
+        await page.getByRole('dialog').getByRole('switch', { name: /Check if this app is online/ }).click();
         await page.waitForTimeout(200);
         await audit(page, `${tag}: add app, status check options`);
       }
