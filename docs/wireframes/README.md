@@ -118,7 +118,7 @@ _Built._
 
 ## Status checks
 
-_Proposed, not built yet. The last board lists what is still to decide._
+_Built, except two parts left out for now: the slow state and the summary line under the greeting. The boards still show both, and the first board's "Needs attention" filter became "Offline · N"._
 
 ### 23 · Status checks: dashboard (dark, with hover card)
 

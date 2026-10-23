@@ -57,10 +57,33 @@ export type AppItem = {
   /** The catalogue id of the icon to show, or "" for the first letter of the name. */
   icon: string;
   position: number;
+  /** Status check: look at the app now and then and show a badge on its icon. */
+  checkEnabled: boolean;
+  /** The address to look at. Empty means the app's own address. */
+  checkUrl: string;
+  /** Only an HTTP 2xx answer counts as online. Otherwise any answer does. */
+  checkStrict: boolean;
+  /** Accept a self-signed certificate. */
+  checkInsecure: boolean;
 };
 
 /** What the user fills in to add or change an app. */
 export type AppInput = Omit<AppItem, 'id' | 'position'>;
+
+/** What the latest look at an app found. Times are in seconds since 1970. */
+export type StatusResult = {
+  state: 'up' | 'down' | 'checking';
+  since: number;
+  lastChecked: number;
+  latencyMs: number;
+  reason: string;
+  address: string;
+};
+
+/** How often apps are checked and how long to wait, both in seconds. */
+export type StatusSettings = { interval: number; timeout: number };
+
+export type TestResult = { up: boolean; latencyMs: number; code: number; reason: string; address: string };
 
 /** An error response from the server. `message` is safe to show to the user. */
 export class ApiError extends Error {
@@ -143,6 +166,11 @@ export const api = {
   deleteApp: (id: number) => request<void>('DELETE', `/api/apps/${id}`),
   /** Saves the dashboard order. `ids` must list every one of the user's apps. */
   reorderApps: (ids: number[]) => request<void>('PUT', '/api/apps/order', { ids }),
+  status: () => request<{ statuses: Record<string, StatusResult> }>('GET', '/api/status'),
+  statusSettings: () => request<{ settings: StatusSettings }>('GET', '/api/status/settings'),
+  saveStatusSettings: (v: StatusSettings) => request<{ settings: StatusSettings }>('PUT', '/api/status/settings', v),
+  testStatus: (url: string, strict: boolean, insecure: boolean) =>
+    request<TestResult>('POST', '/api/status/test', { url, strict, insecure }),
   importData: (file: ExportFile, mode: 'merge' | 'replace', appearance: boolean) =>
     request<ImportResult>('POST', '/api/import', { ...file, mode, appearance }),
   changePassword: (current: string, next: string) =>

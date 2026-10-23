@@ -1,4 +1,5 @@
 import { api, ApiError, type AppInput, type AppItem } from './api';
+import { statuses } from './status.svelte';
 
 export type Group = { name: string; apps: AppItem[] };
 
@@ -38,11 +39,13 @@ class Apps {
   async create(input: AppInput) {
     const { app } = await api.createApp(input);
     this.items = [...this.items, app];
+    if (app.checkEnabled) statuses.soon();
   }
 
   async update(id: number, input: AppInput) {
     const { app } = await api.updateApp(id, input);
     this.items = this.items.map((a) => (a.id === id ? app : a));
+    statuses.soon();
   }
 
   async remove(id: number) {

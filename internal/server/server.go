@@ -18,6 +18,14 @@ func New(conn *sql.DB, assets fs.FS, version string) http.Handler {
 	return newServer(conn, version).routes(assets)
 }
 
+// Start is New for the real program: it also starts the status checks, which run
+// until ctx ends. Tests use New and drive the monitor by hand.
+func Start(ctx context.Context, conn *sql.DB, assets fs.FS, version string) http.Handler {
+	s := newServer(conn, version)
+	go s.monitor.Run(ctx)
+	return s.routes(assets)
+}
+
 func (s *server) routes(assets fs.FS) http.Handler {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /healthz", health(s.db, s.version))
@@ -45,6 +53,10 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.Handle("PUT /api/apps/order", s.authed(false, s.reorderApps))
 	mux.Handle("PUT /api/apps/{id}", s.authed(false, s.updateApp))
 	mux.Handle("DELETE /api/apps/{id}", s.authed(false, s.deleteApp))
+	mux.Handle("GET /api/status", s.authed(false, s.getStatus))
+	mux.Handle("GET /api/status/settings", s.authed(false, s.getStatusSettings))
+	mux.Handle("PUT /api/status/settings", s.authed(false, s.setStatusSettings))
+	mux.Handle("POST /api/status/test", s.authed(false, s.testStatus))
 	mux.Handle("GET /api/export", s.authed(false, s.exportData))
 	mux.Handle("POST /api/import", s.authed(false, s.importData))
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

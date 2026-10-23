@@ -119,7 +119,9 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   await press('ArrowDown');
   check('in Settings, ArrowDown moves down the section list', (await focused()) === 'Appearance', await focused());
   await press('ArrowDown');
-  check('...and on to Backup', (await focused()) === 'Backup', await focused());
+  check('...and on to Status checks', (await focused()) === 'Status checks', await focused());
+  await press('ArrowDown');
+  check('...and Backup', (await focused()) === 'Backup', await focused());
   await page.keyboard.press('Escape');
   await page.waitForSelector('text=5 apps');
   check('Escape leaves Settings', new URL(page.url()).pathname === '/');
