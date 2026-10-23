@@ -18,6 +18,7 @@ import (
 
 	"github.com/dbohry/bifrost/internal/auth"
 	"github.com/dbohry/bifrost/internal/catalog"
+	"github.com/dbohry/bifrost/internal/status"
 	"github.com/dbohry/bifrost/internal/store"
 	"github.com/dbohry/bifrost/internal/themes"
 )
@@ -58,6 +59,8 @@ type server struct {
 	themes  []themes.Theme
 	catalog *catalog.Catalog
 
+	monitor      *status.Monitor
+	testByUser   *auth.Limiter
 	loginByIP    *auth.Limiter
 	loginByUser  *auth.Limiter
 	passwordByID *auth.Limiter
@@ -80,7 +83,10 @@ func newServer(conn *sql.DB, version string) *server {
 	if err != nil {
 		panic(err) // built into the binary, and a test checks it
 	}
+	st := store.New(conn)
 	return &server{
+		monitor:      status.NewMonitor(st, slog.Default()),
+		testByUser:   auth.NewLimiter(30, time.Minute),
 		themes:       bundled,
 		catalog:      apps,
 		db:           conn,

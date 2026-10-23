@@ -3,7 +3,8 @@
   import AppIcon from './AppIcon.svelte';
   import Field from './Field.svelte';
   import Modal from './Modal.svelte';
-  import { ApiError, type AppInput, type AppItem, type CatalogEntry } from '../lib/api';
+  import { api, ApiError, type AppInput, type AppItem, type CatalogEntry, type TestResult } from '../lib/api';
+  import { checkOnForCatalogueApps } from '../lib/status.svelte';
 
   type Props = {
     /** The app being edited, or null to add a new one. */
@@ -39,6 +40,15 @@
   let favourite = $state(start?.favourite ?? false);
   let newTab = $state(start?.newTab ?? true);
 
+  // Status check. An app from the list starts with it on or off as decided in one place.
+  let checkEnabled = $state(start?.checkEnabled ?? (picked ? checkOnForCatalogueApps : false));
+  let checkUrl = $state(start?.checkUrl ?? '');
+  let checkStrict = $state(start?.checkStrict ?? false);
+  let checkInsecure = $state(start?.checkInsecure ?? false);
+  let testing = $state(false);
+  let tested = $state<TestResult | null>(null);
+  let testError = $state('');
+
   // The logo this app can show, if it has one to offer: its own, or the preset's.
   // Turning it off goes back to the first letter of the name.
   const offered = start?.icon || picked?.id || '';
@@ -64,6 +74,24 @@
   const nameInvalid = $derived(touched && name.trim() === '');
   const showPortHint = $derived(port !== null && trimmed !== '' && !/:\d+/.test(trimmed));
 
+  async function testNow() {
+    tested = null;
+    testError = '';
+    const address = checkUrl.trim() || (trimmed ? `${scheme}://${trimmed}` : '');
+    if (!address) {
+      testError = "Enter the app's address first.";
+      return;
+    }
+    testing = true;
+    try {
+      tested = await api.testStatus(address, checkStrict, checkInsecure);
+    } catch (e) {
+      testError = e instanceof ApiError ? e.message : 'Something went wrong.';
+    } finally {
+      testing = false;
+    }
+  }
+
   async function run(action: () => Promise<void>) {
     error = '';
     busy = true;
@@ -83,7 +111,18 @@
     touched = true;
     if (name.trim() === '' || trimmed === '') return;
     run(() =>
-      onsave({ name, url: `${scheme}://${trimmed}`, category, favourite, newTab, icon: useIcon ? offered : '' }),
+      onsave({
+        name,
+        url: `${scheme}://${trimmed}`,
+        category,
+        favourite,
+        newTab,
+        icon: useIcon ? offered : '',
+        checkEnabled,
+        checkUrl,
+        checkStrict,
+        checkInsecure,
+      }),
     );
   }
 
@@ -240,6 +279,58 @@
         <span class="sw" aria-hidden="true"></span>
       </button>
     </div>
+
+    <div class="opts" role="group" aria-label="Status">
+      <button type="button" class="opt" role="switch" aria-checked={checkEnabled} onclick={() => (checkEnabled = !checkEnabled)}>
+        <span class="mini glyph">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4" /></svg>
+        </span>
+        <span class="text"><b>Check if this app is online</b><span>Shows a badge on its icon. Set how often in Settings.</span></span>
+        <span class="sw" aria-hidden="true"></span>
+      </button>
+    </div>
+
+    {#if checkEnabled}
+      <section class="status" aria-label="Status check options">
+        <Field
+          label="Address to check (optional)"
+          bind:value={checkUrl}
+          autocomplete="off"
+          placeholder={trimmed ? `${scheme}://${trimmed}` : 'Same as the address above'}
+          hint="Leave empty to check the address above. The check runs on the machine that hosts Bifrost, so an address only that machine can reach works too."
+        />
+        <fieldset>
+          <legend>Counts as online when</legend>
+          <label class="choice" class:on={!checkStrict}>
+            <input type="radio" name="{uid}-rule" checked={!checkStrict} onchange={() => (checkStrict = false)} />
+            <span><strong>It answers at all</strong><br />Even a login page or an error page. Best for most apps.</span>
+          </label>
+          <label class="choice" class:on={checkStrict}>
+            <input type="radio" name="{uid}-rule" checked={checkStrict} onchange={() => (checkStrict = true)} />
+            <span><strong>It answers with success</strong><br />Only a normal page (HTTP 200 to 299) counts.</span>
+          </label>
+        </fieldset>
+        <label class="check">
+          <input type="checkbox" bind:checked={checkInsecure} />
+          Trust a self-signed certificate
+        </label>
+        <div class="test">
+          <button class="button secondary" type="button" disabled={testing} onclick={testNow}>{testing ? 'Testing…' : 'Test now'}</button>
+          <div role="status" class="test-result">
+            {#if tested}
+              <span class="dot" class:up={tested.up} class:down={!tested.up}></span>
+              {#if tested.up}
+                <span><strong>Online</strong> · answered in {tested.latencyMs} ms (HTTP {tested.code})</span>
+              {:else}
+                <span><strong>Offline</strong> · {tested.reason}</span>
+              {/if}
+            {:else if testError}
+              <span class="err">{testError}</span>
+            {/if}
+          </div>
+        </div>
+      </section>
+    {/if}
 
     <footer>
       {#if app && confirmingDelete}
@@ -606,6 +697,87 @@
   }
   .opt[aria-checked='true'] .sw::after {
     transform: translateX(18px);
+  }
+
+  .status {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .status fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .status legend {
+    padding: 0;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .choice {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 12px;
+    line-height: 1.4;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .choice strong {
+    color: var(--text);
+    font-size: 14px;
+  }
+  .choice.on {
+    border-color: var(--accent);
+    outline: 1px solid var(--accent);
+  }
+  .choice input {
+    margin: 3px 0 0;
+    accent-color: var(--accent);
+  }
+  .test {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+  .test .button {
+    height: 44px;
+    padding: 0 16px;
+    font-size: 14px;
+  }
+  .test-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 20px;
+    font-size: 13px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot.up {
+    background: var(--ok);
+  }
+  .dot.down {
+    background: var(--bad);
+  }
+  .err {
+    color: var(--bad);
   }
 
   footer {

@@ -29,10 +29,18 @@ type appJSON struct {
 	// Icon is the catalogue id of the app's icon, or "" for none.
 	Icon     string `json:"icon"`
 	Position int64  `json:"position"`
+	// Status check settings. CheckURL is empty when the app's own address is used.
+	CheckEnabled  bool   `json:"checkEnabled"`
+	CheckURL      string `json:"checkUrl"`
+	CheckStrict   bool   `json:"checkStrict"`
+	CheckInsecure bool   `json:"checkInsecure"`
 }
 
 func toAppJSON(a store.App) appJSON {
-	return appJSON{ID: a.ID, Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Icon: a.Icon, Position: a.Position}
+	return appJSON{
+		ID: a.ID, Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Icon: a.Icon, Position: a.Position,
+		CheckEnabled: a.CheckEnabled, CheckURL: a.CheckURL, CheckStrict: a.CheckStrict, CheckInsecure: a.CheckInsecure,
+	}
 }
 
 // appBody is what the browser sends to add or change an app. newTab defaults
@@ -44,6 +52,11 @@ type appBody struct {
 	Favourite bool   `json:"favourite"`
 	NewTab    *bool  `json:"newTab"`
 	Icon      string `json:"icon"`
+
+	CheckEnabled  bool   `json:"checkEnabled"`
+	CheckURL      string `json:"checkUrl"`
+	CheckStrict   bool   `json:"checkStrict"`
+	CheckInsecure bool   `json:"checkInsecure"`
 }
 
 func (s *server) listApps(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
@@ -187,7 +200,19 @@ func cleanApp(b appBody) (store.AppInput, string) {
 	if b.NewTab != nil {
 		newTab = *b.NewTab
 	}
-	return store.AppInput{Name: name, URL: address, Category: category, Favourite: b.Favourite, NewTab: newTab, Icon: strings.TrimSpace(b.Icon)}, ""
+
+	// The address to check is optional. Empty means "use the app's own address".
+	checkURL := strings.TrimSpace(b.CheckURL)
+	if checkURL != "" {
+		var msg string
+		if checkURL, msg = cleanURL(checkURL); msg != "" {
+			return store.AppInput{}, "The address to check: " + lowerFirst(msg)
+		}
+	}
+	return store.AppInput{
+		Name: name, URL: address, Category: category, Favourite: b.Favourite, NewTab: newTab, Icon: strings.TrimSpace(b.Icon),
+		CheckEnabled: b.CheckEnabled, CheckURL: checkURL, CheckStrict: b.CheckStrict, CheckInsecure: b.CheckInsecure,
+	}, ""
 }
 
 // cleanURL accepts http and https addresses only, so a tile can never be a
@@ -221,4 +246,12 @@ func cleanURL(raw string) (string, string) {
 
 func hasControl(s string) bool {
 	return strings.IndexFunc(s, unicode.IsControl) >= 0
+}
+
+func lowerFirst(s string) string {
+	if s == "" {
+		return s
+	}
+	r, n := utf8.DecodeRuneInString(s)
+	return string(unicode.ToLower(r)) + s[n:]
 }

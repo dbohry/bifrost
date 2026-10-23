@@ -29,6 +29,7 @@
 - **Works on phones, tablets and desktops**, in either orientation.
 - **Search** your apps as you type, or fall back to a web search.
 - **Backup.** Export your apps and look to a file and import them anywhere.
+- **Status checks.** Switch it on for an app and its icon gets a badge: green when it answers, red with a cross when it does not.
 - **Tiny.** One Go binary and one SQLite file. No other services.
 
 ## Run it
@@ -100,6 +101,12 @@ Plain HTTP is fine on a home network. Behind a reverse proxy that serves HTTPS, 
 - **Search.** Press `/` to jump to the search box. Enter opens the best match, or searches DuckDuckGo if nothing matches.
 - **Touch screens.** The edit buttons are hidden until you press **Edit**. On a phone held upright, the main buttons are in a bar at the bottom.
 - **Users.** The first account is the administrator and can add and remove users in Settings → Users. A new user gets a temporary password, shown once, and must choose their own.
+- **Status checks.** In an app's details, switch on **Check if this app is online**. Bifrost (the server, not your browser) asks the app for a reply every minute and puts a badge on its icon: green for online, grey while it makes up its mind, and red with a cross and "Offline · 3 min" when it has failed twice in a row. Hover or focus a tile for the details: since when, why, and what was checked. When something is offline, an **Offline · N** button above the apps shows only those. A test button in the form tries the settings right away.
+  - The **address to check** is optional. Leave it empty to use the app's address. Fill it in when the server can reach the app at a different address than you do, for example `192.168.1.20:8000`. In Docker, `localhost` means the Bifrost container itself.
+  - **Counts as online when**: by default any answer does, even a login page. Choose success to count only HTTP 200 to 299. A self-signed certificate can be trusted per app.
+  - Settings → Status checks sets how often (1, 2 or 5 minutes, or your own number of seconds from 10 to 86400) and how long to wait (1, 5, 10, 30 seconds or your own, up to 60).
+  - Checks start off. Apps added from the built-in list also start off; this is one setting in the code if you would rather they start on.
+  - The latest result is kept in memory only, so a restart looks again. Checks send a plain GET request with no cookies or login, and follow at most two redirects.
 - **Look.** Settings → Appearance sets the mode, a theme for light and one for dark, and the logo. It follows you to every device.
 - **Keyboard only.** Everything works with the arrow keys. Press `/` to reach the search box (or Tab once), then the arrows move to the nearest control in that direction: tiles, category tabs, the layout switch, buttons, dialog fields and settings. Enter opens an app in a new tab. With a tile focused, `E` opens its details, `F` stars it, and **Alt + arrows** move it: left and right one place, up and down one row, and past the first or last row into the neighbouring category. Esc closes a dialog, or leaves Settings.
 

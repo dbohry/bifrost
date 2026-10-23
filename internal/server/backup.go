@@ -27,6 +27,11 @@ type exportApp struct {
 	Favourite bool   `json:"favourite"`
 	NewTab    bool   `json:"newTab"`
 	Icon      string `json:"icon"`
+
+	CheckEnabled  bool   `json:"checkEnabled,omitempty"`
+	CheckURL      string `json:"checkUrl,omitempty"`
+	CheckStrict   bool   `json:"checkStrict,omitempty"`
+	CheckInsecure bool   `json:"checkInsecure,omitempty"`
 }
 
 // exportFile is the whole file. It holds one person's dashboard and
@@ -47,7 +52,10 @@ func (s *server) exportData(w http.ResponseWriter, r *http.Request, user store.U
 	}
 	file := exportFile{Format: exportFormat, Version: exportVersion, ExportedAt: s.now().UTC().Format("2006-01-02T15:04:05Z"), Apps: make([]exportApp, len(apps))}
 	for i, a := range apps {
-		file.Apps[i] = exportApp{Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Icon: a.Icon}
+		file.Apps[i] = exportApp{
+			Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Icon: a.Icon,
+			CheckEnabled: a.CheckEnabled, CheckURL: a.CheckURL, CheckStrict: a.CheckStrict, CheckInsecure: a.CheckInsecure,
+		}
 	}
 	if p, err := s.store.GetPreferences(r.Context(), user.ID); err == nil {
 		pj := toPreferencesJSON(p)
@@ -101,7 +109,10 @@ func (s *server) importData(w http.ResponseWriter, r *http.Request, user store.U
 	apps := make([]store.AppInput, len(in.Apps))
 	for i, a := range in.Apps {
 		newTab := a.NewTab
-		clean, msg := cleanApp(appBody{Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: &newTab, Icon: a.Icon})
+		clean, msg := cleanApp(appBody{
+			Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: &newTab, Icon: a.Icon,
+			CheckEnabled: a.CheckEnabled, CheckURL: a.CheckURL, CheckStrict: a.CheckStrict, CheckInsecure: a.CheckInsecure,
+		})
 		if msg != "" {
 			writeError(w, http.StatusBadRequest, fmt.Sprintf("App %d (%q) cannot be imported: %s", i+1, a.Name, msg))
 			return

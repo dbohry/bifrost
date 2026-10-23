@@ -17,10 +17,16 @@ type App struct {
 	Favourite bool
 	NewTab    bool
 	// Icon is the catalogue id of the icon to show, or "" for the first letter of the name.
-	Icon      string
-	Position  int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	Icon string
+	// Status check: whether to look at the app now and then, at which address (empty for the
+	// app's own), whether only a 2xx answer counts, and whether a self-signed certificate is fine.
+	CheckEnabled  bool
+	CheckURL      string
+	CheckStrict   bool
+	CheckInsecure bool
+	Position      int64
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 // AppInput is what a user supplies when adding or editing an app. The caller
@@ -32,14 +38,19 @@ type AppInput struct {
 	Favourite bool
 	NewTab    bool
 	Icon      string
+
+	CheckEnabled  bool
+	CheckURL      string
+	CheckStrict   bool
+	CheckInsecure bool
 }
 
-const appColumns = `id, user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at`
+const appColumns = `id, user_id, name, url, category, favourite, new_tab, icon, check_enabled, check_url, check_strict, check_insecure, position, created_at, updated_at`
 
 func scanApp(row interface{ Scan(...any) error }) (App, error) {
 	var a App
 	var created, updated int64
-	err := row.Scan(&a.ID, &a.UserID, &a.Name, &a.URL, &a.Category, &a.Favourite, &a.NewTab, &a.Icon, &a.Position, &created, &updated)
+	err := row.Scan(&a.ID, &a.UserID, &a.Name, &a.URL, &a.Category, &a.Favourite, &a.NewTab, &a.Icon, &a.CheckEnabled, &a.CheckURL, &a.CheckStrict, &a.CheckInsecure, &a.Position, &created, &updated)
 	if errors.Is(err, sql.ErrNoRows) {
 		return App{}, ErrNotFound
 	}
@@ -80,25 +91,31 @@ const reuseCategory = `COALESCE(
 // CreateApp adds an app at the end of the user's dashboard.
 func (s *Store) CreateApp(ctx context.Context, userID int64, in AppInput, now time.Time) (App, error) {
 	return scanApp(s.db.QueryRowContext(ctx,
-		`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at)
-		 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?,
+		`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon,
+		                   check_enabled, check_url, check_strict, check_insecure, position, created_at, updated_at)
+		 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?, ?, ?, ?, ?,
 		         (SELECT COALESCE(MAX(position), 0) + 1 FROM apps WHERE user_id = ?), ?, ?)
 		 RETURNING `+appColumns,
 		userID, in.Name, in.URL,
 		userID, in.Category, 0, in.Category,
-		in.Favourite, in.NewTab, in.Icon, userID, now.Unix(), now.Unix()))
+		in.Favourite, in.NewTab, in.Icon,
+		in.CheckEnabled, in.CheckURL, in.CheckStrict, in.CheckInsecure,
+		userID, now.Unix(), now.Unix()))
 }
 
 // UpdateApp replaces an app's details. It returns ErrNotFound when the app
 // does not exist or belongs to someone else.
 func (s *Store) UpdateApp(ctx context.Context, userID, id int64, in AppInput, now time.Time) (App, error) {
 	return scanApp(s.db.QueryRowContext(ctx,
-		`UPDATE apps SET name = ?, url = ?, category = `+reuseCategory+`, favourite = ?, new_tab = ?, icon = ?, updated_at = ?
+		`UPDATE apps SET name = ?, url = ?, category = `+reuseCategory+`, favourite = ?, new_tab = ?, icon = ?,
+		        check_enabled = ?, check_url = ?, check_strict = ?, check_insecure = ?, updated_at = ?
 		  WHERE id = ? AND user_id = ?
 		 RETURNING `+appColumns,
 		in.Name, in.URL,
 		userID, in.Category, id, in.Category,
-		in.Favourite, in.NewTab, in.Icon, now.Unix(), id, userID))
+		in.Favourite, in.NewTab, in.Icon,
+		in.CheckEnabled, in.CheckURL, in.CheckStrict, in.CheckInsecure,
+		now.Unix(), id, userID))
 }
 
 // ErrOrderMismatch means a new order did not list exactly the user's apps,
@@ -204,12 +221,15 @@ func (s *Store) ImportApps(ctx context.Context, userID int64, apps []AppInput, r
 			continue
 		}
 		_, err = tx.ExecContext(ctx,
-			`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon, position, created_at, updated_at)
-			 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?,
+			`INSERT INTO apps (user_id, name, url, category, favourite, new_tab, icon,
+			                   check_enabled, check_url, check_strict, check_insecure, position, created_at, updated_at)
+			 VALUES (?, ?, ?, `+reuseCategory+`, ?, ?, ?, ?, ?, ?, ?,
 			         (SELECT COALESCE(MAX(position), 0) + 1 FROM apps WHERE user_id = ?), ?, ?)`,
 			userID, in.Name, in.URL,
 			userID, in.Category, 0, in.Category,
-			in.Favourite, in.NewTab, in.Icon, userID, now.Unix(), now.Unix())
+			in.Favourite, in.NewTab, in.Icon,
+			in.CheckEnabled, in.CheckURL, in.CheckStrict, in.CheckInsecure,
+			userID, now.Unix(), now.Unix())
 		if err != nil {
 			return res, err
 		}

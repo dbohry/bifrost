@@ -8,6 +8,7 @@
   import type { AppInput, AppItem, CatalogEntry } from '../lib/api';
   import { apps, groupByCategory } from '../lib/apps.svelte';
   import { play, snapshot } from '../lib/flip';
+  import { statuses } from '../lib/status.svelte';
   import { greeting } from '../lib/tile';
   import { ui } from '../lib/ui.svelte';
   import { view, type View } from '../lib/view.svelte';
@@ -34,8 +35,17 @@
 
   $effect(() => {
     apps.load();
-    return () => apps.clear();
+    statuses.start();
+    return () => {
+      apps.clear();
+      statuses.stop();
+    };
   });
+
+  // Apps whose status check says they are offline, and the filter that shows only them.
+  const offline = $derived(apps.items.filter((a) => a.checkEnabled && statuses.of(a.id)?.state === 'down'));
+  let offlineOnly = $state(false);
+  const showOffline = $derived(offlineOnly && offline.length > 0);
 
   // The bottom bar on a phone asks for search or add. Do it, and clear the request.
   $effect(() => {
@@ -68,8 +78,10 @@
     const first = matches[0];
     if (!first) {
       window.open(`https://duckduckgo.com/?q=${encodeURIComponent(query.trim())}`, '_blank', 'noopener,noreferrer');
-    } else {
+    } else if (first.newTab) {
       window.open(first.url, '_blank', 'noopener,noreferrer');
+    } else {
+      location.assign(first.url);
     }
   }
 
@@ -130,7 +142,12 @@
       {/if}
     </div>
     <div class="controls">
-      {#if apps.loaded && apps.categories.length > 1 && !searching && !flat}
+      {#if offline.length > 0}
+        <button class="button secondary offline-toggle" type="button" aria-pressed={showOffline} onclick={() => (offlineOnly = !offlineOnly)}>
+          <span class="red" aria-hidden="true"></span>Offline · {offline.length}
+        </button>
+      {/if}
+      {#if apps.loaded && apps.categories.length > 1 && !searching && !flat && !showOffline}
         <CategoryTabs categories={apps.categories} selected={activeTab} onselect={(name) => (tab = name)} />
       {/if}
       {#if apps.loaded && count > 1}
@@ -179,16 +196,16 @@
       <button class="button" onclick={enter}>Search the web</button>
     </section>
   {:else}
-    {#if flat}
-      <section aria-label={searching ? 'Matching apps' : 'All apps'}>
+    {#if flat || showOffline}
+      <section aria-label={searching ? 'Matching apps' : showOffline ? 'Offline apps' : 'All apps'}>
         <AppGrid
-          apps={searching ? matches : apps.items}
-          reorderable={!searching}
+          apps={searching ? matches : showOffline ? offline : apps.items}
+          reorderable={!searching && !showOffline}
           editing={editMode}
           onedit={editing}
           onfavourite={(app) => apps.toggleFavourite(app)}
           onmove={(from, to) => apps.moveAll(from, to)}
-          onadd={!searching ? () => adding() : undefined}
+          onadd={!searching && !showOffline ? () => adding() : undefined}
         />
       </section>
     {:else}
@@ -311,6 +328,25 @@
     }
   }
 
+  .offline-toggle {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+  .offline-toggle .red {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bad);
+  }
+  .offline-toggle[aria-pressed='true'] {
+    border-color: var(--bad);
+    outline: 1px solid var(--bad);
+  }
   .views {
     display: flex;
     flex-shrink: 0;

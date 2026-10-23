@@ -1,6 +1,8 @@
 <script lang="ts">
   import type { AppItem } from '../lib/api';
   import AppIcon from './AppIcon.svelte';
+  import { statuses } from '../lib/status.svelte';
+  import { span } from '../lib/time';
 
   let {
     app,
@@ -8,6 +10,13 @@
     onedit,
     onfavourite,
   }: { app: AppItem; editing?: boolean; onedit: () => void; onfavourite: () => void } = $props();
+
+  // The latest look at the app, if it asked to be checked and has been looked at.
+  const result = $derived(app.checkEnabled ? statuses.of(app.id) : undefined);
+  const down = $derived(result?.state === 'down');
+  const label = $derived(
+    result?.state === 'up' ? 'Online' : result?.state === 'down' ? 'Offline' : result ? 'Checking' : '',
+  );
 
   // While editing on a touch screen, a tap changes the app instead of opening it.
   function open(e: MouseEvent) {
@@ -17,18 +26,46 @@
   }
 </script>
 
-<div class="tile" class:editing data-sortable-item data-app-id={app.id}>
+<div class="tile" class:editing class:down data-sortable-item data-app-id={app.id}>
   <a
     class="open"
     href={app.url}
     draggable="false"
-    target="_blank"
+    target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
     onclick={open}
   >
-    <AppIcon name={app.name} seed={app.id} icon={app.icon} />
+    <span class="icon-wrap">
+      <AppIcon name={app.name} seed={app.id} icon={app.icon} />
+      {#if result}
+        <span class="status {result.state}" role="img" aria-label={label}>{down ? '×' : ''}</span>
+      {/if}
+    </span>
     <span class="name">{app.name}</span>
+    {#if down && result}
+      <span class="note">Offline · {span(result.since)}</span>
+    {/if}
   </a>
+
+  {#if result}
+    <!-- Hover or keyboard focus on the tile shows the details. It is decoration for the mouse; the badge and note carry the meaning. -->
+    <div class="card" aria-hidden="true" data-nav-skip>
+      <div class="card-title"><span class="status-dot {result.state}"></span>{app.name} is {label.toLowerCase()}</div>
+      <dl>
+        {#if result.state === 'down'}
+          <dt>Since</dt><dd>{span(result.since)} ago</dd>
+        {/if}
+        <dt>Last check</dt><dd>{span(result.lastChecked)} ago</dd>
+        {#if result.state === 'up' && result.latencyMs > 0}
+          <dt>Answered in</dt><dd>{result.latencyMs} ms</dd>
+        {/if}
+        {#if result.state === 'down' && result.reason}
+          <dt>Reason</dt><dd>{result.reason}</dd>
+        {/if}
+        <dt>Checked</dt><dd class="addr">{result.address}</dd>
+      </dl>
+    </div>
+  {/if}
 
   <!-- Touch screens: a small star on pinned apps, since the button itself is tucked away until Edit. -->
   {#if app.favourite}<span class="badge" aria-hidden="true">★</span>{/if}
@@ -84,6 +121,106 @@
   .open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
+  }
+  .icon-wrap {
+    position: relative;
+    display: block;
+  }
+  /* The badge sits on the corner of the icon. The ring in the tile's colour cuts it out of the icon. */
+  .status {
+    position: absolute;
+    right: -6px;
+    bottom: -6px;
+    width: 18px;
+    height: 18px;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border: 3px solid var(--surface);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--bg);
+  }
+  .status.up {
+    background: var(--ok);
+  }
+  .status.down {
+    background: var(--bad);
+  }
+  .status.checking {
+    background: var(--muted);
+    opacity: 0.55;
+  }
+  .down {
+    border-color: var(--bad);
+  }
+  .down .name {
+    color: var(--muted);
+  }
+  .note {
+    margin-top: -4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--bad);
+  }
+
+  .card {
+    display: none;
+    position: absolute;
+    z-index: 4;
+    top: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 232px;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.3);
+    font-size: 12px;
+    pointer-events: none;
+  }
+  @media (hover: hover) {
+    .tile:hover .card,
+    .tile:focus-within .card {
+      display: block;
+    }
+  }
+  .card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: var(--muted);
+  }
+  .status-dot.up {
+    background: var(--ok);
+  }
+  .status-dot.down {
+    background: var(--bad);
+  }
+  dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 12px;
+    margin: 0;
+    color: var(--muted);
+  }
+  dd {
+    margin: 0;
+    color: var(--text);
+    overflow-wrap: anywhere;
   }
   .name {
     max-width: 100%;

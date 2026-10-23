@@ -76,7 +76,7 @@ Why Bifrost is built the way it is, what is in it, and what comes later.
 
 ## Later
 
-- Status checks (the online/offline dot and its text on tiles). The wireframes show them, but they are deferred.
+- Status checks, later parts: a slow state (needs a warning colour in every theme), a summary line in the header, and a history of past results. Online and offline checks are built.
 - Widgets (live per-app stats such as Jellyfin streams or Sonarr queue size). They depend on the same background worker, so they wait with status checks.
 - Importing your own theme files, and custom CSS.
 - Settings sections for General, Search (including the search provider) and Integrations.

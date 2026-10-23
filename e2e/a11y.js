@@ -64,6 +64,8 @@ async function audit(page, label) {
       if (theme === 'bifrost-light' || theme === 'dracula') {
         await page.goto(BASE + '/settings/appearance'); await page.waitForSelector('main h1');
         await audit(page, `${tag}: appearance`);
+        await page.goto(BASE + '/settings/status'); await page.waitForSelector('text=Check every');
+        await audit(page, `${tag}: status checks`);
         await page.goto(BASE + '/settings/users'); await page.waitForSelector('text=demo (you)');
         await audit(page, `${tag}: users`);
         await page.goto(BASE + '/settings'); await page.waitForSelector('main h1');
@@ -77,6 +79,9 @@ async function audit(page, label) {
         await page.getByRole('dialog').getByRole('button', { name: /Custom app/ }).click();
         await page.waitForTimeout(300);
         await audit(page, `${tag}: add app, step 2`);
+        await page.getByRole('dialog').getByRole('switch', { name: /Check if this app is online/ }).click();
+        await page.waitForTimeout(200);
+        await audit(page, `${tag}: add app, status check options`);
       }
       await ctx.close();
     }

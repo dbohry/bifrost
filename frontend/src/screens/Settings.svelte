@@ -5,20 +5,20 @@
   import AccountSection from './AccountSection.svelte';
   import AppearanceSection from './AppearanceSection.svelte';
   import BackupSection from './BackupSection.svelte';
+  import StatusSection from './StatusSection.svelte';
   import UsersSection from './UsersSection.svelte';
 
   const isAdmin = $derived(session.user?.isAdmin ?? false);
 
   // Only administrators see the Users section. Anyone else who opens its
   // address is sent to their account page, as is any address that is not a section.
+  const sections: Record<string, string> = {
+    '/settings/appearance': 'appearance',
+    '/settings/status': 'status',
+    '/settings/backup': 'backup',
+  };
   const section = $derived(
-    router.path === '/settings/appearance'
-      ? 'appearance'
-      : router.path === '/settings/backup'
-        ? 'backup'
-        : router.path === '/settings/users' && isAdmin
-        ? 'users'
-        : 'account',
+    router.path === '/settings/users' ? (isAdmin ? 'users' : 'account') : (sections[router.path] ?? 'account'),
   );
 
   $effect(() => {
@@ -39,6 +39,7 @@
   <nav aria-label="Settings sections">
     <a href="/settings" use:link aria-current={section === 'account' ? 'page' : undefined}>Account</a>
     <a href="/settings/appearance" use:link aria-current={section === 'appearance' ? 'page' : undefined}>Appearance</a>
+    <a href="/settings/status" use:link aria-current={section === 'status' ? 'page' : undefined}>Status checks</a>
     <a href="/settings/backup" use:link aria-current={section === 'backup' ? 'page' : undefined}>Backup</a>
     {#if isAdmin}
       <a href="/settings/users" use:link aria-current={section === 'users' ? 'page' : undefined}>Users</a>
@@ -50,6 +51,8 @@
       <UsersSection />
     {:else if section === 'appearance'}
       <AppearanceSection />
+    {:else if section === 'status'}
+      <StatusSection />
     {:else if section === 'backup'}
       <BackupSection />
     {:else}
