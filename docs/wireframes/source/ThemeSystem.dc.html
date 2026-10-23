@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Theme tokens and extensibility</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 1100px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; padding: 40px 32px 64px">
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 32px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Theme tokens</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">Components never use raw colours. They read ten semantic tokens, so a new theme is just ten values.</p>
+    </div>
+
+    <div style="overflow-x: auto; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+      <table style="border-collapse: collapse; width: 100%; min-width: 960px; font-size: 13px">
+        <thead>
+          <tr style="text-align: left; border-bottom: 1px solid #d5d9e0">
+            <th style="padding: 12px 16px">Token</th>
+            <th style="padding: 12px 8px">Used for</th>
+            <sc-for list="{{cols}}" as="c" hint-placeholder-count="7">
+              <th style="padding: 12px 8px; font-weight: 600">{{c}}</th>
+            </sc-for>
+          </tr>
+        </thead>
+        <tbody>
+          <sc-for list="{{rows}}" as="r" hint-placeholder-count="10">
+            <tr style="border-bottom: 1px solid #e3e6ec">
+              <td style="padding: 10px 16px; font-family: ui-monospace, Menlo, Consolas, monospace; font-weight: 600">{{r.token}}</td>
+              <td style="padding: 10px 8px; color: #5b6272">{{r.use}}</td>
+              <sc-for list="{{r.cells}}" as="x" hint-placeholder-count="7">
+                <td style="padding: 10px 8px">
+                  <span style="display: inline-flex; align-items: center; gap: 6px">
+                    <span style="width: 18px; height: 18px; border-radius: 5px; border: 1px solid #c4c9d4; background: {{x.hex}}"></span>
+                    <span style="font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12px">{{x.hex}}</span>
+                  </span>
+                </td>
+              </sc-for>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 14px">A theme is one small file</h2>
+        <pre style="margin: 0; padding: 18px; border-radius: 12px; background: #1f2430; color: #e8eaf0; font-size: 13px; line-height: 1.55; overflow-x: auto; font-family: ui-monospace, Menlo, Consolas, monospace">{
+  "name": "Dracula",
+  "mode": "dark",
+  "colors": {
+    "bg":        "#282a36",
+    "surface":   "#343746",
+    "border":    "#44475a",
+    "text":      "#f8f8f2",
+    "muted":     "#a9b3d9",
+    "accent":    "#bd93f9",
+    "onAccent":  "#282a36",
+    "ok":        "#50fa7b",
+    "bad":       "#ff5555",
+    "iconBg":    "#44475a"
+  }
+}</pre>
+      </section>
+
+      <section style="flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-size: 14px">Rules that keep new themes safe</h2>
+        <sc-for list="{{rules}}" as="r" hint-placeholder-count="5">
+          <div style="display: flex; gap: 12px; padding: 14px 16px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 12px">
+            <div style="width: 26px; height: 26px; border-radius: 13px; background: #1f2430; color: #ffffff; display: grid; place-items: center; font-size: 12px; font-weight: 700; flex-shrink: 0">{{r.i}}</div>
+            <div style="font-size: 13px; line-height: 1.5"><b>{{r.t}}</b><br><span style="color: #5b6272">{{r.d}}</span></div>
+          </div>
+        </sc-for>
+      </section>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cols = ['Light', 'Dark', 'Dracula', 'Nord', 'Gruvbox', 'Solarized D', 'Solarized L'];
+    const P = [
+      { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', bad:'#d9480f', iconBg:'#e3e6ec' },
+      { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', bad:'#ff7a59', iconBg:'#232836' },
+      { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', bad:'#ff5555', iconBg:'#44475a' },
+      { bg:'#2e3440', surface:'#3b4252', border:'#4c566a', text:'#eceff4', muted:'#b4bdcf', accent:'#88c0d0', onAccent:'#2e3440', ok:'#a3be8c', bad:'#e5808b', iconBg:'#434c5e' },
+      { bg:'#282828', surface:'#3c3836', border:'#504945', text:'#ebdbb2', muted:'#bdae93', accent:'#fabd2f', onAccent:'#282828', ok:'#b8bb26', bad:'#fb4934', iconBg:'#504945' },
+      { bg:'#002b36', surface:'#073642', border:'#586e75', text:'#eee8d5', muted:'#93a1a1', accent:'#2aa198', onAccent:'#002b36', ok:'#859900', bad:'#f0645a', iconBg:'#094959' },
+      { bg:'#fdf6e3', surface:'#fffaf0', border:'#d6cdb3', text:'#073642', muted:'#586e75', accent:'#1f6fb0', onAccent:'#fdf6e3', ok:'#6b7d00', bad:'#c3261f', iconBg:'#eee8d5' }
+    ];
+    const use = {
+      bg: 'Page background', surface: 'Cards, tiles, header, dialogs', border: 'Outlines and dividers',
+      text: 'Primary text', muted: 'Secondary text, captions', accent: 'Primary buttons, focus, active states',
+      onAccent: 'Text and icons on accent', ok: 'Online status', bad: 'Offline and errors', iconBg: 'Icon placeholder behind app logos'
+    };
+    return {
+      cols,
+      rows: Object.keys(use).map((token) => ({ token, use: use[token], cells: P.map((p) => ({ hex: p[token] })) })),
+      rules: [
+        { i: '1', t: 'Tokens only', d: 'Components use token names. Theme files never reach into component styles.' },
+        { i: '2', t: 'Contrast checked on import', d: 'text, muted and onAccent must reach 4.5:1 on their backgrounds. Failing themes show a warning, not a crash.' },
+        { i: '3', t: 'Light and dark pair', d: 'Each mode remembers its own theme, and System switches between the two with the OS.' },
+        { i: '4', t: 'Missing tokens fall back', d: 'A theme missing a token inherits it from Bifrost Light or Dark, based on its mode.' },
+        { i: '5', t: 'Official palettes adjusted', d: 'Some muted greys are lightened from the originals to stay readable on small text.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>App icon</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 1100px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; padding: 40px 32px 64px">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <!-- rounded app icon: tile and glyph colours come from --tile and --glyph -->
+      <symbol id="ic" viewBox="0 0 96 96">
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="var(--tile)"/>
+        <g fill="none" stroke="var(--glyph)" stroke-width="7" stroke-linecap="round"><path d="M20 63A28 28 0 0 1 76 63"/><path d="M33 63A15 15 0 0 1 63 63"/></g>
+        <circle cx="48" cy="63" r="4.5" fill="var(--glyph)"/>
+      </symbol>
+      <!-- full-bleed version for maskable / adaptive icons: glyph inside the central 80% -->
+      <symbol id="ic-m" viewBox="0 0 96 96">
+        <rect width="96" height="96" fill="var(--tile)"/>
+        <g transform="translate(9.6 9.6) scale(0.8)">
+          <g fill="none" stroke="var(--glyph)" stroke-width="7" stroke-linecap="round"><path d="M20 63A28 28 0 0 1 76 63"/><path d="M33 63A15 15 0 0 1 63 63"/></g>
+          <circle cx="48" cy="63" r="4.5" fill="var(--glyph)"/>
+        </g>
+      </symbol>
+      <!-- glyph alone, one colour, for headers, monochrome icons and tiny sizes -->
+      <symbol id="ic-g" viewBox="0 0 96 96">
+        <g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"><path d="M12 72A36 36 0 0 1 84 72"/><path d="M28 72A20 20 0 0 1 68 72"/></g>
+        <circle cx="48" cy="72" r="5.5" fill="currentColor"/>
+      </symbol>
+      <!-- if the user picks Arches (A): three arches on the accent tile -->
+      <symbol id="ic-a" viewBox="0 0 96 96">
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="var(--tile)"/>
+        <g fill="none" stroke="var(--glyph)" stroke-width="6.5" stroke-linecap="round"><path d="M18 64A30 30 0 0 1 78 64"/><path d="M29 64A19 19 0 0 1 67 64"/><path d="M40 64A8 8 0 0 1 56 64"/></g>
+      </symbol>
+      <!-- if the user picks Spectrum (D): five colours on a fixed dark tile so every colour stays visible -->
+      <symbol id="ic-d" viewBox="0 0 96 96">
+        <rect x="4" y="4" width="88" height="88" rx="22" fill="#171a22"/>
+        <g fill="none" stroke-width="4.5" stroke-linecap="round"><path d="M17 66A31 31 0 0 1 79 66" stroke="#e5484d"/><path d="M23 66A25 25 0 0 1 73 66" stroke="#f59f00"/><path d="M29 66A19 19 0 0 1 67 66" stroke="#2f9e63"/><path d="M35 66A13 13 0 0 1 61 66" stroke="#3b9ddd"/><path d="M41 66A7 7 0 0 1 55 66" stroke="#7048e8"/></g>
+      </symbol>
+      <!-- Spectrum on a light tile, used when the user's theme is a light theme -->
+      <symbol id="ic-dl" viewBox="0 0 96 96">
+        <rect x="5" y="5" width="86" height="86" rx="21" fill="#ffffff" stroke="#c4c9d4" stroke-width="2"/>
+        <g fill="none" stroke-width="4.5" stroke-linecap="round"><path d="M17 66A31 31 0 0 1 79 66" stroke="#e5484d"/><path d="M23 66A25 25 0 0 1 73 66" stroke="#f59f00"/><path d="M29 66A19 19 0 0 1 67 66" stroke="#2f9e63"/><path d="M35 66A13 13 0 0 1 61 66" stroke="#3b9ddd"/><path d="M41 66A7 7 0 0 1 55 66" stroke="#7048e8"/></g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">App icon</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">Direction E, refined: arches centred optically in a rounded tile, with a heavier glyph below 24 px.</p>
+    </div>
+
+    <!-- hero -->
+    <section style="display: flex; flex-wrap: wrap; gap: 24px">
+      <div style="flex: 1 1 360px; display: flex; align-items: center; justify-content: center; gap: 28px; min-height: 280px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 16px">
+        <svg width="180" height="180" style="--tile: #3b5bdb; --glyph: #ffffff" role="img" aria-label="Bifrost app icon"><use href="#ic"></use></svg>
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; gap: 12px"><svg width="44" height="44" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic"></use></svg><span style="font-size: 30px; font-weight: 700; letter-spacing: -0.5px">Bifrost</span></div>
+          <div style="display: flex; align-items: center; gap: 12px; color: #3b5bdb"><svg width="44" height="44" aria-hidden="true"><use href="#ic-g"></use></svg><span style="font-size: 30px; font-weight: 700; letter-spacing: -0.5px; color: #1f2430">Bifrost</span></div>
+        </div>
+      </div>
+      <div style="flex: 1 1 360px; display: flex; align-items: center; justify-content: center; gap: 28px; min-height: 280px; background: #171a22; border: 1px solid #2a2f3c; border-radius: 16px">
+        <svg width="180" height="180" style="--tile: #7c93ff; --glyph: #0f1117" role="img" aria-label="Bifrost app icon, dark"><use href="#ic"></use></svg>
+        <div style="display: flex; flex-direction: column; gap: 14px">
+          <div style="display: flex; align-items: center; gap: 12px"><svg width="44" height="44" style="--tile: #7c93ff; --glyph: #0f1117" aria-hidden="true"><use href="#ic"></use></svg><span style="font-size: 30px; font-weight: 700; letter-spacing: -0.5px; color: #e8eaf0">Bifrost</span></div>
+          <div style="display: flex; align-items: center; gap: 12px; color: #7c93ff"><svg width="44" height="44" aria-hidden="true"><use href="#ic-g"></use></svg><span style="font-size: 30px; font-weight: 700; letter-spacing: -0.5px; color: #e8eaf0">Bifrost</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- sizes -->
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">Size ladder</h2>
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; gap: 28px; padding: 24px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 16px">
+        <sc-for list="{{sizes}}" as="s" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; font-size: 12px; color: #5b6272">
+            <svg width="{{s.px}}" height="{{s.px}}" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="{{s.ref}}"></use></svg>
+            {{s.label}}
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- themed -->
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">In-app logo follows the theme accent</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 16px">
+        <sc-for list="{{themes}}" as="t" hint-placeholder-count="6">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 20px 12px 16px; background: {{t.bg}}; border: 1px solid {{t.border}}; border-radius: 14px">
+            <svg width="72" height="72" style="--tile: {{t.tile}}; --glyph: {{t.glyph}}" aria-hidden="true"><use href="#ic"></use></svg>
+            <span style="font-size: 13px; font-weight: 600; color: {{t.fg}}">{{t.name}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- other logo choices as app icons -->
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">If a user picks another logo</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px">
+        <div style="flex: 1 1 420px; display: flex; flex-direction: column; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 16px; overflow: hidden">
+          <div style="display: flex; align-items: flex-end; gap: 24px; padding: 24px">
+            <svg width="96" height="96" style="--tile: #3b5bdb; --glyph: #ffffff" role="img" aria-label="Arches app icon"><use href="#ic-a"></use></svg>
+            <svg width="48" height="48" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic-a"></use></svg>
+            <svg width="32" height="32" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic-a"></use></svg>
+            <svg width="16" height="16" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic"></use></svg>
+          </div>
+          <div style="padding: 16px 20px 20px; border-top: 1px solid #e3e6ec; font-size: 13px; line-height: 1.5">
+            <div style="font-size: 15px; font-weight: 700; margin-bottom: 4px">A · Arches</div>
+            <span style="color: #5b6272">Same tile as the default, with the three nested arches in place of two arches and a dot. Tile uses the user's theme accent, glyph uses the on-accent colour. At 16 px the three arches blur together, so the favicon uses the default two-arch glyph in the same colours.</span>
+          </div>
+        </div>
+        <div style="flex: 1 1 420px; display: flex; flex-direction: column; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 16px; overflow: hidden">
+          <div style="display: flex; align-items: flex-end; gap: 24px; padding: 24px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: #5b6272">
+              <svg width="96" height="96" role="img" aria-label="Spectrum app icon, dark tile"><use href="#ic-d"></use></svg>Dark themes
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; color: #5b6272">
+              <svg width="96" height="96" role="img" aria-label="Spectrum app icon, light tile"><use href="#ic-dl"></use></svg>Light themes
+            </div>
+            <svg width="32" height="32" aria-hidden="true"><use href="#ic-d"></use></svg>
+            <svg width="32" height="32" aria-hidden="true"><use href="#ic-dl"></use></svg>
+            <svg width="16" height="16" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic"></use></svg>
+          </div>
+          <div style="padding: 16px 20px 20px; border-top: 1px solid #e3e6ec; font-size: 13px; line-height: 1.5">
+            <div style="font-size: 15px; font-weight: 700; margin-bottom: 4px">D · Spectrum</div>
+            <span style="color: #5b6272">Five coloured arcs on a tile that matches the theme's mode: dark (#171a22) in dark themes, white with a thin grey outline in light themes. The colours never change, and Spectrum ignores the theme accent. At 24 px and below the favicon switches to the single-colour default glyph so the colours do not muddy.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- in context -->
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">In context</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <!-- browser tabs -->
+        <div style="flex: 1 1 420px; display: flex; flex-direction: column; gap: 16px">
+          <div style="display: flex; align-items: flex-end; gap: 4px; padding: 10px 10px 0; background: #d5d9e0; border-radius: 12px 12px 0 0">
+            <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; background: #ffffff; border-radius: 10px 10px 0 0; font-size: 13px; min-width: 160px">
+              <svg width="16" height="16" style="--tile: #3b5bdb; --glyph: #ffffff" aria-hidden="true"><use href="#ic"></use></svg>Bifrost
+            </div>
+            <div style="display: flex; align-items: center; height: 32px; padding: 0 14px; font-size: 13px; color: #5b6272">Grafana</div>
+          </div>
+          <div style="display: flex; align-items: flex-end; gap: 4px; padding: 10px 10px 0; background: #0f1117; border-radius: 12px 12px 0 0">
+            <div style="display: flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; background: #2a2f3c; border-radius: 10px 10px 0 0; font-size: 13px; min-width: 160px; color: #e8eaf0">
+              <svg width="16" height="16" style="--tile: #7c93ff; --glyph: #0f1117" aria-hidden="true"><use href="#ic"></use></svg>Bifrost
+            </div>
+            <div style="display: flex; align-items: center; height: 32px; padding: 0 14px; font-size: 13px; color: #9aa1b2">Grafana</div>
+          </div>
+        </div>
+
+        <!-- home screen -->
+        <div style="flex: 0 0 280px; box-sizing: border-box; padding: 24px 20px; background: #2a2f3c; border-radius: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 12px">
+          <sc-for list="{{home}}" as="h" hint-placeholder-count="8">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 10px; color: #e8eaf0">
+              <div style="width: 52px; height: 52px; border-radius: 13px; overflow: hidden; background: {{h.bg}}">
+                <sc-if value="{{h.mine}}" hint-placeholder-val="{{false}}"><svg width="52" height="52" style="--tile: #3b5bdb; --glyph: #ffffff; display: block" aria-hidden="true"><use href="#ic-m"></use></svg></sc-if>
+              </div>
+              {{h.label}}
+            </div>
+          </sc-for>
+        </div>
+
+        <!-- maskable crops -->
+        <div style="flex: 0 0 260px; display: flex; flex-direction: column; gap: 10px">
+          <div style="display: flex; gap: 14px; align-items: center">
+            <div style="width: 72px; height: 72px; border-radius: 36px; overflow: hidden"><svg width="72" height="72" style="--tile: #3b5bdb; --glyph: #ffffff; display: block" aria-hidden="true"><use href="#ic-m"></use></svg></div>
+            <div style="width: 72px; height: 72px; border-radius: 18px; overflow: hidden"><svg width="72" height="72" style="--tile: #3b5bdb; --glyph: #ffffff; display: block" aria-hidden="true"><use href="#ic-m"></use></svg></div>
+            <div style="width: 72px; height: 72px; border-radius: 4px; overflow: hidden"><svg width="72" height="72" style="--tile: #3b5bdb; --glyph: #ffffff; display: block" aria-hidden="true"><use href="#ic-m"></use></svg></div>
+          </div>
+          <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5b6272">Full-bleed version for Android and PWA. The glyph stays inside the central 80%, so circle, squircle and square crops all keep it.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- rules -->
+    <section style="display: flex; flex-wrap: wrap; gap: 24px; padding: 20px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px; font-size: 13px; line-height: 1.5">
+      <div style="flex: 1 1 240px"><b>Colour</b><br>Default tile is brand blue #3b5bdb (#7c93ff on dark). In the app it follows each user's theme accent, with the glyph in the theme's "on accent" colour. Spectrum is the exception and never recolours.</div>
+      <div style="flex: 1 1 240px"><b>Small sizes</b><br>Below 24 px use the tile version with the lighter two-arch glyph, never a thinner stroke. Minimum size 16 px.</div>
+      <div style="flex: 1 1 240px"><b>Clear space</b><br>Keep a quarter of the icon's width free on every side. Do not stretch, rotate or add shadows.</div>
+      <div style="flex: 1 1 240px"><b>Glyph only</b><br>Use the bare arches for monochrome contexts and next to the wordmark in the top bar on narrow screens.</div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1100}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const th = (name, tile, glyph, bg, border, fg) => ({ name, tile, glyph, bg, border, fg });
+    const generic = ['Mail', 'Maps', 'Notes', 'Camera', 'Photos', 'Music', 'Files'];
+    return {
+      sizes: [
+        { px: 128, ref: '#ic', label: '128' }, { px: 64, ref: '#ic', label: '64' }, { px: 48, ref: '#ic', label: '48' },
+        { px: 32, ref: '#ic', label: '32' }, { px: 24, ref: '#ic', label: '24' }, { px: 16, ref: '#ic', label: '16' }
+      ],
+      themes: [
+        th('Bifrost Light', '#3b5bdb', '#ffffff', '#ffffff', '#d5d9e0', '#1f2430'),
+        th('Bifrost Dark', '#7c93ff', '#0f1117', '#171a22', '#2a2f3c', '#e8eaf0'),
+        th('Dracula', '#bd93f9', '#282a36', '#282a36', '#44475a', '#f8f8f2'),
+        th('Nord', '#88c0d0', '#2e3440', '#2e3440', '#4c566a', '#eceff4'),
+        th('Gruvbox', '#fabd2f', '#282828', '#282828', '#504945', '#ebdbb2'),
+        th('Solarized Dark', '#2aa198', '#002b36', '#002b36', '#586e75', '#eee8d5'),
+        th('Solarized Light', '#1f6fb0', '#fdf6e3', '#fdf6e3', '#d6cdb3', '#073642')
+      ],
+      home: [
+        { mine: true, label: 'Bifrost', bg: 'transparent' },
+        ...generic.map((label, i) => ({ mine: false, label, bg: ['#6b7285', '#7d8497', '#5d6579'][i % 3] }))
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

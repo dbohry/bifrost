@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add app: configure</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:#3b5bdb}a:hover{color:#2b44a8}
+</style>
+</helmet>
+<div style="position: relative; min-height: 900px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; overflow: hidden">
+  <div aria-hidden="true" style="padding: 20px 32px; background: #ffffff; border-bottom: 1px solid #d5d9e0; display: flex; align-items: center; gap: 16px">
+    <div style="width: 28px; height: 28px; border-radius: 8px; background: #1f2430"></div>
+    <div style="flex: 1; max-width: 520px; height: 44px; margin: 0 auto; border: 1px solid #c4c9d4; border-radius: 10px"></div>
+    <div style="width: 110px; height: 44px; border-radius: 10px; background: #3b5bdb"></div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(31,36,48,0.55); display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; box-sizing: border-box">
+    <div role="dialog" aria-label="Configure application" style="width: 100%; max-width: 860px; background: #ffffff; border-radius: 16px; border: 1px solid #c4c9d4; display: flex; flex-direction: column; overflow: hidden">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #d5d9e0">
+        <div>
+          <h1 style="margin: 0; font-size: 20px">Configure Jellyfin</h1>
+          <p style="margin: 2px 0 0; font-size: 13px; color: #5b6272">Step 2 of 2 · Same form is used to edit an existing app</p>
+        </div>
+        <a href="AddPick.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font-size: 18px; color: #1f2430; text-decoration: none; display: grid; place-items: center">×</a>
+      </div>
+
+      <div style="display: flex; flex-wrap: wrap; gap: 32px; padding: 24px">
+        <!-- form -->
+        <div style="flex: 1 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Name
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; display: flex; align-items: center; font-weight: 400; font-size: 14px">Jellyfin</span>
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">URL
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; display: flex; align-items: center; font-weight: 400; font-size: 14px">https://jellyfin.home.lan</span>
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Category
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; font-weight: 400; font-size: 14px">Media <span aria-hidden="true">▾</span></span>
+          </label>
+
+          <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; font-weight: 600">Icon
+            <div style="display: flex; align-items: center; gap: 12px; font-weight: 400">
+              <div style="width: 52px; height: 52px; border-radius: 14px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">J</div>
+              <button style="height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font: inherit; font-size: 13px">Upload</button>
+              <button style="height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font: inherit; font-size: 13px">Fetch favicon</button>
+            </div>
+          </div>
+
+          <div style="border-top: 1px solid #d5d9e0; padding-top: 16px; display: flex; flex-direction: column; gap: 14px">
+            <sc-for list="{{toggles}}" as="t" hint-placeholder-count="4">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 14px">
+                <div>
+                  <div style="font-weight: 600">{{t.label}}</div>
+                  <div style="font-size: 12px; color: #5b6272">{{t.hint}}</div>
+                </div>
+                <div role="img" aria-label="{{t.state}}" style="width: 44px; height: 26px; border-radius: 13px; background: {{t.bg}}; position: relative; flex-shrink: 0">
+                  <div style="position: absolute; top: 3px; left: {{t.knob}}; width: 20px; height: 20px; border-radius: 10px; background: #ffffff"></div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+
+        <!-- live preview -->
+        <div style="flex: 1 1 220px; max-width: 260px; display: flex; flex-direction: column; gap: 10px">
+          <div style="font-size: 13px; font-weight: 600">Preview</div>
+          <div style="padding: 24px 12px; background: #f6f7f9; border: 1px solid #d5d9e0; border-radius: 14px; display: grid; place-items: center">
+            <div style="width: 160px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 12px 16px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+              <div style="width: 52px; height: 52px; border-radius: 14px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">J</div>
+              <div style="font-size: 14px; font-weight: 600">Jellyfin</div>
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5b6272"><span style="width: 8px; height: 8px; border-radius: 4px; background: #2f9e63"></span>3 streams</div>
+            </div>
+          </div>
+          <p style="margin: 0; font-size: 12px; color: #5b6272">Updates as you type. Status text comes from the widget below.</p>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Widget
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; display: flex; align-items: center; justify-content: space-between; font-weight: 400; font-size: 14px">Jellyfin: active streams <span aria-hidden="true">▾</span></span>
+          </label>
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">API key
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; display: flex; align-items: center; font-weight: 400; font-size: 14px; color: #5b6272">••••••••••••</span>
+          </label>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 24px; border-top: 1px solid #d5d9e0; background: #f6f7f9">
+        <a href="AddPick.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 10px; color: #1f2430; text-decoration: none; font-size: 14px">← Back</a>
+        <div style="display: flex; gap: 8px">
+          <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; color: #1f2430; text-decoration: none; font-size: 14px">Cancel</a>
+          <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 10px; background: #3b5bdb; color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600">Save app</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const t = (label, hint, on) => ({
+      label, hint, state: on ? 'On' : 'Off',
+      bg: on ? '#3b5bdb' : '#b4bac7', knob: on ? '21px' : '3px'
+    });
+    return {
+      toggles: [
+        t('Pin to favourites', 'Shows in the top row of the dashboard', true),
+        t('Check status', 'Ping the URL every 60 seconds', true),
+        t('Open in new tab', 'Otherwise opens in the same tab', true)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

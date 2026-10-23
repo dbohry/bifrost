@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status checks: dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 900px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 12px 32px; background: {{c.surface}}; border-bottom: 1px solid {{c.border}}">
+    <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: {{c.accent}}"></div>
+      Bifrost
+    </div>
+    <label style="flex: 1 1 280px; max-width: 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; color: {{c.muted}}; font-size: 14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <span style="flex: 1">Search apps or the web</span>
+      <span style="border: 1px solid {{c.border}}; border-radius: 5px; padding: 0 6px; font-size: 12px">/</span>
+    </label>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: {{c.accent}}; color: {{c.onAccent}}; font: inherit; font-size: 14px; font-weight: 600">+ Add app</button>
+      <button aria-label="Settings" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid {{c.border}}; background: {{c.surface}}"></button>
+      <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid {{c.border}}; background: {{c.surface}}; color: {{c.text}}; font: inherit; font-size: 14px">Sign out (admin)</button>
+    </div>
+  </header>
+
+  <main style="width: 100%; max-width: 1120px; box-sizing: border-box; margin: 0 auto; padding: 28px 32px 48px; display: flex; flex-direction: column; gap: 22px">
+    <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div>
+        <h1 style="margin: 0; font-size: 26px">Good evening</h1>
+        <p style="margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 14px; color: {{c.muted}}">
+          <span>12 apps</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.ok}}"></span>9 online</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.warn}}"></span>1 slow</span>
+          <span style="display: inline-flex; align-items: center; gap: 6px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.bad}}"></span>1 offline</span>
+        </p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+        <!-- new: show only what needs attention -->
+        <div role="group" aria-label="Filter" style="display: flex; padding: 3px; gap: 2px; border: 1px solid {{c.border}}; border-radius: 12px; background: {{c.surface}}">
+          <button style="height: 38px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: {{c.muted}}; font: inherit; font-size: 13px">All</button>
+          <button style="height: 38px; padding: 0 12px; border: 0; border-radius: 9px; background: {{c.accent}}; color: {{c.onAccent}}; font: inherit; font-size: 13px; font-weight: 600">Needs attention · 2</button>
+        </div>
+        <div style="display: flex; padding: 3px; gap: 2px; border: 1px solid {{c.border}}; border-radius: 12px; background: {{c.surface}}">
+          <button style="height: 38px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: {{c.muted}}; font: inherit; font-size: 13px">By category</button>
+          <button style="height: 38px; padding: 0 12px; border: 0; border-radius: 9px; background: {{c.accent}}; color: {{c.onAccent}}; font: inherit; font-size: 13px; font-weight: 600">All apps</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="12">
+        <div style="position: relative">
+          <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 8px 14px; box-sizing: border-box; min-height: 124px; background: {{c.surface}}; border: 1px solid {{t.border}}; border-radius: 14px">
+            <span aria-hidden="true" style="position: absolute; top: 9px; right: 11px; font-size: 14px; color: {{c.muted}}">☆</span>
+            <!-- the icon with its status badge -->
+            <div style="position: relative; width: 48px; height: 48px">
+              <div style="width: 48px; height: 48px; border-radius: 12px; background: {{t.tint}}; display: grid; place-items: center; font-weight: 700; font-size: 18px; color: {{c.text}}">{{t.l}}</div>
+              <sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{true}}">
+                <span role="img" aria-label="{{t.state}}" style="position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; background: {{t.dot}}; border: 3px solid {{c.surface}}; display: grid; place-items: center; color: {{c.bg}}; font-size: 9px; font-weight: 800; line-height: 1">{{t.glyph}}</span>
+              </sc-if>
+            </div>
+            <div style="font-size: 13px; font-weight: 600; text-align: center; color: {{t.nameColor}}">{{t.n}}</div>
+            <!-- only problems say it in words, so a healthy grid stays calm -->
+            <sc-if value="{{t.hasNote}}" hint-placeholder-val="{{false}}">
+              <div style="margin-top: -2px; font-size: 11px; font-weight: 600; color: {{t.dot}}">{{t.note}}</div>
+            </sc-if>
+          </div>
+          <!-- hover / focus card -->
+          <sc-if value="{{t.hover}}" hint-placeholder-val="{{false}}">
+            <div role="tooltip" style="position: absolute; z-index: 3; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); width: 232px; box-sizing: border-box; padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 12px; box-shadow: 0 10px 28px rgba(0,0,0,0.38); font-size: 12px">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.bad}}"></span>Asustor is offline</div>
+              <div style="display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; color: {{c.muted}}">
+                <span>Since</span><span style="color: {{c.text}}">3 minutes ago</span>
+                <span>Last check</span><span style="color: {{c.text}}">12 seconds ago</span>
+                <span>Reason</span><span style="color: {{c.text}}">Timed out after 5 s</span>
+                <span>Checked</span><span style="color: {{c.text}}">http://asustor.lan:8000</span>
+              </div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- legend -->
+    <div style="display: flex; flex-wrap: wrap; gap: 8px 22px; padding-top: 6px; font-size: 12px; color: {{c.muted}}">
+      <span style="display: inline-flex; align-items: center; gap: 7px"><span style="width: 10px; height: 10px; border-radius: 5px; background: {{c.ok}}"></span>Online. No label, to keep the grid calm.</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px"><span style="width: 10px; height: 10px; border-radius: 5px; background: {{c.warn}}"></span>Slow. Answers, but takes over a second.</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px"><span style="width: 10px; height: 10px; border-radius: 5px; background: {{c.bad}}"></span>Offline. Marked with a cross and a word.</span>
+      <span style="display: inline-flex; align-items: center; gap: 7px"><span style="width: 10px; height: 10px; border-radius: 5px; border: 1px dashed {{c.muted}}; box-sizing: border-box"></span>No badge: checks are off for this app.</span>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"dark","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":1280,"height":800}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light:          { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', warn:'#b7791f', bad:'#d9480f', iconBg:'#e3e6ec' },
+      dark:           { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', warn:'#f0b429', bad:'#ff7a59', iconBg:'#232836' },
+      dracula:        { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', warn:'#f1fa8c', bad:'#ff5555', iconBg:'#44475a' },
+      nord:           { bg:'#2e3440', surface:'#3b4252', border:'#4c566a', text:'#eceff4', muted:'#b4bdcf', accent:'#88c0d0', onAccent:'#2e3440', ok:'#a3be8c', warn:'#ebcb8b', bad:'#e5808b', iconBg:'#434c5e' },
+      gruvbox:        { bg:'#282828', surface:'#3c3836', border:'#504945', text:'#ebdbb2', muted:'#bdae93', accent:'#fabd2f', onAccent:'#282828', ok:'#b8bb26', warn:'#fe8019', bad:'#fb4934', iconBg:'#504945' },
+      solarizedDark:  { bg:'#002b36', surface:'#073642', border:'#586e75', text:'#eee8d5', muted:'#93a1a1', accent:'#2aa198', onAccent:'#002b36', ok:'#859900', warn:'#b58900', bad:'#f0645a', iconBg:'#094959' },
+      solarizedLight: { bg:'#fdf6e3', surface:'#fffaf0', border:'#d6cdb3', text:'#073642', muted:'#586e75', accent:'#1f6fb0', onAccent:'#fdf6e3', ok:'#6b7d00', warn:'#9a6700', bad:'#c3261f', iconBg:'#eee8d5' }
+    };
+    const c = P[this.props.theme] || P.dark;
+    const tints = ['#2f5d8a', '#3c3f4a', '#6b8e23', '#2a8fbd', '#2f9e63', '#c98a1a', '#5b5fd1', '#7a4fb0', '#3b78d4', '#c04a6a', '#8a5a3c', '#7f3b8f'];
+    const mk = (n, l, state, extra = {}) => {
+      const up = state === 'up', slow = state === 'slow', down = state === 'down', off = state === 'off';
+      return Object.assign({
+        n, l, state: up ? 'Online' : slow ? 'Slow' : down ? 'Offline' : 'Not checked',
+        hasBadge: !off, dot: up ? c.ok : slow ? c.warn : c.bad,
+        glyph: down ? '×' : slow ? '!' : '',
+        border: down ? c.bad : c.border, nameColor: down ? c.muted : c.text,
+        hasNote: down || slow, note: down ? 'Offline · 3 min' : slow ? 'Slow · 1.4 s' : '',
+        hover: false
+      }, extra);
+    };
+    const list = [
+      mk('Fritzbox', 'F', 'up'), mk('Proxmox VE', 'P', 'up'), mk('Asustor', 'A', 'down', { hover: true }),
+      mk('TrueNAS', 'T', 'up'), mk('AdGuard Home', 'A', 'up'), mk('Plex', 'P', 'up'),
+      mk('Portainer (saturn)', 'P', 'up'), mk('Portainer (pluto)', 'P', 'up'), mk('qBittorrent', 'q', 'up'),
+      mk('Immich', 'I', 'up'), mk('portfolio', 'p', 'slow'), mk('iMG', 'I', 'off')
+    ];
+    list.forEach((t, i) => { t.tint = tints[i % tints.length]; });
+    return { c, tiles: list };
+  }
+}
+</script>
+</body>
+</html>

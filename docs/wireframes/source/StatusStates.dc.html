@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status checks: states and rules</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 1000px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; padding: 40px 32px 64px">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Status checks</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: {{c.muted}}">A badge on the icon, a word only when something is wrong, and a card with the details on hover or focus.</p>
+    </div>
+
+    <!-- states -->
+    <section style="display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">The five states</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 20px">
+        <sc-for list="{{states}}" as="s" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 22px 8px 14px; box-sizing: border-box; min-height: 128px; background: {{c.surface}}; border: 1px solid {{s.border}}; border-radius: 14px">
+              <div style="position: relative; width: 48px; height: 48px">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: {{s.tint}}; display: grid; place-items: center; font-weight: 700; font-size: 18px">{{s.l}}</div>
+                <sc-if value="{{s.hasBadge}}" hint-placeholder-val="{{true}}">
+                  <span style="position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; background: {{s.dot}}; border: 3px solid {{c.surface}}; display: grid; place-items: center; color: {{c.bg}}; font-size: 9px; font-weight: 800; line-height: 1; opacity: {{s.opacity}}">{{s.glyph}}</span>
+                </sc-if>
+              </div>
+              <div style="font-size: 13px; font-weight: 600; color: {{s.nameColor}}">{{s.n}}</div>
+              <sc-if value="{{s.hasNote}}" hint-placeholder-val="{{false}}">
+                <div style="margin-top: -2px; font-size: 11px; font-weight: 600; color: {{s.dot}}">{{s.note}}</div>
+              </sc-if>
+            </div>
+            <div style="font-size: 13px; font-weight: 600">{{s.title}}</div>
+            <div style="margin-top: -6px; font-size: 12px; line-height: 1.5; color: {{c.muted}}">{{s.text}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+      <!-- rules -->
+      <section style="flex: 1 1 460px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">How it behaves</h2>
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="7">
+            <li style="display: flex; gap: 12px"><span style="flex-shrink: 0; width: 6px; height: 6px; margin-top: 8px; border-radius: 3px; background: {{c.accent}}"></span><span><strong>{{r.h}}</strong> <span style="color: {{c.muted}}">{{r.t}}</span></span></li>
+          </sc-for>
+        </ul>
+      </section>
+
+      <!-- settings -->
+      <section style="flex: 1 1 340px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+        <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Settings → Status checks</h2>
+        <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 14px">
+          <sc-for list="{{settings}}" as="f" hint-placeholder-count="4">
+            <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">{{f.label}}
+              <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; display: flex; align-items: center; justify-content: space-between; font-weight: 400; font-size: 14px">{{f.value}} <span aria-hidden="true" style="color: {{c.muted}}">▾</span></span>
+              <span style="font-weight: 400; font-size: 12px; color: {{c.muted}}">{{f.hint}}</span>
+            </label>
+          </sc-for>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 4px; border-top: 1px solid {{c.border}}; font-size: 14px">
+            <span style="padding-top: 12px"><strong>Pause all checks</strong><br><span style="font-size: 12px; color: {{c.muted}}">Badges disappear until you switch them on again.</span></span>
+            <div role="img" aria-label="Off" style="margin-top: 12px; width: 44px; height: 26px; border-radius: 13px; background: {{c.border}}; position: relative; flex-shrink: 0"><div style="position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 10px; background: {{c.muted}}"></div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- decisions -->
+    <section style="display: flex; flex-direction: column; gap: 14px; padding: 20px; border: 1px dashed {{c.border}}; border-radius: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">To decide before building</h2>
+      <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; line-height: 1.5">
+        <sc-for list="{{questions}}" as="q" hint-placeholder-count="4">
+          <li><strong>{{q.h}}</strong> <span style="color: {{c.muted}}">{{q.t}}</span></li>
+        </sc-for>
+      </ul>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"light","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light: { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', warn:'#b7791f', bad:'#d9480f' },
+      dark:  { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', warn:'#f0b429', bad:'#ff7a59' },
+      dracula: { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', warn:'#f1fa8c', bad:'#ff5555' }
+    };
+    const c = P[this.props.theme] || P.light;
+    const s = (n, l, tint, title, text, o = {}) => Object.assign({ n, l, tint, title, text, hasBadge: true, dot: c.ok, glyph: '', border: c.border, nameColor: c.text, hasNote: false, note: '', opacity: '1' }, o);
+    return {
+      c,
+      states: [
+        s('Jellyfin', 'J', '#6b4fbf', 'Online', 'Answered in time. A green badge and nothing else.'),
+        s('portfolio', 'p', '#c98a1a', 'Slow', 'Answered, but took over a second. Optional: needs one more theme colour.', { dot: c.warn, glyph: '!', hasNote: true, note: 'Slow · 1.4 s' }),
+        s('Asustor', 'A', '#2f5d8a', 'Offline', 'No answer in 5 seconds, twice in a row. Red border, a cross and a word, so colour is never the only signal.', { dot: c.bad, glyph: '×', border: c.bad, nameColor: c.muted, hasNote: true, note: 'Offline · 3 min' }),
+        s('Immich', 'I', '#2f9e63', 'Checking', 'First check after saving or restarting. A grey ring, for a few seconds.', { dot: c.muted, opacity: '0.55' }),
+        s('iMG', 'I', '#7f3b8f', 'Not checked', 'Checks are off for this app. No badge, no note, the tile stays as it is today.', { hasBadge: false })
+      ],
+      rules: [
+        { h: 'The server checks, not the browser.', t: 'Bifrost asks each app itself, so the answer is the same on every device and works for addresses only the server can reach.' },
+        { h: 'Every 60 seconds by default.', t: 'Apps are checked a few at a time, with a 5 second timeout, so a slow app never holds up the others.' },
+        { h: 'Two misses before it goes red.', t: 'One failed check is ignored. This stops a single dropped packet from lighting up the dashboard.' },
+        { h: 'Any answer counts as online,', t: 'including a login page. A stricter "success only" rule is a per-app choice.' },
+        { h: 'Only the latest result is kept,', t: 'with when it last changed. No history or graphs in the first version.' },
+        { h: 'Off until you switch it on, per app.', t: 'Nothing is contacted that you did not ask for. New apps from the list start with it on, since their address is already known.' },
+        { h: 'Needs attention', t: 'filters the dashboard to offline and slow apps. On a phone it replaces the category tabs while active.' }
+      ],
+      settings: [
+        { label: 'Check every', value: '1 minute', hint: 'Between 30 seconds and 10 minutes.' },
+        { label: 'Give up after', value: '5 seconds', hint: 'How long to wait for an answer.' },
+        { label: 'Mark offline after', value: '2 failed checks in a row', hint: 'Higher means fewer false alarms and slower warnings.' }
+      ],
+      questions: [
+        { h: 'Per-user or shared?', t: 'Each user has private apps, so checks and results are private too. Two users with the same address would each trigger a check.' },
+        { h: 'A fourth colour?', t: 'The "slow" state needs a warning colour in every theme, with the same contrast rule as the others. Without it, v1 has only online and offline.' },
+        { h: 'Network reach.', t: 'In Docker, "localhost" means the Bifrost container itself. The address-to-check field exists so people can enter an address the container can reach.' },
+        { h: 'Safety.', t: 'Checks only send a plain GET, follow no more than 2 redirects, and refuse to send credentials. Pointing a check at an internal address is allowed, since that is the whole point on a home network.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

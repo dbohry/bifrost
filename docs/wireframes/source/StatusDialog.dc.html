@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status checks: app details</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="position: relative; min-height: 900px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; overflow: hidden">
+  <div aria-hidden="true" style="padding: 12px 32px; background: {{c.surface}}; border-bottom: 1px solid {{c.border}}; display: flex; align-items: center; gap: 16px">
+    <div style="width: 28px; height: 28px; border-radius: 8px; background: {{c.accent}}"></div>
+    <div style="flex: 1; max-width: 520px; height: 44px; margin: 0 auto; border: 1px solid {{c.border}}; border-radius: 10px"></div>
+    <div style="width: 110px; height: 44px; border-radius: 10px; background: {{c.accent}}"></div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,0.55); display: flex; align-items: flex-start; justify-content: center; padding: 28px 16px; box-sizing: border-box">
+    <div role="dialog" aria-label="Edit app" style="width: 100%; max-width: 480px; background: {{c.surface}}; border-radius: 16px; border: 1px solid {{c.border}}; display: flex; flex-direction: column; overflow: hidden">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid {{c.border}}">
+        <h1 style="margin: 0; font-size: 18px">Edit app</h1>
+        <span aria-label="Close" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid {{c.border}}; display: grid; place-items: center; font-size: 18px">×</span>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 14px; padding: 20px">
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Name
+          <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; display: flex; align-items: center; font-weight: 400; font-size: 14px">Asustor</span>
+        </label>
+        <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Address
+          <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; display: flex; align-items: center; font-weight: 400; font-size: 14px">https://nas.example.com</span>
+        </label>
+        <div style="display: flex; align-items: center; gap: 12px; font-size: 14px; color: {{c.muted}}">
+          <span style="width: 18px; height: 18px; border-radius: 4px; background: {{c.accent}}"></span>Pin to favourites
+        </div>
+
+        <!-- the new part -->
+        <section aria-labelledby="st" style="display: flex; flex-direction: column; gap: 14px; padding: 16px; border: 1px solid {{c.accent}}; border-radius: 12px; background: {{c.bg}}">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+            <div>
+              <h2 id="st" style="margin: 0; font-size: 15px">Status check</h2>
+              <p style="margin: 2px 0 0; font-size: 12px; color: {{c.muted}}">Bifrost asks the app for a reply every minute and shows a badge on its icon.</p>
+            </div>
+            <div role="img" aria-label="On" style="width: 44px; height: 26px; border-radius: 13px; background: {{c.accent}}; position: relative; flex-shrink: 0">
+              <div style="position: absolute; top: 3px; left: 21px; width: 20px; height: 20px; border-radius: 10px; background: {{c.onAccent}}"></div>
+            </div>
+          </div>
+
+          <label style="display: flex; flex-direction: column; gap: 6px; font-size: 13px; font-weight: 600">Address to check
+            <span style="height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.surface}}; display: flex; align-items: center; font-weight: 400; font-size: 14px">http://192.168.1.20:8000</span>
+            <span style="font-weight: 400; font-size: 12px; color: {{c.muted}}">Leave empty to check the address above. The check runs on the machine that hosts Bifrost, so a local address such as this one works even if you open the app through a public name.</span>
+          </label>
+
+          <fieldset style="margin: 0; padding: 0; border: 0; display: flex; flex-direction: column; gap: 8px">
+            <legend style="padding: 0; margin-bottom: 8px; font-size: 13px; font-weight: 600">Counts as online when</legend>
+            <label style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid {{c.accent}}; border-radius: 10px; font-size: 13px; color: {{c.muted}}">
+              <span style="width: 16px; height: 16px; margin-top: 2px; border-radius: 8px; border: 5px solid {{c.accent}}; box-sizing: border-box; flex-shrink: 0"></span>
+              <span><strong style="color: {{c.text}}; font-size: 14px">It answers at all</strong><br>Even a login page or an error page. Best for most apps.</span>
+            </label>
+            <label style="display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border: 1px solid {{c.border}}; border-radius: 10px; font-size: 13px; color: {{c.muted}}">
+              <span style="width: 16px; height: 16px; margin-top: 2px; border-radius: 8px; border: 2px solid {{c.muted}}; box-sizing: border-box; flex-shrink: 0"></span>
+              <span><strong style="color: {{c.text}}; font-size: 14px">It answers with success</strong><br>Only a normal page (HTTP 200 to 299) counts.</span>
+            </label>
+          </fieldset>
+
+          <div style="display: flex; align-items: center; gap: 12px; font-size: 14px">
+            <span style="width: 18px; height: 18px; border-radius: 4px; border: 2px solid {{c.muted}}; box-sizing: border-box"></span>Trust a self-signed certificate
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px">
+            <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid {{c.border}}; background: {{c.surface}}; color: {{c.text}}; font: inherit; font-size: 14px; font-weight: 600">Test now</button>
+            <div role="status" style="display: flex; align-items: center; gap: 8px; font-size: 13px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.ok}}"></span><span><strong>Online</strong> · answered in 24 ms (HTTP 200)</span></div>
+          </div>
+        </section>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; border-top: 1px solid {{c.border}}">
+        <span style="font-size: 14px; color: {{c.bad}}">Delete</span>
+        <div style="display: flex; gap: 8px">
+          <span style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid {{c.border}}; font-size: 14px">Cancel</span>
+          <span style="display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 10px; background: {{c.accent}}; color: {{c.onAccent}}; font-size: 14px; font-weight: 700">Save changes</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"dark","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light: { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', warn:'#b7791f', bad:'#d9480f' },
+      dark:  { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', warn:'#f0b429', bad:'#ff7a59' },
+      dracula: { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', warn:'#f1fa8c', bad:'#ff5555' }
+    };
+    return { c: P[this.props.theme] || P.dark };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Bifrost dashboard (dark)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 900px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; display: flex; flex-direction: column">
+  <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 16px; padding: 16px 32px; background: {{c.surface}}; border-bottom: 1px solid {{c.border}}">
+    <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: {{c.accent}}"></div>
+      Bifrost
+    </div>
+    <label style="flex: 1 1 280px; max-width: 520px; margin: 0 auto; display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; color: {{c.muted}}; font-size: 14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <span style="flex: 1">Search apps or the web</span>
+      <span style="border: 1px solid {{c.border}}; border-radius: 5px; padding: 0 6px; font-size: 12px">/</span>
+    </label>
+    <div style="display: flex; align-items: center; gap: 8px">
+      <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 0; background: {{c.accent}}; color: {{c.onAccent}}; font: inherit; font-size: 14px; font-weight: 600">+ Add app</button>
+      <button aria-label="Settings" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid {{c.border}}; background: {{c.surface}}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="{{c.text}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+      </button>
+      <div aria-label="User menu" role="img" style="width: 44px; height: 44px; border-radius: 22px; background: {{c.iconBg}}; display: grid; place-items: center; font-size: 14px; font-weight: 600">D</div>
+    </div>
+  </header>
+
+  <main style="width: 100%; max-width: 1120px; box-sizing: border-box; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: 32px">
+    <div style="display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 16px">
+      <div>
+        <h1 style="margin: 0; font-size: 26px">Good evening</h1>
+        <p style="margin: 4px 0 0; font-size: 14px; color: {{c.muted}}">12 apps · 11 online</p>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+          <button style="height: 36px; padding: 0 16px; border-radius: 18px; font: inherit; font-size: 14px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}">{{t.label}}</button>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Favourites</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px">
+        <sc-for list="{{favs}}" as="a" hint-placeholder-count="5">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 12px 16px; background: {{c.surface}}; border: 1px solid {{c.border}}; border-radius: 14px">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: {{c.iconBg}}; display: grid; place-items: center; font-weight: 700; color: {{c.muted}}">{{a.l}}</div>
+            <div style="font-size: 14px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: {{c.muted}}"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">All apps</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px">
+        <sc-for list="{{apps}}" as="a" hint-placeholder-count="8">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 12px 16px; background: {{c.surface}}; border: 1px solid {{a.border}}; border-radius: 14px">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: {{c.iconBg}}; display: grid; place-items: center; font-weight: 700; color: {{c.muted}}">{{a.l}}</div>
+            <div style="font-size: 14px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: {{c.muted}}"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+        <a href="AddPick.dc.html" style="text-decoration: none; color: {{c.muted}}; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-height: 140px; box-sizing: border-box; border: 2px dashed {{c.border}}; border-radius: 14px; font-size: 14px">
+          <span style="font-size: 26px; line-height: 1">+</span>Add app
+        </a>
+      </div>
+    </section>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"dark","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light:          { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', bad:'#d9480f', iconBg:'#e3e6ec' },
+      dark:           { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', bad:'#ff7a59', iconBg:'#232836' },
+      dracula:        { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', bad:'#ff5555', iconBg:'#44475a' },
+      nord:           { bg:'#2e3440', surface:'#3b4252', border:'#4c566a', text:'#eceff4', muted:'#b4bdcf', accent:'#88c0d0', onAccent:'#2e3440', ok:'#a3be8c', bad:'#e5808b', iconBg:'#434c5e' },
+      gruvbox:        { bg:'#282828', surface:'#3c3836', border:'#504945', text:'#ebdbb2', muted:'#bdae93', accent:'#fabd2f', onAccent:'#282828', ok:'#b8bb26', bad:'#fb4934', iconBg:'#504945' },
+      solarizedDark:  { bg:'#002b36', surface:'#073642', border:'#586e75', text:'#eee8d5', muted:'#93a1a1', accent:'#2aa198', onAccent:'#002b36', ok:'#859900', bad:'#f0645a', iconBg:'#094959' },
+      solarizedLight: { bg:'#fdf6e3', surface:'#fffaf0', border:'#d6cdb3', text:'#073642', muted:'#586e75', accent:'#1f6fb0', onAccent:'#fdf6e3', ok:'#6b7d00', bad:'#c3261f', iconBg:'#eee8d5' }
+    };
+    const c = P[this.props.theme] || P.dark;
+    const mk = (n, meta, up = true) => ({ n, l: n[0], meta, dot: up ? c.ok : c.bad, border: up ? c.border : c.bad });
+    const labels = ['All', 'Media', 'Productivity', 'Network', 'Monitoring'];
+    return {
+      c,
+      tabs: labels.map((label, i) => i === 0
+        ? { label, bg: c.text, fg: c.bg, border: c.text }
+        : { label, bg: c.surface, fg: c.text, border: c.border }),
+      favs: [mk('Jellyfin', '3 streams'), mk('Nextcloud', 'online'), mk('Pi-hole', '18% blocked'), mk('Grafana', 'online'), mk('Portainer', '19 containers')],
+      apps: [
+        mk('Jellyfin', '3 streams'), mk('Sonarr', '12 queued'), mk('Radarr', 'online'), mk('Nextcloud', 'online'),
+        mk('Paperless', '8 in inbox'), mk('Vaultwarden', 'online'), mk('Pi-hole', '18% blocked'), mk('Traefik', '24 routes'),
+        mk('WireGuard', 'offline', false), mk('Grafana', 'online'), mk('Uptime Kuma', '11 / 12 up'), mk('Gitea', 'online')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

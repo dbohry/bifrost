@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Responsive rules</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="width: 1100px; height: 760px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; padding: 36px 40px; display: flex; flex-direction: column; gap: 24px; overflow: hidden">
+  <div>
+    <h1 style="margin: 0; font-size: 24px">Responsive rules</h1>
+    <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">One layout that adapts at three widths. Themes work the same on every size.</p>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px">
+    <sc-for list="{{cols}}" as="c" hint-placeholder-count="3">
+      <section style="display: flex; flex-direction: column; gap: 14px; padding: 18px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+        <div>
+          <h2 style="margin: 0; font-size: 16px">{{c.name}}</h2>
+          <div style="font-size: 12px; color: #5b6272">{{c.range}}</div>
+        </div>
+        <!-- schematic -->
+        <div style="height: 120px; box-sizing: border-box; border: 1px solid #c4c9d4; border-radius: 8px; background: #f6f7f9; padding: 8px; display: flex; flex-direction: column; gap: 6px">
+          <div style="height: 12px; border-radius: 4px; background: #c4c9d4"></div>
+          <div style="flex: 1; display: grid; grid-template-columns: repeat({{c.n}}, minmax(0, 1fr)); gap: 5px">
+            <sc-for list="{{c.cells}}" as="x" hint-placeholder-count="6">
+              <div style="border-radius: 4px; background: #e3e6ec; border: 1px solid #d5d9e0"></div>
+            </sc-for>
+          </div>
+          <sc-if value="{{c.bar}}" hint-placeholder-val="{{false}}"><div style="height: 12px; border-radius: 4px; background: #3b5bdb"></div></sc-if>
+        </div>
+        <ul style="margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 7px; font-size: 13px; line-height: 1.45">
+          <sc-for list="{{c.points}}" as="p" hint-placeholder-count="5"><li>{{p}}</li></sc-for>
+        </ul>
+      </section>
+    </sc-for>
+  </div>
+
+  <section style="display: flex; flex-wrap: wrap; gap: 20px; padding: 16px 18px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px; font-size: 13px; line-height: 1.5">
+    <div style="flex: 1 1 300px"><b>Touch first</b><br>All targets are at least 44 px. Hover-only actions (edit, favourite) move behind a long-press or an Edit mode on touch screens.</div>
+    <div style="flex: 1 1 300px"><b>Same data, different shell</b><br>Dialogs become bottom sheets on phones. The top bar becomes a bottom tab bar. Search stays one tap away.</div>
+    <div style="flex: 1 1 300px"><b>Orientation</b><br>Phone landscape uses the tablet grid with the tab bar hidden. Tablet landscape uses the desktop layout.</div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1100,"height":760}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const cells = (k) => Array.from({ length: k }, (_, i) => ({ i }));
+    return {
+      cols: [
+        { name: 'Phone', range: 'under 600 px', n: 3, cells: cells(9), bar: true, points: [
+          '3 tile columns, tabs scroll sideways',
+          'Bottom tab bar: Apps, Search, Add, Settings',
+          'Add and edit open as bottom sheets',
+          'Widget tiles collapse to normal tiles',
+          'Settings are a full-screen list'] },
+        { name: 'Tablet', range: '600 to 1024 px', n: 4, cells: cells(12), bar: false, points: [
+          '4 tile columns, widgets span 2',
+          'Top bar with inline search and tabs',
+          'Add and edit open as centred dialogs',
+          'Settings use a two-pane layout',
+          'Favourites stay in the top row'] },
+        { name: 'Desktop', range: 'over 1024 px', n: 6, cells: cells(18), bar: false, points: [
+          '6 or more columns, content up to 1120 px',
+          'Search with / shortcut and hover actions',
+          'Widgets can sit beside tiles',
+          'Settings sidebar stays visible',
+          'Keyboard navigation across tiles'] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

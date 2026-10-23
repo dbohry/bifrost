@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone add app sheet</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; overflow: hidden">
+  <!-- dimmed dashboard behind -->
+  <div aria-hidden="true" style="display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: #ffffff; border-bottom: 1px solid #d5d9e0">
+    <div style="width: 26px; height: 26px; border-radius: 8px; background: #3b5bdb"></div>
+    <div style="font-weight: 700; font-size: 17px">Bifrost</div>
+  </div>
+  <div aria-hidden="true" style="padding: 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+    <sc-for list="{{ghosts}}" as="g" hint-placeholder-count="9">
+      <div style="height: 110px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px"></div>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(31,36,48,0.55)"></div>
+
+  <!-- bottom sheet -->
+  <div role="dialog" aria-label="Add application" style="position: absolute; left: 0; right: 0; bottom: 0; height: 660px; background: #ffffff; border-radius: 20px 20px 0 0; display: flex; flex-direction: column; overflow: hidden">
+    <div style="display: grid; place-items: center; padding: 10px 0 4px"><div style="width: 40px; height: 5px; border-radius: 3px; background: #c4c9d4"></div></div>
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 4px 16px 12px 20px">
+      <div>
+        <h1 style="margin: 0; font-size: 18px">Add application</h1>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #5b6272">Step 1 of 2</p>
+      </div>
+      <a href="Phone.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 10px; color: #1f2430; text-decoration: none; display: grid; place-items: center; font-size: 22px">×</a>
+    </div>
+
+    <div style="padding: 0 16px; display: flex; flex-direction: column; gap: 12px">
+      <label style="display: flex; align-items: center; gap: 10px; height: 48px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 12px; font-size: 15px; color: #5b6272">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5b6272" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        Search 300+ apps
+      </label>
+      <div style="display: flex; gap: 8px; overflow: hidden; margin-right: -16px">
+        <sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+          <span style="flex-shrink: 0; height: 36px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; display: flex; align-items: center; font-size: 13px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}">{{c.label}}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="flex: 1; overflow: hidden; padding: 8px 16px 0">
+      <sc-for list="{{presets}}" as="p" hint-placeholder-count="6">
+        <a href="#" style="display: flex; align-items: center; gap: 14px; min-height: 56px; text-decoration: none; color: inherit; border-bottom: 1px solid #e3e6ec">
+          <div style="width: 40px; height: 40px; border-radius: 11px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{p.l}}</div>
+          <div style="flex: 1">
+            <div style="font-size: 15px; font-weight: 600">{{p.n}}</div>
+            <div style="font-size: 12px; color: #5b6272">{{p.cat}}</div>
+          </div>
+          <span aria-hidden="true" style="color: #5b6272; font-size: 18px">›</span>
+        </a>
+      </sc-for>
+    </div>
+
+    <div style="padding: 12px 16px 20px; border-top: 1px solid #d5d9e0; background: #ffffff">
+      <a href="#" style="display: flex; align-items: center; justify-content: center; height: 48px; border-radius: 12px; border: 1px solid #1f2430; color: #1f2430; text-decoration: none; font-size: 15px; font-weight: 600">Add custom app</a>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (n, cat) => ({ n, l: n[0], cat });
+    return {
+      ghosts: Array.from({ length: 9 }, (_, i) => ({ i })),
+      chips: ['All', 'Media', 'Productivity', 'Network', 'Monitoring'].map((label, i) => i === 0
+        ? { label, bg: '#1f2430', fg: '#ffffff', border: '#1f2430' }
+        : { label, bg: '#ffffff', fg: '#1f2430', border: '#c4c9d4' }),
+      presets: [mk('Jellyfin', 'Media'), mk('Plex', 'Media'), mk('Nextcloud', 'Productivity'), mk('Pi-hole', 'Network'), mk('Grafana', 'Monitoring'), mk('Gitea', 'Development')]
+    };
+  }
+}
+</script>
+</body>
+</html>

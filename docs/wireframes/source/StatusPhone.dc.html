@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status checks: phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; display: flex; flex-direction: column">
+  <header style="display: flex; flex-direction: column; gap: 10px; padding: 8px 16px 10px; background: {{c.surface}}; border-bottom: 1px solid {{c.border}}">
+    <div style="display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 700; font-size: 18px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: {{c.accent}}"></div>
+      Bifrost
+    </div>
+    <label style="display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid {{c.border}}; border-radius: 10px; background: {{c.bg}}; color: {{c.muted}}; font-size: 14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="{{c.muted}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      Search apps or the web
+    </label>
+  </header>
+
+  <main style="flex: 1; min-height: 0; overflow: hidden; padding: 20px 16px 0; display: flex; flex-direction: column; gap: 16px">
+    <div>
+      <h1 style="margin: 0; font-size: 26px">Good evening</h1>
+      <p style="margin: 6px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; font-size: 13px; color: {{c.muted}}">
+        <span>12 apps</span>
+        <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.ok}}"></span>9 online</span>
+        <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.warn}}"></span>1 slow</span>
+        <span style="display: inline-flex; align-items: center; gap: 5px"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.bad}}"></span>1 offline</span>
+      </p>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 8px">
+      <button style="flex: 1; min-width: 0; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px solid {{c.accent}}; background: {{c.surface}}; color: {{c.text}}; font: inherit; font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px">
+        <span style="width: 8px; height: 8px; border-radius: 4px; background: {{c.bad}}"></span>Needs attention · 2
+      </button>
+      <div style="display: flex; border: 1px solid {{c.border}}; border-radius: 12px; background: {{c.surface}}">
+        <button aria-label="By category" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: {{c.accent}}"></button>
+        <button aria-label="All apps" style="width: 44px; height: 44px; border: 0; border-radius: 12px; background: transparent"></button>
+      </div>
+      <button style="height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid {{c.border}}; background: {{c.surface}}; color: {{c.text}}; font: inherit; font-size: 14px; font-weight: 600">Edit</button>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="9">
+        <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 16px 4px 11px; box-sizing: border-box; min-height: 108px; background: {{c.surface}}; border: 1px solid {{t.border}}; border-radius: 14px">
+          <div style="position: relative; width: 44px; height: 44px">
+            <div style="width: 44px; height: 44px; border-radius: 11px; background: {{t.tint}}; display: grid; place-items: center; font-weight: 700; font-size: 17px">{{t.l}}</div>
+            <sc-if value="{{t.hasBadge}}" hint-placeholder-val="{{true}}">
+              <span role="img" aria-label="{{t.state}}" style="position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; box-sizing: border-box; border-radius: 8px; background: {{t.dot}}; border: 3px solid {{c.surface}}; display: grid; place-items: center; color: {{c.bg}}; font-size: 9px; font-weight: 800; line-height: 1">{{t.glyph}}</span>
+            </sc-if>
+          </div>
+          <div style="font-size: 12px; font-weight: 600; text-align: center; color: {{t.nameColor}}">{{t.n}}</div>
+          <sc-if value="{{t.hasNote}}" hint-placeholder-val="{{false}}">
+            <div style="margin-top: -3px; font-size: 10px; font-weight: 700; color: {{t.dot}}">{{t.note}}</div>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </main>
+
+  <nav aria-label="Main" style="display: flex; padding: 6px 8px 22px; background: {{c.surface}}; border-top: 1px solid {{c.border}}">
+    <sc-for list="{{nav}}" as="n" hint-placeholder-count="4">
+      <div style="flex: 1; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font-size: 11px; color: {{n.fg}}; font-weight: {{n.w}}">
+        <span style="width: 20px; height: 20px; border-radius: 6px; border: 2px solid {{n.fg}}; box-sizing: border-box"></span>{{n.label}}
+      </div>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"dark","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light:          { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', warn:'#b7791f', bad:'#d9480f', iconBg:'#e3e6ec' },
+      dark:           { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', warn:'#f0b429', bad:'#ff7a59', iconBg:'#232836' },
+      dracula:        { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', warn:'#f1fa8c', bad:'#ff5555', iconBg:'#44475a' }
+    };
+    const c = P[this.props.theme] || P.dark;
+    const tints = ['#2f5d8a', '#3c3f4a', '#6b8e23', '#2a8fbd', '#2f9e63', '#c98a1a', '#5b5fd1', '#7a4fb0', '#3b78d4', '#c04a6a', '#8a5a3c', '#7f3b8f'];
+    const mk = (n, l, state) => {
+      const slow = state === 'slow', down = state === 'down', off = state === 'off';
+      return { n, l, state: slow ? 'Slow' : down ? 'Offline' : off ? 'Not checked' : 'Online', hasBadge: !off,
+        dot: slow ? c.warn : down ? c.bad : c.ok, glyph: down ? '×' : slow ? '!' : '',
+        border: down ? c.bad : c.border, nameColor: down ? c.muted : c.text,
+        hasNote: down || slow, note: down ? 'Offline · 3 min' : slow ? 'Slow · 1.4 s' : '' };
+    };
+    const list = [mk('Fritzbox','F'), mk('Proxmox VE','P'), mk('Asustor','A','down'), mk('TrueNAS','T'), mk('AdGuard Home','A'), mk('Plex','P'),
+      mk('Portainer (saturn)','P'), mk('Portainer (pluto)','P'), mk('qBittorrent','q'), mk('Immich','I'), mk('portfolio','p','slow'), mk('iMG','I','off')];
+    list.forEach((t, i) => { t.tint = tints[i % tints.length]; });
+    return {
+      c, tiles: list,
+      nav: [['Apps', c.accent, '700'], ['Search', c.muted, '400'], ['Add', c.muted, '400'], ['Settings', c.muted, '400']].map(([label, fg, w]) => ({ label, fg, w }))
+    };
+  }
+}
+</script>
+</body>
+</html>

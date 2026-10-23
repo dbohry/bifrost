@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tile status and widget variants</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 900px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; padding: 40px 32px 64px">
+  <div style="max-width: 1120px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Tile variants</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">Every tile starts simple. Status and widgets are opt-in per app, so the grid stays calm.</p>
+    </div>
+
+    <!-- row 1: standard tiles -->
+    <section style="display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">Standard tile (1 × 1)</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 24px">
+        <sc-for list="{{tiles}}" as="v" hint-placeholder-count="5">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="position: relative; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 12px 16px; background: #ffffff; border: 1px solid {{v.border}}; border-radius: 14px; opacity: {{v.opacity}}">
+              <sc-if value="{{v.hover}}" hint-placeholder-val="{{false}}">
+                <div style="position: absolute; top: 8px; left: 8px; right: 8px; display: flex; justify-content: space-between">
+                  <span style="width: 28px; height: 28px; border-radius: 8px; border: 1px solid #c4c9d4; background: #f6f7f9; display: grid; place-items: center; font-size: 13px">✎</span>
+                  <span style="width: 28px; height: 28px; border-radius: 8px; border: 1px solid #c4c9d4; background: #f6f7f9; display: grid; place-items: center; font-size: 13px">★</span>
+                </div>
+              </sc-if>
+              <div style="width: 52px; height: 52px; border-radius: 14px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{v.l}}</div>
+              <div style="font-size: 14px; font-weight: 600">{{v.n}}</div>
+              <div style="min-height: 18px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5b6272">
+                <sc-if value="{{v.showDot}}" hint-placeholder-val="{{true}}"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{v.dot}}"></span></sc-if>{{v.meta}}
+              </div>
+            </div>
+            <div style="font-size: 12px; color: #5b6272; text-align: center">{{v.caption}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- row 2: widget tiles -->
+    <section style="display: flex; flex-direction: column; gap: 14px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">Widget tile (2 × 1), for apps with an API</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 24px">
+        <sc-for list="{{widgets}}" as="w" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; flex-direction: column; gap: 16px; padding: 18px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+              <div style="display: flex; align-items: center; gap: 12px">
+                <div style="width: 40px; height: 40px; border-radius: 11px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{w.l}}</div>
+                <div style="font-size: 15px; font-weight: 600; flex: 1">{{w.n}}</div>
+                <span style="width: 8px; height: 8px; border-radius: 4px; background: #2f9e63"></span>
+              </div>
+              <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+                <sc-for list="{{w.stats}}" as="s" hint-placeholder-count="3">
+                  <div>
+                    <div style="font-size: 20px; font-weight: 700">{{s.v}}</div>
+                    <div style="font-size: 12px; color: #5b6272">{{s.k}}</div>
+                  </div>
+                </sc-for>
+              </div>
+              <div style="height: 6px; border-radius: 3px; background: #e3e6ec"><div style="height: 6px; border-radius: 3px; background: #3b5bdb; width: {{w.bar}}"></div></div>
+            </div>
+            <div style="font-size: 12px; color: #5b6272">{{w.caption}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <!-- notes -->
+    <section style="display: flex; flex-wrap: wrap; gap: 24px; padding: 20px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px; font-size: 13px; line-height: 1.5">
+      <div style="flex: 1 1 260px"><b>Status</b><br>A dot plus one short line of text. Color is never the only signal: offline always reads "offline".</div>
+      <div style="flex: 1 1 260px"><b>Refresh</b><br>Tiles poll quietly in the background. A stale tile fades instead of showing an error banner.</div>
+      <div style="flex: 1 1 260px"><b>Density</b><br>Widget tiles span two columns on desktop and collapse to a normal tile on phones.</div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const base = { border: '#d5d9e0', opacity: '1', hover: false, showDot: true, dot: '#2f9e63' };
+    return {
+      tiles: [
+        { ...base, n: 'Wiki', l: 'W', meta: '', showDot: false, caption: 'Plain link: icon and name only' },
+        { ...base, n: 'Nextcloud', l: 'N', meta: 'online', caption: 'Status check on' },
+        { ...base, n: 'Pi-hole', l: 'P', meta: '18% blocked', caption: 'Status with one metric' },
+        { ...base, n: 'WireGuard', l: 'W', meta: 'offline', dot: '#d9480f', border: '#d9480f', caption: 'Offline: dot and border change' },
+        { ...base, n: 'Gitea', l: 'G', meta: 'online', hover: true, border: '#3b5bdb', caption: 'Hover: edit and favourite actions' }
+      ],
+      widgets: [
+        { n: 'Jellyfin', l: 'J', bar: '64%', caption: 'Media server: streams, library size, transcode load',
+          stats: [{ v: '3', k: 'Streams' }, { v: '4.2k', k: 'Items' }, { v: '64%', k: 'CPU' }] },
+        { n: 'Sonarr', l: 'S', bar: '40%', caption: 'Downloads: queue and upcoming episodes',
+          stats: [{ v: '12', k: 'Queued' }, { v: '5', k: 'Upcoming' }, { v: '0', k: 'Missing' }] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
