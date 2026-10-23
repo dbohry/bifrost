@@ -53,10 +53,41 @@ Design phase. No application code yet.
 - One exposed port and one volume at `/data`.
 - Configuration through environment variables.
 
-## Out of scope for the MVP
+## MVP scope
+
+**Accounts**
+- First-run setup: create the first admin account.
+- Sign in and sign out, including "Keep me signed in".
+- Users screen: add a user, change a password, remove a user.
+- `reset-password` command on the host.
+
+**Dashboard**
+- Tiles grouped by category, a Favourites row and category tabs.
+- Add, edit and delete an app: name, URL, category and icon.
+- A small starter catalogue of about 30 popular apps with icons. The full catalogue comes later.
+- Categories are created on the fly when adding an app. There is no screen to manage them.
+- Apps without a preset or uploaded icon show their first letter on a coloured tile.
+- Drag-to-reorder tiles.
+- Search over your apps. When nothing matches, Enter searches the web with DuckDuckGo. The provider is fixed for now.
+
+**Look and feel**
+- Responsive layouts for phone, tablet and desktop, in portrait and landscape.
+- Light and dark mode, with six bundled themes (Bifrost, Dracula, Nord, Gruvbox, Solarized Dark and Solarized Light), chosen per user.
+- Per-user logo choice: app icon (default), arches or spectrum.
+
+**Packaging**
+- Multi-architecture Docker image with a `/data` volume and a health check.
+
+## Later
 
 - Status checks (the online/offline dot and its text on tiles). The wireframes show them, but they are deferred.
 - Widgets (live per-app stats such as Jellyfin streams or Sonarr queue size). They depend on the same background worker, so they wait with status checks.
+- The full preset catalogue (300+ apps).
+- Importing your own theme files, and custom CSS.
+- Settings sections for General, Search (including the search provider) and Integrations.
+- Installing Bifrost as an app (PWA) with the per-user icon.
+- Uploading custom icons and fetching favicons.
+- Export and import. Until then, back up by copying the `/data` volume.
 
 ## Open decisions
 
