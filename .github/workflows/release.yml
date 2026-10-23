@@ -26,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
       # Repository secrets: DOCKERHUB_USERNAME, and DOCKERHUB_TOKEN (an access token with
       # read and write rights, made at hub.docker.com under Account settings > Personal access tokens).
       - uses: docker/login-action@v3
@@ -36,7 +36,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       # The version shown in the app: the commit this image was built from.
       - run: echo "VERSION=main-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
-      - uses: docker/build-push-action@v6
+      - uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
