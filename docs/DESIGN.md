@@ -26,7 +26,7 @@ Why Bifrost is built the way it is, what is in it, and what comes later.
 - Every user has a private dashboard. Apps belong to one user and are never shared between users.
 - Passwords are hashed with argon2id. Sessions are stored in SQLite.
 - The same binary has subcommands for operations: `healthcheck` (no `curl` in the image) and `reset-password <username>`. Because the sign-in page has no reset, a locked-out user is helped from the host with `docker exec`.
-- The preset app catalogue is embedded in the binary. Custom icons and user-added themes live under `/data`.
+- The preset app catalogue and the bundled themes are embedded in the binary. Only the database lives under `/data`.
 
 ### Frontend
 

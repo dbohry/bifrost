@@ -79,6 +79,7 @@ type Monitor struct {
 	mu      sync.Mutex
 	entries map[int64]*entry
 	sem     chan struct{}
+	looking sync.WaitGroup // looks under way, for Wait
 
 	history History
 	// pending holds counts not yet saved: app, then hour.
@@ -117,18 +118,7 @@ func (m *Monitor) SetCheck(f func(ctx context.Context, t store.CheckTarget) Outc
 
 // Wait returns once no look is under way. Tests use it after Step.
 func (m *Monitor) Wait() {
-	for {
-		m.mu.Lock()
-		busy := false
-		for _, e := range m.entries {
-			busy = busy || e.running
-		}
-		m.mu.Unlock()
-		if !busy {
-			return
-		}
-		time.Sleep(2 * time.Millisecond)
-	}
+	m.looking.Wait()
 }
 
 // Run checks until ctx ends.
@@ -195,8 +185,10 @@ func (m *Monitor) Step(ctx context.Context) {
 	m.mu.Unlock()
 
 	for _, t := range due {
-		m.sem <- struct{}{}
+		m.looking.Add(1)
 		go func() {
+			defer m.looking.Done()
+			m.sem <- struct{}{} // taken here, so a full queue never holds up Step
 			defer func() { <-m.sem }()
 			m.mu.Lock()
 			check := m.check

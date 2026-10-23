@@ -34,7 +34,7 @@ Commands:
 
 Environment:
   BIFROST_ADDR       Listen address (default ":8080")
-  BIFROST_DATA_DIR   Directory for the database and uploads (default "/data")
+  BIFROST_DATA_DIR   Directory for the database (default "/data")
 `
 
 func main() {

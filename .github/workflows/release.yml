@@ -41,7 +41,9 @@ jobs:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: dbohry/bifrost:latest
+          tags: |
+            dbohry/bifrost:latest
+            dbohry/bifrost:${{ env.VERSION }}
           build-args: VERSION=${{ env.VERSION }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
