@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Phone dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; box-sizing: border-box; background: {{c.bg}}; color: {{c.text}}; overflow: hidden; display: flex; flex-direction: column">
+  <!-- app bar -->
+  <header style="display: flex; align-items: center; gap: 10px; padding: 8px 12px 8px 16px; background: {{c.surface}}; border-bottom: 1px solid {{c.border}}">
+    <div style="width: 26px; height: 26px; border-radius: 8px; background: {{c.accent}}"></div>
+    <div style="flex: 1; font-weight: 700; font-size: 17px">Bifrost</div>
+    <button aria-label="Search" style="width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{c.text}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+    </button>
+    <button aria-label="Menu" style="width: 44px; height: 44px; border-radius: 10px; border: 0; background: transparent">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{{c.text}}" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+  </header>
+
+  <!-- scrolling content -->
+  <div style="flex: 1; overflow: hidden; padding: 16px 16px 0; display: flex; flex-direction: column; gap: 18px">
+    <div>
+      <h1 style="margin: 0; font-size: 22px">Good afternoon</h1>
+      <p style="margin: 2px 0 0; font-size: 13px; color: {{c.muted}}">12 apps · 11 online</p>
+    </div>
+    <div style="display: flex; gap: 8px; overflow: hidden; margin-right: -16px">
+      <sc-for list="{{tabs}}" as="t" hint-placeholder-count="5">
+        <span style="flex-shrink: 0; height: 36px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; display: flex; align-items: center; font-size: 13px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}">{{t.label}}</span>
+      </sc-for>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Favourites</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{favs}}" as="a" hint-placeholder-count="3">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px 12px; background: {{c.surface}}; border: 1px solid {{a.border}}; border-radius: 14px">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: {{c.iconBg}}; display: grid; place-items: center; font-weight: 700; color: {{c.muted}}">{{a.l}}</div>
+            <div style="font-size: 13px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: {{c.muted}}"><span style="width: 7px; height: 7px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 10px">
+      <h2 style="margin: 0; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: {{c.muted}}">Media</h2>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px">
+        <sc-for list="{{apps}}" as="a" hint-placeholder-count="6">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 14px 6px 12px; background: {{c.surface}}; border: 1px solid {{a.border}}; border-radius: 14px">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: {{c.iconBg}}; display: grid; place-items: center; font-weight: 700; color: {{c.muted}}">{{a.l}}</div>
+            <div style="font-size: 13px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 5px; font-size: 11px; color: {{c.muted}}"><span style="width: 7px; height: 7px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+
+  <!-- bottom tab bar -->
+  <nav aria-label="Primary" style="display: flex; align-items: center; justify-content: space-around; padding: 6px 8px 10px; background: {{c.surface}}; border-top: 1px solid {{c.border}}">
+    <sc-for list="{{tabbar}}" as="b" hint-placeholder-count="4">
+      <a href="{{b.href}}" style="flex: 1; min-height: 52px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; font-size: 11px; color: {{b.color}}; font-weight: {{b.weight}}">
+        <span style="width: 22px; height: 22px; border-radius: 7px; background: {{b.color}}; opacity: 0.85"></span>{{b.label}}
+      </a>
+    </sc-for>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","default":"light","options":["light","dark","dracula","nord","gruvbox","solarizedDark","solarizedLight"]},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const P = {
+      light:          { bg:'#f6f7f9', surface:'#ffffff', border:'#d5d9e0', text:'#1f2430', muted:'#5b6272', accent:'#3b5bdb', onAccent:'#ffffff', ok:'#2f9e63', bad:'#d9480f', iconBg:'#e3e6ec' },
+      dark:           { bg:'#0f1117', surface:'#171a22', border:'#2a2f3c', text:'#e8eaf0', muted:'#9aa1b2', accent:'#7c93ff', onAccent:'#0f1117', ok:'#4cc38a', bad:'#ff7a59', iconBg:'#232836' },
+      dracula:        { bg:'#282a36', surface:'#343746', border:'#44475a', text:'#f8f8f2', muted:'#a9b3d9', accent:'#bd93f9', onAccent:'#282a36', ok:'#50fa7b', bad:'#ff5555', iconBg:'#44475a' },
+      nord:           { bg:'#2e3440', surface:'#3b4252', border:'#4c566a', text:'#eceff4', muted:'#b4bdcf', accent:'#88c0d0', onAccent:'#2e3440', ok:'#a3be8c', bad:'#e5808b', iconBg:'#434c5e' },
+      gruvbox:        { bg:'#282828', surface:'#3c3836', border:'#504945', text:'#ebdbb2', muted:'#bdae93', accent:'#fabd2f', onAccent:'#282828', ok:'#b8bb26', bad:'#fb4934', iconBg:'#504945' },
+      solarizedDark:  { bg:'#002b36', surface:'#073642', border:'#586e75', text:'#eee8d5', muted:'#93a1a1', accent:'#2aa198', onAccent:'#002b36', ok:'#859900', bad:'#f0645a', iconBg:'#094959' },
+      solarizedLight: { bg:'#fdf6e3', surface:'#fffaf0', border:'#d6cdb3', text:'#073642', muted:'#586e75', accent:'#1f6fb0', onAccent:'#fdf6e3', ok:'#6b7d00', bad:'#c3261f', iconBg:'#eee8d5' }
+    };
+    const c = P[this.props.theme] || P.light;
+    const mk = (n, meta, up = true) => ({ n, l: n[0], meta, dot: up ? c.ok : c.bad, border: up ? c.border : c.bad });
+    const tabs = ['All', 'Media', 'Productivity', 'Network', 'Monitoring'].map((label, i) => i === 0
+      ? { label, bg: c.text, fg: c.bg, border: c.text }
+      : { label, bg: c.surface, fg: c.text, border: c.border });
+    const tabbar = [['Apps', '#'], ['Search', '#'], ['Add', 'PhoneSheet.dc.html'], ['Settings', '#']].map(([label, href], i) => ({
+      label, href, color: i === 0 ? c.accent : c.muted, weight: i === 0 ? '700' : '400'
+    }));
+    return {
+      c, tabs, tabbar,
+      favs: [mk('Jellyfin', '3 streams'), mk('Nextcloud', 'online'), mk('Pi-hole', '18% blocked')],
+      apps: [mk('Jellyfin', '3 streams'), mk('Sonarr', '12 queued'), mk('Radarr', 'online'), mk('Navidrome', 'online'), mk('Plex', 'offline', false), mk('Overseerr', '4 requests')]
+    };
+  }
+}
+</script>
+</body>
+</html>

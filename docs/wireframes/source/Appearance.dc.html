@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Settings: appearance</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 900px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; display: flex; flex-direction: column">
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="lg-e" viewBox="0 0 96 96"><rect x="4" y="4" width="88" height="88" rx="22" fill="var(--tile)"/><g fill="none" stroke="var(--glyph)" stroke-width="7" stroke-linecap="round"><path d="M20 63A28 28 0 0 1 76 63"/><path d="M33 63A15 15 0 0 1 63 63"/></g><circle cx="48" cy="63" r="4.5" fill="var(--glyph)"/></symbol>
+      <symbol id="lg-a" viewBox="0 0 96 96"><g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"><path d="M12 72A36 36 0 0 1 84 72"/><path d="M26 72A22 22 0 0 1 70 72"/><path d="M40 72A8 8 0 0 1 56 72"/></g></symbol>
+      <symbol id="lg-d" viewBox="0 0 96 96"><g fill="none" stroke-width="6" stroke-linecap="round"><path d="M10 74A38 38 0 0 1 86 74" stroke="#e5484d"/><path d="M17 74A31 31 0 0 1 79 74" stroke="#f59f00"/><path d="M24 74A24 24 0 0 1 72 74" stroke="#2f9e63"/><path d="M31 74A17 17 0 0 1 65 74" stroke="#3b9ddd"/><path d="M38 74A10 10 0 0 1 58 74" stroke="#7048e8"/></g></symbol>
+    </defs>
+  </svg>
+  <header style="display: flex; align-items: center; gap: 16px; padding: 16px 32px; background: #ffffff; border-bottom: 1px solid #d5d9e0">
+    <div style="width: 28px; height: 28px; border-radius: 8px; background: #1f2430"></div>
+    <div style="font-weight: 700; font-size: 18px">Bifrost</div>
+    <div style="color: #5b6272; font-size: 14px">/ Settings</div>
+  </header>
+
+  <div style="width: 100%; max-width: 1120px; box-sizing: border-box; margin: 0 auto; padding: 32px; display: flex; flex-wrap: wrap; gap: 32px; align-items: flex-start">
+    <!-- settings nav -->
+    <nav aria-label="Settings sections" style="flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px">
+      <sc-for list="{{nav}}" as="n" hint-placeholder-count="5">
+        <a href="#" style="display: flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; text-decoration: none; font-size: 14px; background: {{n.bg}}; color: {{n.fg}}; font-weight: {{n.weight}}">{{n.label}}</a>
+      </sc-for>
+    </nav>
+
+    <div style="flex: 1 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+      <div>
+        <h1 style="margin: 0; font-size: 24px">Appearance</h1>
+        <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">Choose how Bifrost looks. Saved per user.</p>
+      </div>
+
+      <!-- mode -->
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 14px">Mode</h2>
+        <div role="radiogroup" aria-label="Mode" style="display: inline-flex; align-self: flex-start; border: 1px solid #c4c9d4; border-radius: 10px; overflow: hidden; background: #ffffff">
+          <sc-for list="{{modes}}" as="m" hint-placeholder-count="3">
+            <span role="radio" aria-checked="{{m.on}}" style="height: 44px; padding: 0 20px; display: flex; align-items: center; font-size: 14px; background: {{m.bg}}; color: {{m.fg}}">{{m.label}}</span>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; color: #5b6272">System follows your OS. Light and dark each remember their own theme.</p>
+      </section>
+
+      <!-- logo -->
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 14px">Logo</h2>
+        <div role="radiogroup" aria-label="Logo" style="display: flex; flex-wrap: wrap; gap: 12px">
+          <sc-for list="{{logos}}" as="l" hint-placeholder-count="3">
+            <div role="radio" aria-checked="{{l.on}}" style="flex: 1 1 150px; max-width: 200px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 12px 14px; background: #ffffff; border: 2px solid {{l.border}}; border-radius: 14px">
+              <svg width="56" height="56" style="--tile: #3b5bdb; --glyph: #ffffff; color: #3b5bdb" aria-hidden="true"><use href="{{l.ref}}"></use></svg>
+              <div style="text-align: center">
+                <div style="font-size: 14px; font-weight: 600">{{l.name}}</div>
+                <div style="font-size: 12px; color: #5b6272">{{l.sub}}</div>
+              </div>
+              <span style="height: 22px; padding: 0 10px; border-radius: 11px; display: flex; align-items: center; font-size: 11px; font-weight: 600; background: {{l.tagBg}}; color: {{l.tagFg}}">{{l.tag}}</span>
+            </div>
+          </sc-for>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #5b6272">Saved per user, like the theme. It applies to your top bar, your browser tab icon and the app icon when you install Bifrost while signed in. Other users keep their own choice. App icon and Arches follow the theme accent. Spectrum keeps its own colours and switches to a single colour on very small icons.</p>
+      </section>
+
+      <!-- theme list + preview -->
+      <section style="display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+        <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 14px">Dark theme</h2>
+          <div role="radiogroup" aria-label="Dark theme" style="display: flex; flex-direction: column; gap: 8px">
+            <sc-for list="{{themes}}" as="t" hint-placeholder-count="5">
+              <div role="radio" aria-checked="{{t.on}}" style="display: flex; align-items: center; gap: 14px; min-height: 52px; box-sizing: border-box; padding: 8px 14px; background: #ffffff; border: 2px solid {{t.border}}; border-radius: 12px">
+                <span style="width: 18px; height: 18px; border-radius: 9px; border: 2px solid {{t.border}}; display: grid; place-items: center; flex-shrink: 0"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{t.dot}}"></span></span>
+                <span style="flex: 1; font-size: 14px; font-weight: 600">{{t.name}}</span>
+                <span style="display: flex; border-radius: 8px; overflow: hidden; border: 1px solid #c4c9d4">
+                  <sc-for list="{{t.sw}}" as="s" hint-placeholder-count="4">
+                    <span style="width: 22px; height: 28px; background: {{s.c}}"></span>
+                  </sc-for>
+                </span>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        <div style="flex: 1 1 320px; min-width: 0; display: flex; flex-direction: column; gap: 10px">
+          <h2 style="margin: 0; font-size: 14px">Preview</h2>
+          <dc-import name="Mini" theme="dracula" hint-size="100%,290px"></dc-import>
+        </div>
+      </section>
+
+      <!-- custom -->
+      <section style="display: flex; flex-direction: column; gap: 10px">
+        <h2 style="margin: 0; font-size: 14px">Customise</h2>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+          <span style="font-size: 14px">Accent colour</span>
+          <span style="display: flex; gap: 8px">
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: #bd93f9; border: 2px solid #1f2430"></span>
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: #8be9fd"></span>
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: #50fa7b"></span>
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: #ffb86c"></span>
+            <span style="width: 28px; height: 28px; border-radius: 14px; background: #ff79c6"></span>
+          </span>
+          <span style="font-size: 13px; color: #5b6272">Overrides the theme's accent only.</span>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap">
+          <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font: inherit; font-size: 14px">Import theme file…</button>
+          <button style="height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font: inherit; font-size: 14px">Edit custom CSS</button>
+        </div>
+      </section>
+
+      <div style="display: flex; justify-content: flex-end; gap: 8px; padding-top: 8px; border-top: 1px solid #d5d9e0">
+        <button style="height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font: inherit; font-size: 14px">Reset</button>
+        <button style="height: 44px; padding: 0 20px; border-radius: 10px; border: 0; background: #3b5bdb; color: #ffffff; font: inherit; font-size: 14px; font-weight: 600">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const nav = ['General', 'Appearance', 'Search', 'Users', 'Integrations'].map((label) => label === 'Appearance'
+      ? { label, bg: '#e3e6ec', fg: '#1f2430', weight: '600' }
+      : { label, bg: 'transparent', fg: '#1f2430', weight: '400' });
+    const modes = ['Light', 'Dark', 'System'].map((label) => label === 'Dark'
+      ? { label, on: true, bg: '#1f2430', fg: '#ffffff' }
+      : { label, on: false, bg: '#ffffff', fg: '#1f2430' });
+    const sw = (a) => a.map((c) => ({ c }));
+    const th = (name, on, colors) => ({ name, on, border: on ? '#3b5bdb' : '#d5d9e0', dot: on ? '#3b5bdb' : 'transparent', sw: sw(colors) });
+    const lg = (ref, name, sub, on) => ({
+      ref, name, sub, on, border: on ? '#3b5bdb' : '#d5d9e0',
+      tag: on ? 'Default' : 'Select', tagBg: on ? '#3b5bdb' : '#e3e6ec', tagFg: on ? '#ffffff' : '#1f2430'
+    });
+    return {
+      nav, modes,
+      logos: [
+        lg('#lg-e', 'App icon', 'Arches on a tile', true),
+        lg('#lg-a', 'Arches', 'Bare arches, one colour', false),
+        lg('#lg-d', 'Spectrum', 'Five-colour rainbow', false)
+      ],
+      themes: [
+        th('Bifrost Dark', false, ['#0f1117', '#171a22', '#e8eaf0', '#7c93ff']),
+        th('Dracula', true, ['#282a36', '#343746', '#f8f8f2', '#bd93f9']),
+        th('Nord', false, ['#2e3440', '#3b4252', '#eceff4', '#88c0d0']),
+        th('Gruvbox Dark', false, ['#282828', '#3c3836', '#ebdbb2', '#fabd2f']),
+        th('Solarized Dark', false, ['#002b36', '#073642', '#eee8d5', '#2aa198'])
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

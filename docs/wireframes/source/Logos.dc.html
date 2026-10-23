@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Logo explorations</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="min-height: 1000px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; padding: 40px 32px 64px">
+  <!-- shared marks, drawn once, reused by every card -->
+  <svg width="0" height="0" style="position: absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="mk-e" viewBox="0 0 96 96"><rect x="4" y="4" width="88" height="88" rx="22" fill="currentColor"/><g fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round"><path d="M20 63A28 28 0 0 1 76 63"/><path d="M33 63A15 15 0 0 1 63 63"/></g><circle cx="48" cy="63" r="4.5" fill="#ffffff"/></symbol>
+      <symbol id="mk-a" viewBox="0 0 96 96"><g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"><path d="M12 72A36 36 0 0 1 84 72"/><path d="M26 72A22 22 0 0 1 70 72"/><path d="M40 72A8 8 0 0 1 56 72"/></g></symbol>
+      <symbol id="mk-d" viewBox="0 0 96 96"><g fill="none" stroke-width="6" stroke-linecap="round"><path d="M10 74A38 38 0 0 1 86 74" stroke="#e5484d"/><path d="M17 74A31 31 0 0 1 79 74" stroke="#f59f00"/><path d="M24 74A24 24 0 0 1 72 74" stroke="#2f9e63"/><path d="M31 74A17 17 0 0 1 65 74" stroke="#3b9ddd"/><path d="M38 74A10 10 0 0 1 58 74" stroke="#7048e8"/></g></symbol>
+    </defs>
+  </svg>
+
+  <div style="max-width: 1216px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px">
+    <div>
+      <h1 style="margin: 0; font-size: 24px">Logo options</h1>
+      <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">Three logos ship with Bifrost. App icon is the default and users can switch in Settings › Appearance.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 24px">
+      <sc-for list="{{logos}}" as="l" hint-placeholder-count="3">
+        <section style="display: flex; flex-direction: column; background: #ffffff; border: 2px solid {{l.border}}; border-radius: 16px; overflow: hidden">
+          <div style="display: flex; align-items: center; justify-content: center; gap: 18px; height: 190px; color: #3b5bdb">
+            <svg width="112" height="112" role="img" aria-label="{{l.name}} mark"><use href="{{l.ref}}"></use></svg>
+            <span style="font-size: 34px; font-weight: 700; letter-spacing: -0.5px; color: #1f2430">Bifrost</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: #171a22; color: #7c93ff">
+            <svg width="40" height="40" aria-hidden="true"><use href="{{l.ref}}"></use></svg>
+            <span style="font-size: 20px; font-weight: 700; color: #e8eaf0; flex: 1">Bifrost</span>
+            <svg width="24" height="24" aria-hidden="true"><use href="{{l.ref}}"></use></svg>
+            <svg width="16" height="16" aria-hidden="true"><use href="{{l.ref}}"></use></svg>
+          </div>
+          <div style="padding: 16px 20px 20px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div style="font-size: 15px; font-weight: 700">{{l.label}}</div>
+              <span style="height: 22px; padding: 0 10px; border-radius: 11px; display: flex; align-items: center; font-size: 11px; font-weight: 600; background: {{l.tagBg}}; color: {{l.tagFg}}">{{l.tag}}</span>
+            </div>
+            <div style="margin-top: 4px; font-size: 13px; line-height: 1.5; color: #5b6272">{{l.note}}</div>
+          </div>
+        </section>
+      </sc-for>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const def = { border: '#3b5bdb', tag: 'Default', tagBg: '#3b5bdb', tagFg: '#ffffff' };
+    const alt = { border: '#d5d9e0', tag: 'Alternative', tagBg: '#e3e6ec', tagFg: '#1f2430' };
+    return {
+      logos: [
+        { ...def, ref: '#mk-e', name: 'App icon', label: 'E · App icon', note: 'Arches on a rounded tile. The shape for the favicon, phone home screen and PWA install. Follows the theme accent.' },
+        { ...alt, ref: '#mk-a', name: 'Arches', label: 'A · Arches', note: 'Three nested arches: the rainbow bridge in its simplest form. One colour, follows the theme accent.' },
+        { ...alt, ref: '#mk-d', name: 'Spectrum', label: 'D · Spectrum', note: 'Five coloured arcs. The most literal rainbow. Keeps its own colours and falls back to one colour at very small sizes.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

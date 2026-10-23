@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Add app: choose from catalogue</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:#3b5bdb}a:hover{color:#2b44a8}
+</style>
+</helmet>
+<div style="position: relative; min-height: 900px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; overflow: hidden">
+  <!-- dimmed dashboard behind -->
+  <div aria-hidden="true" style="padding: 20px 32px; background: #ffffff; border-bottom: 1px solid #d5d9e0; display: flex; align-items: center; gap: 16px">
+    <div style="width: 28px; height: 28px; border-radius: 8px; background: #1f2430"></div>
+    <div style="flex: 1; max-width: 520px; height: 44px; margin: 0 auto; border: 1px solid #c4c9d4; border-radius: 10px"></div>
+    <div style="width: 110px; height: 44px; border-radius: 10px; background: #3b5bdb"></div>
+  </div>
+  <div aria-hidden="true" style="max-width: 1056px; margin: 32px auto; padding: 0 32px; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px">
+    <sc-for list="{{ghosts}}" as="g" hint-placeholder-count="10">
+      <div style="height: 140px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px"></div>
+    </sc-for>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(31,36,48,0.55); display: flex; align-items: flex-start; justify-content: center; padding: 56px 16px; box-sizing: border-box">
+    <div role="dialog" aria-label="Add application" style="width: 100%; max-width: 760px; background: #ffffff; border-radius: 16px; border: 1px solid #c4c9d4; display: flex; flex-direction: column; overflow: hidden">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; border-bottom: 1px solid #d5d9e0">
+        <div>
+          <h1 style="margin: 0; font-size: 20px">Add application</h1>
+          <p style="margin: 2px 0 0; font-size: 13px; color: #5b6272">Step 1 of 2 · Pick a preset or add your own</p>
+        </div>
+        <button aria-label="Close" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff; font-size: 18px">×</button>
+      </div>
+
+      <div style="padding: 20px 24px; display: flex; flex-direction: column; gap: 16px">
+        <label style="display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; font-size: 14px; color: #5b6272">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5b6272" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+          Search 300+ supported apps
+        </label>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px">
+          <sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+            <button style="height: 36px; padding: 0 14px; border-radius: 18px; font: inherit; font-size: 13px; border: 1px solid {{c.border}}; background: {{c.bg}}; color: {{c.fg}}">{{c.label}}</button>
+          </sc-for>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px">
+          <sc-for list="{{presets}}" as="p" hint-placeholder-count="8">
+            <a href="AddForm.dc.html" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #d5d9e0; border-radius: 12px; background: #ffffff">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: #5b6272; flex-shrink: 0">{{p.l}}</div>
+              <div style="min-width: 0">
+                <div style="font-size: 14px; font-weight: 600">{{p.n}}</div>
+                <div style="font-size: 12px; color: #5b6272">{{p.cat}}</div>
+              </div>
+            </a>
+          </sc-for>
+        </div>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 16px 24px; border-top: 1px solid #d5d9e0; background: #f6f7f9">
+        <span style="font-size: 13px; color: #5b6272">Can't find it? Add any URL as a custom app.</span>
+        <a href="AddForm.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 10px; border: 1px solid #1f2430; color: #1f2430; text-decoration: none; font-size: 14px; font-weight: 600; background: #ffffff">Custom app →</a>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":900}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (n, cat) => ({ n, l: n[0], cat });
+    const labels = ['All', 'Media', 'Productivity', 'Network', 'Monitoring', 'Development'];
+    return {
+      ghosts: Array.from({ length: 10 }, (_, i) => ({ i })),
+      chips: labels.map((label, i) => i === 0
+        ? { label, bg: '#1f2430', fg: '#ffffff', border: '#1f2430' }
+        : { label, bg: '#ffffff', fg: '#1f2430', border: '#c4c9d4' }),
+      presets: [
+        mk('Jellyfin', 'Media'), mk('Plex', 'Media'), mk('Sonarr', 'Media'), mk('Radarr', 'Media'),
+        mk('Nextcloud', 'Productivity'), mk('Paperless', 'Productivity'), mk('Pi-hole', 'Network'), mk('Traefik', 'Network'),
+        mk('Grafana', 'Monitoring'), mk('Uptime Kuma', 'Monitoring'), mk('Gitea', 'Development'), mk('Portainer', 'Monitoring')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

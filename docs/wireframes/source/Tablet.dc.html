@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tablet dashboard</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+</style>
+</helmet>
+<div style="width: 820px; height: 1180px; box-sizing: border-box; background: #f6f7f9; color: #1f2430; overflow: hidden; display: flex; flex-direction: column">
+  <header style="display: flex; align-items: center; gap: 14px; padding: 14px 28px; background: #ffffff; border-bottom: 1px solid #d5d9e0">
+    <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 18px">
+      <div style="width: 28px; height: 28px; border-radius: 8px; background: #1f2430"></div>Bifrost
+    </div>
+    <label style="flex: 1; display: flex; align-items: center; gap: 10px; height: 44px; box-sizing: border-box; padding: 0 14px; border: 1px solid #c4c9d4; border-radius: 10px; background: #f6f7f9; color: #5b6272; font-size: 14px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5b6272" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      Search apps or the web
+    </label>
+    <button aria-label="Add app" style="width: 44px; height: 44px; border-radius: 10px; border: 0; background: #3b5bdb; color: #ffffff; font-size: 22px">+</button>
+    <button aria-label="Settings" style="width: 44px; height: 44px; border-radius: 10px; border: 1px solid #c4c9d4; background: #ffffff">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f2430" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>
+    </button>
+  </header>
+
+  <div style="flex: 1; overflow: hidden; padding: 28px; display: flex; flex-direction: column; gap: 26px">
+    <div style="display: flex; align-items: end; justify-content: space-between; gap: 16px">
+      <div>
+        <h1 style="margin: 0; font-size: 26px">Good afternoon</h1>
+        <p style="margin: 4px 0 0; font-size: 14px; color: #5b6272">12 apps · 11 online</p>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <sc-for list="{{tabs}}" as="t" hint-placeholder-count="4">
+          <span style="height: 36px; box-sizing: border-box; padding: 0 14px; border-radius: 18px; display: flex; align-items: center; font-size: 14px; border: 1px solid {{t.border}}; background: {{t.bg}}; color: {{t.fg}}">{{t.label}}</span>
+        </sc-for>
+      </div>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">Favourites</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+        <sc-for list="{{favs}}" as="a" hint-placeholder-count="4">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 10px 16px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{a.l}}</div>
+            <div style="font-size: 14px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5b6272"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">Widgets</h2>
+      <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px">
+        <sc-for list="{{widgets}}" as="w" hint-placeholder-count="2">
+          <div style="display: flex; flex-direction: column; gap: 14px; padding: 16px; background: #ffffff; border: 1px solid #d5d9e0; border-radius: 14px">
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div style="width: 36px; height: 36px; border-radius: 10px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{w.l}}</div>
+              <div style="flex: 1; font-size: 15px; font-weight: 600">{{w.n}}</div>
+              <span style="width: 8px; height: 8px; border-radius: 4px; background: #2f9e63"></span>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+              <sc-for list="{{w.stats}}" as="s" hint-placeholder-count="3">
+                <div><div style="font-size: 20px; font-weight: 700">{{s.v}}</div><div style="font-size: 12px; color: #5b6272">{{s.k}}</div></div>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display: flex; flex-direction: column; gap: 12px">
+      <h2 style="margin: 0; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; color: #5b6272">All apps</h2>
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px">
+        <sc-for list="{{apps}}" as="a" hint-placeholder-count="8">
+          <a href="#" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 20px 10px 16px; background: #ffffff; border: 1px solid {{a.border}}; border-radius: 14px">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: #e3e6ec; display: grid; place-items: center; font-weight: 700; color: #5b6272">{{a.l}}</div>
+            <div style="font-size: 14px; font-weight: 600">{{a.n}}</div>
+            <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; color: #5b6272"><span style="width: 8px; height: 8px; border-radius: 4px; background: {{a.dot}}"></span>{{a.meta}}</div>
+          </a>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":820,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const mk = (n, meta, up = true) => ({ n, l: n[0], meta, dot: up ? '#2f9e63' : '#d9480f', border: up ? '#d5d9e0' : '#d9480f' });
+    return {
+      tabs: ['All', 'Media', 'Network', 'Monitoring'].map((label, i) => i === 0
+        ? { label, bg: '#1f2430', fg: '#ffffff', border: '#1f2430' }
+        : { label, bg: '#ffffff', fg: '#1f2430', border: '#c4c9d4' }),
+      favs: [mk('Jellyfin', '3 streams'), mk('Nextcloud', 'online'), mk('Pi-hole', '18% blocked'), mk('Grafana', 'online')],
+      widgets: [
+        { n: 'Jellyfin', l: 'J', stats: [{ v: '3', k: 'Streams' }, { v: '4.2k', k: 'Items' }, { v: '64%', k: 'CPU' }] },
+        { n: 'Sonarr', l: 'S', stats: [{ v: '12', k: 'Queued' }, { v: '5', k: 'Upcoming' }, { v: '0', k: 'Missing' }] }
+      ],
+      apps: [mk('Jellyfin', '3 streams'), mk('Sonarr', '12 queued'), mk('Radarr', 'online'), mk('Nextcloud', 'online'),
+             mk('Paperless', '8 in inbox'), mk('Vaultwarden', 'online'), mk('Pi-hole', '18% blocked'), mk('WireGuard', 'offline', false)]
+    };
+  }
+}
+</script>
+</body>
+</html>
