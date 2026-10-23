@@ -4,6 +4,7 @@
   import ChangePassword from './screens/ChangePassword.svelte';
   import Home from './screens/Home.svelte';
   import Login from './screens/Login.svelte';
+  import Settings from './screens/Settings.svelte';
   import Setup from './screens/Setup.svelte';
 
   let failed = $state(false);
@@ -26,10 +27,17 @@
     }
   });
 
-  const paths = { setup: '/setup', login: '/login', 'change-password': '/change-password', home: '/' };
+  const paths = { setup: '/setup', login: '/login', 'change-password': '/change-password' };
+  const inSettings = $derived(router.path === '/settings' || router.path.startsWith('/settings/'));
 
   $effect(() => {
-    if (screen !== 'loading') router.navigate(paths[screen], { replace: true });
+    if (screen === 'loading') return;
+    if (screen === 'home') {
+      // Signed in: the dashboard at /, settings under /settings. Anything else goes to /.
+      if (router.path !== '/' && !inSettings) router.navigate('/', { replace: true });
+    } else {
+      router.navigate(paths[screen], { replace: true });
+    }
   });
 </script>
 
@@ -42,7 +50,11 @@
 {:else if screen === 'change-password'}
   <ChangePassword />
 {:else if screen === 'home'}
-  <Home />
+  {#if inSettings}
+    <Settings />
+  {:else}
+    <Home />
+  {/if}
 {:else}
   <p class="status" role="status">Loading…</p>
 {/if}

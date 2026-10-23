@@ -1,9 +1,13 @@
 name: CI
 
+# Switched off to save GitHub Actions minutes: it only runs when started by hand
+# from the Actions tab. To turn it back on, put the triggers below back:
+#   push:
+#     branches: [main]
+#   pull_request:
+# Until then, run `make lint test size` before opening a pull request.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read

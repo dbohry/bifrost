@@ -273,7 +273,8 @@ func (s *server) changePassword(w http.ResponseWriter, r *http.Request, user sto
 	}
 	if !match {
 		s.passwordByID.Fail(key)
-		writeError(w, http.StatusUnauthorized, "Your current password is wrong.")
+		// Not 401: that means "not signed in", and the browser would drop the session screen.
+		writeError(w, http.StatusForbidden, "Your current password is wrong.")
 		return
 	}
 	if msg := checkPassword(in.New); msg != "" {
@@ -321,6 +322,8 @@ func (s *server) startSession(w http.ResponseWriter, r *http.Request, user store
 	if err := s.store.CreateSession(r.Context(), hash, user.ID, persistent, now, now.Add(ttl(persistent))); err != nil {
 		return err
 	}
+	// Only used for the "last seen" line on the Users screen.
+	_ = s.store.TouchUser(r.Context(), user.ID, now)
 	setCookie(w, r, token, persistent)
 	return nil
 }
@@ -329,6 +332,7 @@ func (s *server) startSession(w http.ResponseWriter, r *http.Request, user store
 // here is not worth failing the request for: the session just expires on the
 // old schedule.
 func (s *server) extend(ctx context.Context, w http.ResponseWriter, r *http.Request, token string, sess store.Session) {
+	// Sessions are only extended every few minutes, which also keeps "last seen" current.
 	now := s.now()
 	want := now.Add(ttl(sess.Persistent))
 	if want.Sub(sess.ExpiresAt) < extendAfter {
@@ -337,6 +341,7 @@ func (s *server) extend(ctx context.Context, w http.ResponseWriter, r *http.Requ
 	if err := s.store.ExtendSession(ctx, sess.TokenHash, want); err != nil {
 		return
 	}
+	_ = s.store.TouchUser(ctx, sess.UserID, now)
 	setCookie(w, r, token, sess.Persistent)
 }
 

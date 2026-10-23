@@ -92,3 +92,12 @@ body {
   margin: 0;
   accent-color: var(--accent);
 }
+
+.button.danger {
+  background: var(--bad);
+  color: var(--on-accent);
+}
+
+.button.danger-text {
+  color: var(--bad);
+}

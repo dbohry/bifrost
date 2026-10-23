@@ -5,6 +5,16 @@ export type User = {
   mustChangePassword: boolean;
 };
 
+/** A row on the Users screen. */
+export type UserSummary = {
+  id: number;
+  username: string;
+  isAdmin: boolean;
+  mustChangePassword: boolean;
+  /** Unix seconds, or null if the user has never signed in. */
+  lastSeenAt: number | null;
+};
+
 /** An app tile on a user's dashboard. */
 export type AppItem = {
   id: number;
@@ -73,6 +83,12 @@ export const api = {
     request<{ user: User }>('POST', '/api/login', { username, password, remember }),
   logout: () => request<void>('POST', '/api/logout'),
   me: () => request<{ user: User }>('GET', '/api/me'),
+  users: () => request<{ users: UserSummary[] }>('GET', '/api/users'),
+  createUser: (username: string, isAdmin: boolean) =>
+    request<{ user: UserSummary; temporaryPassword: string }>('POST', '/api/users', { username, isAdmin }),
+  resetUserPassword: (id: number) =>
+    request<{ temporaryPassword: string }>('POST', `/api/users/${id}/reset-password`),
+  deleteUser: (id: number) => request<void>('DELETE', `/api/users/${id}`),
   apps: () => request<{ apps: AppItem[] }>('GET', '/api/apps'),
   createApp: (input: AppInput) => request<{ app: AppItem }>('POST', '/api/apps', input),
   updateApp: (id: number, input: AppInput) =>

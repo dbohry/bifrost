@@ -20,6 +20,11 @@ func ResetPassword(ctx context.Context, st *store.Store, username string) (strin
 	if err != nil {
 		return "", err
 	}
+	return ResetUserPassword(ctx, st, user.ID)
+}
+
+// ResetUserPassword does the same for a user known by id.
+func ResetUserPassword(ctx context.Context, st *store.Store, id int64) (string, error) {
 	temp, err := TempPassword()
 	if err != nil {
 		return "", err
@@ -28,10 +33,10 @@ func ResetPassword(ctx context.Context, st *store.Store, username string) (strin
 	if err != nil {
 		return "", err
 	}
-	if err := st.SetPassword(ctx, user.ID, hash, true); err != nil {
+	if err := st.SetPassword(ctx, id, hash, true); err != nil {
 		return "", err
 	}
-	if err := st.DeleteUserSessions(ctx, user.ID, ""); err != nil {
+	if err := st.DeleteUserSessions(ctx, id, ""); err != nil {
 		return "", err
 	}
 	return temp, nil

@@ -12,13 +12,7 @@ func newUsers(t *testing.T) (*Store, User, User) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// There is no "add user" yet (milestone 3), so insert one directly.
-	res, err := st.db.Exec(`INSERT INTO users (username, password_hash, created_at) VALUES ('sam', 'hash', ?)`, now.Unix())
-	if err != nil {
-		t.Fatal(err)
-	}
-	id, _ := res.LastInsertId()
-	sam, err := st.UserByID(ctx, id)
+	sam, err := st.CreateUser(ctx, "sam", "hash", false, false, now)
 	if err != nil {
 		t.Fatal(err)
 	}
