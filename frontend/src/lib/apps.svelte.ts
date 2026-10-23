@@ -1,6 +1,17 @@
-import { api, type AppInput, type AppItem } from './api';
+import { api, ApiError, type AppInput, type AppItem } from './api';
 
 export type Group = { name: string; apps: AppItem[] };
+
+/** Groups apps by category, in the order the first app of each category appears. */
+export function groupByCategory(items: AppItem[]): Group[] {
+  const byName = new Map<string, AppItem[]>();
+  for (const app of items) {
+    const list = byName.get(app.category);
+    if (list) list.push(app);
+    else byName.set(app.category, [app]);
+  }
+  return [...byName].map(([name, apps]) => ({ name, apps }));
+}
 
 /** The signed-in user's apps. */
 class Apps {
@@ -10,16 +21,7 @@ class Apps {
 
   favourites = $derived(this.items.filter((a) => a.favourite));
 
-  /** Apps grouped by category, in the order the first app of each group appears. */
-  groups = $derived.by(() => {
-    const byName = new Map<string, AppItem[]>();
-    for (const app of this.items) {
-      const list = byName.get(app.category);
-      if (list) list.push(app);
-      else byName.set(app.category, [app]);
-    }
-    return [...byName].map(([name, apps]): Group => ({ name, apps }));
-  });
+  groups = $derived(groupByCategory(this.items));
 
   categories = $derived(this.groups.map((g) => g.name));
 
@@ -58,6 +60,56 @@ class Apps {
     } catch (e) {
       this.items = before;
       this.error = e instanceof Error ? e.message : 'Could not update the app.';
+    }
+  }
+
+  /**
+   * Moves the app at index `from` of a category to index `to`, and saves the new
+   * order. Only the apps of that category swap places, so the other categories
+   * stay where they are. The screen changes straight away and goes back if the
+   * server refuses.
+   */
+  async move(category: string, from: number, to: number) {
+    if (from === to) return;
+    const slots = this.items.flatMap((a, i) => (a.category === category ? [i] : []));
+    if (from < 0 || to < 0 || from >= slots.length || to >= slots.length) return;
+
+    const inCategory = slots.map((i) => this.items[i]);
+    const [moved] = inCategory.splice(from, 1);
+    inCategory.splice(to, 0, moved);
+
+    const next = [...this.items];
+    slots.forEach((slot, k) => (next[slot] = inCategory[k]));
+
+    const before = this.items;
+    this.items = next.map((a, i) => ({ ...a, position: i + 1 }));
+    try {
+      await api.reorderApps(next.map((a) => a.id));
+    } catch (e) {
+      this.items = before;
+      this.error = e instanceof Error ? e.message : 'Could not save the new order.';
+      // Another window may have changed the list. Fetch it again.
+      if (e instanceof ApiError && e.status === 409) await this.refresh();
+    }
+  }
+
+  /** Moves an app one place earlier (-1) or later (+1) within its category. */
+  moveBy(app: AppItem, delta: -1 | 1) {
+    const group = this.groups.find((g) => g.name === app.category);
+    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
+    if (index < 0) return Promise.resolve();
+    return this.move(app.category, index, index + delta);
+  }
+
+  dismissError() {
+    this.error = '';
+  }
+
+  private async refresh() {
+    try {
+      this.items = (await api.apps()).apps;
+    } catch {
+      // the error from the failed save stays on screen
     }
   }
 

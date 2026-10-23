@@ -9,10 +9,11 @@
   }: { app: AppItem; onedit: () => void; onfavourite: () => void } = $props();
 </script>
 
-<div class="tile">
+<div class="tile" data-sortable-item>
   <a
     class="open"
     href={app.url}
+    draggable="false"
     target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
   >

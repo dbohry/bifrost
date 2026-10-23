@@ -219,3 +219,63 @@ func TestOneUsersAppsAreInvisibleToAnother(t *testing.T) {
 		t.Errorf("alex's app was touched: %s", r.Body)
 	}
 }
+
+func idsOf(r resp) []int64 {
+	var out []int64
+	for _, a := range r.apps() {
+		out = append(out, int64(a.(map[string]any)["id"].(float64)))
+	}
+	return out
+}
+
+func TestReorderingOverHTTP(t *testing.T) {
+	e := newEnv(t)
+	b := e.browser()
+	b.setup("alex", "correct-password")
+
+	var made []int64
+	for _, name := range []string{"one", "two", "three"} {
+		r := b.do("POST", "/api/apps", m{"name": name, "url": name + ".lan", "category": "x"})
+		mustStatus(t, r, 201)
+		made = append(made, int64(r.app()["id"].(float64)))
+	}
+
+	mustStatus(t, b.do("PUT", "/api/apps/order", m{"ids": []int64{made[2], made[0], made[1]}}), 204)
+	got := idsOf(b.do("GET", "/api/apps", nil))
+	if len(got) != 3 || got[0] != made[2] || got[1] != made[0] || got[2] != made[1] {
+		t.Errorf("order = %v", got)
+	}
+
+	// An out-of-date list is refused with a message, and changes nothing.
+	r := b.do("PUT", "/api/apps/order", m{"ids": []int64{made[0], made[1]}})
+	if r.Code != 409 || !strings.Contains(r.errMsg(), "Reload") {
+		t.Errorf("stale order: %d %s", r.Code, r.Body)
+	}
+	mustStatus(t, b.do("PUT", "/api/apps/order", m{"ids": nil}), 409)
+	if again := idsOf(b.do("GET", "/api/apps", nil)); again[0] != made[2] {
+		t.Errorf("a refused order changed things: %v", again)
+	}
+}
+
+func TestReorderingNeedsASignedInUserAndOwnsItsApps(t *testing.T) {
+	e := newEnv(t)
+	alex := e.browser()
+	alex.setup("alex", "correct-password")
+	r := alex.do("POST", "/api/apps", m{"name": "mine", "url": "mine.lan"})
+	mine := int64(r.app()["id"].(float64))
+
+	mustStatus(t, e.browser().do("PUT", "/api/apps/order", m{"ids": []int64{mine}}), 401)
+
+	r = alex.do("POST", "/api/users", m{"username": "samuel"})
+	temp := r.json()["temporaryPassword"].(string)
+	sam := e.browser()
+	sam.login("samuel", temp, false)
+	sam.do("POST", "/api/me/password", m{"current": temp, "new": "samuel-pass-1"})
+
+	// Another user cannot reorder with someone else's id, and the id "order" is not an app id.
+	mustStatus(t, sam.do("PUT", "/api/apps/order", m{"ids": []int64{mine}}), 409)
+	mustStatus(t, sam.do("PUT", "/api/apps/order", m{"ids": []int64{}}), 204)
+	if got := idsOf(alex.do("GET", "/api/apps", nil)); len(got) != 1 || got[0] != mine {
+		t.Errorf("alex's apps changed: %v", got)
+	}
+}

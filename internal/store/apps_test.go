@@ -160,3 +160,72 @@ func TestAppsGoWhenTheirUserGoes(t *testing.T) {
 		t.Errorf("%d apps left, want 1 (only alex's)", n)
 	}
 }
+
+func ids(apps []App) []int64 {
+	out := make([]int64, len(apps))
+	for i, a := range apps {
+		out[i] = a.ID
+	}
+	return out
+}
+
+func TestReorderApps(t *testing.T) {
+	st, alex, _ := newUsers(t)
+	a, _ := st.CreateApp(ctx, alex.ID, input("a", "x"), now)
+	b, _ := st.CreateApp(ctx, alex.ID, input("b", "x"), now)
+	c, _ := st.CreateApp(ctx, alex.ID, input("c", "y"), now)
+
+	if err := st.ReorderApps(ctx, alex.ID, []int64{c.ID, a.ID, b.ID}); err != nil {
+		t.Fatal(err)
+	}
+	list, _ := st.ListApps(ctx, alex.ID)
+	if got := ids(list); got[0] != c.ID || got[1] != a.ID || got[2] != b.ID {
+		t.Errorf("order = %v, want [%d %d %d]", got, c.ID, a.ID, b.ID)
+	}
+	for i, app := range list {
+		if app.Position != int64(i+1) {
+			t.Errorf("position %d = %d, want %d (renumbered from 1)", i, app.Position, i+1)
+		}
+	}
+
+	// A new app still goes last.
+	d, _ := st.CreateApp(ctx, alex.ID, input("d", "x"), now)
+	if d.Position != 4 {
+		t.Errorf("new app position = %d, want 4", d.Position)
+	}
+}
+
+func TestReorderAppsRefusesAnythingButTheUsersOwnApps(t *testing.T) {
+	st, alex, sam := newUsers(t)
+	a, _ := st.CreateApp(ctx, alex.ID, input("a", "x"), now)
+	b, _ := st.CreateApp(ctx, alex.ID, input("b", "x"), now)
+	theirs, _ := st.CreateApp(ctx, sam.ID, input("s", "x"), now)
+
+	for name, order := range map[string][]int64{
+		"missing one":    {a.ID},
+		"extra id":       {a.ID, b.ID, 999},
+		"duplicate":      {a.ID, a.ID},
+		"someone else's": {a.ID, theirs.ID},
+		"empty":          {},
+		"nil":            nil,
+	} {
+		if err := st.ReorderApps(ctx, alex.ID, order); err != ErrOrderMismatch {
+			t.Errorf("%s: err = %v, want ErrOrderMismatch", name, err)
+		}
+	}
+
+	// Nothing changed, for either user.
+	if list, _ := st.ListApps(ctx, alex.ID); list[0].ID != a.ID || list[1].ID != b.ID || list[0].Position != 1 {
+		t.Errorf("alex's order changed: %+v", list)
+	}
+	if list, _ := st.ListApps(ctx, sam.ID); list[0].Position != 1 {
+		t.Errorf("sam's app changed: %+v", list)
+	}
+}
+
+func TestReorderAppsForAUserWithNoApps(t *testing.T) {
+	st, alex, _ := newUsers(t)
+	if err := st.ReorderApps(ctx, alex.ID, []int64{}); err != nil {
+		t.Errorf("empty list for an empty dashboard: %v", err)
+	}
+}

@@ -36,6 +36,7 @@ func (s *server) routes(assets fs.FS) http.Handler {
 
 	mux.Handle("GET /api/apps", s.authed(false, s.listApps))
 	mux.Handle("POST /api/apps", s.authed(false, s.createApp))
+	mux.Handle("PUT /api/apps/order", s.authed(false, s.reorderApps))
 	mux.Handle("PUT /api/apps/{id}", s.authed(false, s.updateApp))
 	mux.Handle("DELETE /api/apps/{id}", s.authed(false, s.deleteApp))
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

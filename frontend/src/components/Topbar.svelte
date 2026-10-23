@@ -6,14 +6,18 @@
 
   let {
     current,
+    center,
     children,
-  }: { current: 'dashboard' | 'settings'; children?: Snippet } = $props();
+  }: { current: 'dashboard' | 'settings'; center?: Snippet; children?: Snippet } = $props();
 </script>
 
 <header class="bar">
   <a class="brand" href="/" use:link aria-label="Bifrost, back to your apps">
     <Logo size={28} /> Bifrost
   </a>
+  {#if center}
+    <div class="center">{@render center()}</div>
+  {/if}
   <span class="actions">
     {@render children?.()}
     <a
@@ -29,8 +33,16 @@
         <path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2" />
       </svg>
     </a>
-    <button class="button secondary" onclick={() => session.logout()}>
-      Sign out<span class="who">&nbsp;({session.user?.username})</span>
+    <button
+      class="button secondary signout"
+      aria-label={`Sign out ${session.user?.username ?? ''}`.trim()}
+      onclick={() => session.logout()}
+    >
+      <svg class="out-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M9 4H5v16h4" />
+        <path d="M16 8l4 4-4 4M20 12H9" />
+      </svg>
+      <span class="text" aria-hidden="true">Sign out<span class="who">&nbsp;({session.user?.username})</span></span>
     </button>
   </span>
 </header>
@@ -38,9 +50,10 @@
 <style>
   .bar {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
+    gap: 8px 12px;
     padding: 8px 16px;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
@@ -60,6 +73,12 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
     border-radius: 10px;
+  }
+  /* On a phone the search box gets a row of its own under the brand and buttons. */
+  .center {
+    order: 3;
+    flex: 1 1 100%;
+    padding-bottom: 6px;
   }
   .actions {
     display: flex;
@@ -87,9 +106,40 @@
   .who {
     display: none;
   }
+  /* On a phone Sign out is just an icon, so the brand and buttons fit on one row. */
+  .signout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .signout .text {
+    display: none;
+  }
+  .actions :global(.button.signout) {
+    padding: 0;
+    width: 44px;
+  }
   @media (min-width: 640px) {
+    .out-icon {
+      display: none;
+    }
+    .signout .text {
+      display: inline;
+    }
+    .actions :global(.button.signout) {
+      padding: 0 16px;
+      width: auto;
+    }
     .bar {
       padding: 12px 32px;
+      flex-wrap: nowrap;
+    }
+    .center {
+      order: 0;
+      flex: 1 1 auto;
+      max-width: 520px;
+      padding-bottom: 0;
+      margin: 0 auto;
     }
     .who {
       display: inline;

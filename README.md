@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 3 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite and delete apps on your dashboard. Search, reordering, themes and the rest are still to come. See the build order below.
+Milestones 0 to 4 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. Themes, the app catalogue and the rest are still to come. See the build order below.
 
 ## Running it
 
@@ -41,6 +41,9 @@ It prints a temporary password and signs that user out everywhere. They must cho
 - Addresses without a scheme get `http://`. Only `http` and `https` are accepted, and addresses with a username or password in them are refused.
 - Starred apps also appear in a Favourites row at the top.
 - Tiles show the app's first letter on a coloured background.
+- Category tabs above the apps show one category at a time. **All** shows everything.
+- The search box filters your apps by name, category or address as you type. Press `/` to jump to it and Escape to clear it. Enter opens the best match, or searches the web with DuckDuckGo when nothing matches.
+- Drag a tile to change its place within its category. On a touch screen, press and hold first, so the page can still scroll. To move an app without dragging, open it with the pencil and use **Move earlier** or **Move later**. Dragging is off while a search is showing, and your order is saved.
 
 ### Sessions and passwords
 
