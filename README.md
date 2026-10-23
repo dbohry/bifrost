@@ -8,10 +8,10 @@ Milestones 0 to 8 are in place: the server runs, accounts work (first-run setup,
 
 ## Running it
 
-Bifrost is distributed as a Docker image for amd64 and arm64 (PCs, servers and Raspberry Pi). Pushing a version tag publishes it to `ghcr.io/dbohry/bifrost`, using the Release workflow. Run it with Docker:
+Bifrost is distributed as a Docker image for amd64 and arm64 (PCs, servers and Raspberry Pi). Pushing a version tag such as `v0.1.0` publishes it to Docker Hub as `dbohry/bifrost` (tags `0.1.0`, `0.1` and `latest`), using the Release workflow. The workflow needs two repository secrets, `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`. Run it with Docker:
 
 ```sh
-docker run -d --name bifrost --restart unless-stopped -p 8080:8080 -v bifrost-data:/data ghcr.io/dbohry/bifrost:latest
+docker run -d --name bifrost --restart unless-stopped -p 8080:8080 -v bifrost-data:/data dbohry/bifrost:latest
 ```
 
 or with Docker Compose, using the `docker-compose.yml` in this repository:
@@ -108,7 +108,7 @@ Project layout:
 - `frontend`: the Svelte app. `npm run build` writes into `internal/webui/dist`
 - Database migrations are numbered SQL files in `internal/db/migrations`, applied in order at start-up
 
-CI (`.github/workflows/ci.yml`) is switched off to save GitHub Actions minutes, and can be started by hand from the Actions tab. When on, it runs the Go checks and tests, and the frontend type check, build and size budget. It never builds the Docker image. So before opening a pull request, run `make lint test size` yourself, and run `make image` when you change the Dockerfile.
+CI (`.github/workflows/ci.yml`) runs the Go checks and tests and the frontend type check, build and size budget on every pull request. When a pull request is merged to main it also builds the image for amd64 and arm64 without publishing it. Publishing is separate: pushing a `v*` tag runs the Release workflow. The browser checks (`make e2e`) are not in CI yet, so run `make e2e` before opening a pull request that changes the interface.
 
 ## Goals
 
