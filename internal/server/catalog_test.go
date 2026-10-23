@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/dbohry/bifrost/internal/catalog"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -13,22 +14,28 @@ func TestTheCatalogueIsListedForAnyone(t *testing.T) {
 
 	cats, _ := r.json()["categories"].([]any)
 	apps, _ := r.json()["apps"].([]any)
-	if len(cats) != 5 || cats[0] != "Media" || len(apps) != 30 {
+	if len(cats) != len(catalog.Categories) || cats[0] != "Media" || len(apps) < 300 {
 		t.Fatalf("categories %v, %d apps", cats, len(apps))
 	}
-	first := apps[0].(map[string]any)
-	if first["id"] != "jellyfin" || first["name"] != "Jellyfin" || first["category"] != "Media" || first["port"] != float64(8096) {
-		t.Errorf("first app = %v", first)
+	var jellyfin map[string]any
+	for _, a := range apps {
+		if m := a.(map[string]any); m["id"] == "jellyfin" {
+			jellyfin = m
+		}
+	}
+	if jellyfin == nil || jellyfin["name"] != "Jellyfin" || jellyfin["category"] != "Media" || jellyfin["port"] != float64(8096) {
+		t.Errorf("jellyfin = %v", jellyfin)
 	}
 }
 
 func TestEveryCatalogueIconIsServedSafely(t *testing.T) {
 	e := newEnv(t)
-	list := e.browser().do("GET", "/api/catalog", nil).json()["apps"].([]any)
+	b := e.browser()
+	list := b.do("GET", "/api/catalog", nil).json()["apps"].([]any)
 
 	for _, a := range list {
 		id := a.(map[string]any)["id"].(string)
-		rec := e.browser().do("GET", "/api/catalog/icons/"+id+".svg", nil)
+		rec := b.do("GET", "/api/catalog/icons/"+id+".svg", nil)
 		if rec.Code != 200 {
 			t.Errorf("%s: status %d", id, rec.Code)
 			continue

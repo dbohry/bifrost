@@ -107,6 +107,16 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T;
 }
 
+/** A Bifrost export file, as the server writes it and reads it back. */
+export type ExportFile = {
+  format: string;
+  version: number;
+  apps: unknown[];
+  preferences?: Preferences;
+};
+
+export type ImportResult = { added: number; skipped: number; removed: number; appearanceApplied: boolean };
+
 export const api = {
   health: () => request<{ status: string; version: string }>('GET', '/healthz'),
   setupStatus: () => request<{ needsSetup: boolean }>('GET', '/api/setup/status'),
@@ -133,6 +143,8 @@ export const api = {
   deleteApp: (id: number) => request<void>('DELETE', `/api/apps/${id}`),
   /** Saves the dashboard order. `ids` must list every one of the user's apps. */
   reorderApps: (ids: number[]) => request<void>('PUT', '/api/apps/order', { ids }),
+  importData: (file: ExportFile, mode: 'merge' | 'replace', appearance: boolean) =>
+    request<ImportResult>('POST', '/api/import', { ...file, mode, appearance }),
   changePassword: (current: string, next: string) =>
     request<void>('POST', '/api/me/password', { current, new: next }),
 };

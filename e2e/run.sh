@@ -4,7 +4,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 port=18100
-for check in flows a11y; do
+for check in flows backup a11y; do
   data=$(mktemp -d)
   BIFROST_DATA_DIR="$data" BIFROST_ADDR="127.0.0.1:$port" bin/bifrost serve >"$data/server.log" 2>&1 &
   pid=$!

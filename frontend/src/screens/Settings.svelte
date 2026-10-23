@@ -4,6 +4,7 @@
   import { session } from '../lib/session.svelte';
   import AccountSection from './AccountSection.svelte';
   import AppearanceSection from './AppearanceSection.svelte';
+  import BackupSection from './BackupSection.svelte';
   import UsersSection from './UsersSection.svelte';
 
   const isAdmin = $derived(session.user?.isAdmin ?? false);
@@ -13,7 +14,9 @@
   const section = $derived(
     router.path === '/settings/appearance'
       ? 'appearance'
-      : router.path === '/settings/users' && isAdmin
+      : router.path === '/settings/backup'
+        ? 'backup'
+        : router.path === '/settings/users' && isAdmin
         ? 'users'
         : 'account',
   );
@@ -36,6 +39,7 @@
   <nav aria-label="Settings sections">
     <a href="/settings" use:link aria-current={section === 'account' ? 'page' : undefined}>Account</a>
     <a href="/settings/appearance" use:link aria-current={section === 'appearance' ? 'page' : undefined}>Appearance</a>
+    <a href="/settings/backup" use:link aria-current={section === 'backup' ? 'page' : undefined}>Backup</a>
     {#if isAdmin}
       <a href="/settings/users" use:link aria-current={section === 'users' ? 'page' : undefined}>Users</a>
     {/if}
@@ -46,6 +50,8 @@
       <UsersSection />
     {:else if section === 'appearance'}
       <AppearanceSection />
+    {:else if section === 'backup'}
+      <BackupSection />
     {:else}
       <AccountSection />
     {/if}

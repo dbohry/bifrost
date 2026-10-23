@@ -31,7 +31,7 @@
     style:padding="{Math.round(size * 0.14)}px"
     aria-hidden="true"
   >
-    <img src={iconUrl(icon)} alt="" draggable="false" onerror={() => (broken = true)} />
+    <img src={iconUrl(icon)} alt="" loading="lazy" decoding="async" draggable="false" onerror={() => (broken = true)} />
   </span>
 {:else}
   <span
