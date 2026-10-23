@@ -21,7 +21,14 @@
   $effect(() => {
     if (router.path !== '/settings' && section === 'account') router.navigate('/settings', { replace: true });
   });
+
+  // Escape leaves Settings, unless a dialog is open: that one closes first.
+  function leave(e: KeyboardEvent) {
+    if (e.key === 'Escape' && !e.defaultPrevented && !document.querySelector('dialog[open]')) router.navigate('/');
+  }
 </script>
+
+<svelte:window onkeydown={leave} />
 
 <Topbar current="settings" />
 

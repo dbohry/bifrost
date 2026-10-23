@@ -4,16 +4,25 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 7 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo, and add popular apps from a built-in list of 30. The layout works on phones, tablets and desktops in either orientation. The release work is still to come. See the build order below.
+Milestones 0 to 8 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo, and add popular apps from a built-in list of 30. The layout works on phones, tablets and desktops in either orientation. The release image, workflow and checks are in place, but the image has not been built or published yet. See the build order below.
 
 ## Running it
 
-Bifrost is distributed as a Docker image. Until images are published, build one yourself:
+Bifrost is distributed as a Docker image for amd64 and arm64 (PCs, servers and Raspberry Pi). Pushing a version tag publishes it to `ghcr.io/dbohry/bifrost`, using the Release workflow. Run it with Docker:
 
 ```sh
-docker build -t bifrost .
-docker run -d --name bifrost -p 8080:8080 -v bifrost-data:/data bifrost
+docker run -d --name bifrost --restart unless-stopped -p 8080:8080 -v bifrost-data:/data ghcr.io/dbohry/bifrost:latest
 ```
+
+or with Docker Compose, using the `docker-compose.yml` in this repository:
+
+```sh
+docker compose up -d
+```
+
+To build the image yourself instead, run `docker build -t bifrost .` and use `bifrost` in place of the image name above.
+
+To update, pull the new image and start the container again. Your data stays in the volume, and the database upgrades itself on start. Back up by copying the volume (stop the container first, or copy the `bifrost.db*` files together).
 
 Then open http://localhost:8080. The first visit asks you to create the administrator account. Whoever opens the page first creates it, so do this before exposing Bifrost to anyone else. Everything Bifrost stores lives in the `/data` volume.
 
@@ -47,6 +56,7 @@ It prints a temporary password and signs that user out everywhere. They must cho
 - Drag a tile to change its place within its category. On a touch screen, press and hold first, so the page can still scroll. To move an app without dragging, open it with the pencil and use **Move earlier** or **Move later**. Dragging is off while a search is showing, and your order is saved.
 - On a phone held upright, Add app, Search, Settings and Sign out move to a bar at the bottom (Sign out is in Settings → Account). A phone on its side keeps the top bar, since it has room for it.
 - On a touch screen the pencil and star buttons are tucked away. Press **Edit** above the apps to show them, tap a tile to open its details, then press **Done**. Pinned apps show a small star.
+- Escape leaves Settings and returns to your apps.
 - On a computer, the arrow keys move between tiles. The pages respect notches and rounded corners, and animations are off if your system asks for reduced motion.
 
 ### Appearance
@@ -81,8 +91,11 @@ You need Go 1.26 and Node 22. `make help` lists the targets:
 | `make build` | Builds the frontend, then `bin/bifrost` with it embedded |
 | `make test` | Go tests with the race detector |
 | `make lint` | `gofmt`, `go vet` and `svelte-check` |
+| `make e2e` | Browser checks of the main journeys and an accessibility scan of every screen and theme, using `bin/bifrost`, so run `make build` first |
 | `make size` | Checks the built frontend against the 100 KB gzipped budget |
 | `make image` | Builds the Docker image |
+
+Browser checks live in `e2e/` and need Chromium: run `npm install` in that directory once, then `make e2e`. Each check starts its own server on an empty data directory; to run one by hand, start Bifrost on an empty directory and use `BASE=http://127.0.0.1:8080 npm run flows` or `npm run a11y`. The accessibility scan (axe-core) runs on a phone and a desktop in all seven themes and must report nothing.
 
 Project layout:
 
@@ -194,7 +207,7 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 | 5 | Themes and logo | Mode switch, six bundled themes, logo choice and per-user preferences. A test checks the contrast rule on every bundled theme. |
 | 6 | Starter catalogue | Embedded list of about 30 apps with icons, and the two-step add flow. |
 | 7 | Responsive and touch polish | Review at every breakpoint and orientation, a bottom bar and sheets on phones, touch behaviour for edit and reorder. Done. |
-| 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. |
+| 8 | Release | Multi-architecture image, accessibility pass, end-to-end tests of login, add app and reorder, and user docs. Done. |
 
 ### Risks to watch
 

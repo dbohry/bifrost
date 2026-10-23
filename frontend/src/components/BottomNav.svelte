@@ -81,9 +81,13 @@
     text-decoration: none;
     cursor: pointer;
   }
+  /* The label stays in the text colour: small accent text can miss 4.5:1 on some themes. */
   a[aria-current='page'] {
-    color: var(--accent);
+    color: var(--text);
     font-weight: 700;
+  }
+  a[aria-current='page'] svg {
+    color: var(--accent);
   }
   a:focus-visible,
   button:focus-visible {

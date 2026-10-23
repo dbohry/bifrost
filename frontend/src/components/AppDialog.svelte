@@ -122,7 +122,7 @@
       <label class="check logo-choice">
         <input type="checkbox" bind:checked={useIcon} />
         <AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} size={32} />
-        Show the app's logo (otherwise its first letter)
+        Show the app's logo
       </label>
     {/if}
     <label class="check">

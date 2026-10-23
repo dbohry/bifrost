@@ -1,0 +1,13 @@
+# docker compose up -d   then open http://localhost:8080
+services:
+  bifrost:
+    image: ghcr.io/dbohry/bifrost:latest
+    container_name: bifrost
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - bifrost-data:/data
+
+volumes:
+  bifrost-data:
