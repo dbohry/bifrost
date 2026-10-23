@@ -1,8 +1,9 @@
 name: Release
 
 # Every merge to main builds the image for amd64 and arm64 and publishes it to
-# Docker Hub as dbohry/bifrost:latest. It can also be started by hand. Changes
-# that cannot affect the image (docs, browser checks) are skipped.
+# Docker Hub as dbohry/bifrost:latest, then asks Portainer to redeploy it. It can
+# also be started by hand. Changes that cannot affect the image (docs, browser
+# checks) are skipped.
 on:
   push:
     branches: [main]
@@ -47,3 +48,15 @@ jobs:
             org.opencontainers.image.revision=${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  deploy:
+    name: Deploy
+    needs: image
+    runs-on: ubuntu-latest
+    steps:
+      # Repository secret DEPLOY_WEBHOOK: the Portainer webhook URL of the bifrost service.
+      # It is read from the environment so the URL never appears in the command line.
+      - name: Trigger Portainer webhook
+        env:
+          DEPLOY_WEBHOOK: ${{ secrets.DEPLOY_WEBHOOK }}
+        run: curl --fail --silent --show-error --location --request POST "$DEPLOY_WEBHOOK"

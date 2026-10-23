@@ -22,7 +22,7 @@
     class="open"
     href={app.url}
     draggable="false"
-    target={app.newTab ? '_blank' : undefined}
+    target="_blank"
     rel="noopener noreferrer"
     onclick={open}
   >

@@ -98,12 +98,35 @@ class Apps {
     await this.commitOrder(next);
   }
 
-  /** Moves an app one place earlier (-1) or later (+1) within its category. */
-  moveBy(app: AppItem, delta: -1 | 1) {
-    const group = this.groups.find((g) => g.name === app.category);
-    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
-    if (index < 0) return Promise.resolve();
-    return this.move(app.category, index, index + delta);
+  /**
+   * Moves the app at index `from` of one category into another category, at
+   * index `to` among that category's apps. The app takes on the new category,
+   * and the screen changes straight away and goes back if the server refuses.
+   */
+  async moveToCategory(fromCategory: string, toCategory: string, from: number, to: number) {
+    const app = this.items.filter((a) => a.category === fromCategory)[from];
+    if (!app || fromCategory === toCategory) return;
+
+    const rest = this.items.filter((a) => a.id !== app.id);
+    const target = rest.filter((a) => a.category === toCategory);
+    let at = rest.length;
+    if (to < target.length) at = rest.indexOf(target[to]);
+    else if (target.length > 0) at = rest.indexOf(target[target.length - 1]) + 1;
+
+    const moved = { ...app, category: toCategory };
+    const next = [...rest.slice(0, at), moved, ...rest.slice(at)];
+
+    const before = this.items;
+    this.items = next.map((a, i) => ({ ...a, position: i + 1 }));
+    try {
+      const { id, position: _p, ...input } = moved;
+      await api.updateApp(id, input);
+      await api.reorderApps(next.map((a) => a.id));
+    } catch (e) {
+      this.items = before;
+      this.error = e instanceof Error ? e.message : 'Could not move the app.';
+      if (e instanceof ApiError && e.status === 409) await this.refresh();
+    }
   }
 
   /** Shows a new order straight away and saves it, putting the old one back if the server refuses. */

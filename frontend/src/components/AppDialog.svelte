@@ -17,12 +17,10 @@
     onsave: (input: AppInput) => Promise<void>;
     ondelete: (id: number) => Promise<void>;
     /** Where the app sits in its category now, so it can be moved without dragging. */
-    order?: { index: number; count: number } | null;
-    onmove?: (delta: -1 | 1) => void;
     onclose: () => void;
   };
 
-  let { app, preset = null, onback, categories, onsave, ondelete, order = null, onmove, onclose }: Props = $props();
+  let { app, preset = null, onback, categories, onsave, ondelete, onclose }: Props = $props();
 
   let modal = $state<Modal>();
 
@@ -34,7 +32,6 @@
   let url = $state(start?.url ?? '');
   let category = $state(start?.category ?? picked?.category ?? '');
   let favourite = $state(start?.favourite ?? false);
-  let newTab = $state(start?.newTab ?? true);
 
   // The logo this app can show, if it has one to offer: its own, or the preset's.
   // Unticking it goes back to the first letter of the name.
@@ -67,7 +64,7 @@
 
   function submit(e: SubmitEvent) {
     e.preventDefault();
-    run(() => onsave({ name, url, category, favourite, newTab, icon: useIcon ? offered : '' }));
+    run(() => onsave({ name, url, category, favourite, newTab: true, icon: useIcon ? offered : '' }));
   }
 </script>
 
@@ -108,16 +105,6 @@
       {#each categories as c (c)}<option value={c}></option>{/each}
     </datalist>
 
-    {#if app && order && order.count > 1}
-      <div class="order">
-        <span id="{uid}-order">Position in {app.category}: {order.index + 1} of {order.count}</span>
-        <span class="move" role="group" aria-labelledby="{uid}-order">
-          <button class="button secondary" type="button" disabled={order.index === 0} onclick={() => onmove?.(-1)}>Move earlier</button>
-          <button class="button secondary" type="button" disabled={order.index === order.count - 1} onclick={() => onmove?.(1)}>Move later</button>
-        </span>
-      </div>
-    {/if}
-
     {#if offered}
       <label class="check logo-choice">
         <input type="checkbox" bind:checked={useIcon} />
@@ -128,10 +115,6 @@
     <label class="check">
       <input type="checkbox" bind:checked={favourite} />
       Pin to favourites
-    </label>
-    <label class="check">
-      <input type="checkbox" bind:checked={newTab} />
-      Open in a new tab
     </label>
 
     <footer>
@@ -189,21 +172,6 @@
   }
   .logo-choice {
     gap: 12px;
-  }
-  .order {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 13px;
-  }
-  .move {
-    display: flex;
-    gap: 8px;
-  }
-  .move .button {
-    height: 44px;
-    padding: 0 14px;
-    font-size: 13px;
   }
   footer {
     display: flex;
