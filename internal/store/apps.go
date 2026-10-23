@@ -98,6 +98,55 @@ func (s *Store) UpdateApp(ctx context.Context, userID, id int64, in AppInput, no
 		in.Favourite, in.NewTab, now.Unix(), id, userID))
 }
 
+// ErrOrderMismatch means a new order did not list exactly the user's apps,
+// for example because the page was out of date.
+var ErrOrderMismatch = errors.New("order does not match the user's apps")
+
+// ReorderApps sets the dashboard order. ids must list every one of the user's
+// apps exactly once, first to last. The whole change happens or none of it.
+func (s *Store) ReorderApps(ctx context.Context, userID int64, ids []int64) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	rows, err := tx.QueryContext(ctx, `SELECT id FROM apps WHERE user_id = ?`, userID)
+	if err != nil {
+		return err
+	}
+	owned := map[int64]bool{}
+	for rows.Next() {
+		var id int64
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return err
+		}
+		owned[id] = true
+	}
+	if err := rows.Close(); err != nil {
+		return err
+	}
+
+	if len(ids) != len(owned) {
+		return ErrOrderMismatch
+	}
+	seen := make(map[int64]bool, len(ids))
+	for _, id := range ids {
+		if !owned[id] || seen[id] {
+			return ErrOrderMismatch
+		}
+		seen[id] = true
+	}
+
+	for i, id := range ids {
+		if _, err := tx.ExecContext(ctx, `UPDATE apps SET position = ? WHERE id = ? AND user_id = ?`, i+1, id, userID); err != nil {
+			return err
+		}
+	}
+	return tx.Commit()
+}
+
 // DeleteApp removes an app. It returns ErrNotFound when the app does not exist
 // or belongs to someone else.
 func (s *Store) DeleteApp(ctx context.Context, userID, id int64) error {

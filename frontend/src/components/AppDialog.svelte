@@ -11,10 +11,13 @@
     categories: string[];
     onsave: (input: AppInput) => Promise<void>;
     ondelete: (id: number) => Promise<void>;
+    /** Where the app sits in its category now, so it can be moved without dragging. */
+    order?: { index: number; count: number } | null;
+    onmove?: (delta: -1 | 1) => void;
     onclose: () => void;
   };
 
-  let { app, categories, onsave, ondelete, onclose }: Props = $props();
+  let { app, categories, onsave, ondelete, order = null, onmove, onclose }: Props = $props();
 
   let modal = $state<Modal>();
 
@@ -77,6 +80,16 @@
       {#each categories as c (c)}<option value={c}></option>{/each}
     </datalist>
 
+    {#if app && order && order.count > 1}
+      <div class="order">
+        <span id="{uid}-order">Position in {app.category}: {order.index + 1} of {order.count}</span>
+        <span class="move" role="group" aria-labelledby="{uid}-order">
+          <button class="button secondary" type="button" disabled={order.index === 0} onclick={() => onmove?.(-1)}>Move earlier</button>
+          <button class="button secondary" type="button" disabled={order.index === order.count - 1} onclick={() => onmove?.(1)}>Move later</button>
+        </span>
+      </div>
+    {/if}
+
     <label class="check">
       <input type="checkbox" bind:checked={favourite} />
       Pin to favourites
@@ -130,6 +143,21 @@
     place-items: center;
     font-size: 12px;
     font-weight: 700;
+  }
+  .order {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .move {
+    display: flex;
+    gap: 8px;
+  }
+  .move .button {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 13px;
   }
   footer {
     display: flex;

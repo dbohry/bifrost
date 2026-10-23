@@ -90,6 +90,28 @@ func (s *server) updateApp(w http.ResponseWriter, r *http.Request, user store.Us
 	writeJSON(w, http.StatusOK, map[string]appJSON{"app": toAppJSON(app)})
 }
 
+// reorderApps saves a new dashboard order. The body lists every app id, first
+// to last. If the list does not match the user's apps (another tab added or
+// removed one) it is refused and the page should reload.
+func (s *server) reorderApps(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
+	var in struct {
+		IDs []int64 `json:"ids"`
+	}
+	if !decode(w, r, &in) {
+		return
+	}
+	err := s.store.ReorderApps(r.Context(), user.ID, in.IDs)
+	if errors.Is(err, store.ErrOrderMismatch) {
+		writeError(w, http.StatusConflict, "Your apps changed in another window. Reload the page and try again.")
+		return
+	}
+	if err != nil {
+		serverError(w, err)
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (s *server) deleteApp(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
 	id, ok := appID(w, r)
 	if !ok {

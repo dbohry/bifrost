@@ -94,6 +94,8 @@ export const api = {
   updateApp: (id: number, input: AppInput) =>
     request<{ app: AppItem }>('PUT', `/api/apps/${id}`, input),
   deleteApp: (id: number) => request<void>('DELETE', `/api/apps/${id}`),
+  /** Saves the dashboard order. `ids` must list every one of the user's apps. */
+  reorderApps: (ids: number[]) => request<void>('PUT', '/api/apps/order', { ids }),
   changePassword: (current: string, next: string) =>
     request<void>('POST', '/api/me/password', { current, new: next }),
 };
