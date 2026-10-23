@@ -1,4 +1,4 @@
-import { api, ApiError, type User } from './api';
+import { api, ApiError, setUnauthorizedHandler, type User } from './api';
 
 type Phase = 'loading' | 'setup' | 'anonymous' | 'authed';
 
@@ -56,3 +56,12 @@ class Session {
 }
 
 export const session = new Session();
+
+// If the server stops recognising the session while someone is using the app,
+// show the sign-in screen instead of a broken page.
+setUnauthorizedHandler(() => {
+  if (session.phase === 'authed') {
+    session.user = null;
+    session.phase = 'anonymous';
+  }
+});

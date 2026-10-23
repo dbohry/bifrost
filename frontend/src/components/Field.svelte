@@ -6,6 +6,8 @@
     autocomplete?: AutoFill;
     hint?: string;
     invalid?: boolean;
+    list?: string;
+    placeholder?: string;
     input?: HTMLInputElement;
   };
 
@@ -16,6 +18,8 @@
     autocomplete,
     hint,
     invalid = false,
+    list,
+    placeholder,
     input = $bindable(),
   }: Props = $props();
 
@@ -32,6 +36,8 @@
       bind:value
       type={type === 'password' && shown ? 'text' : type}
       {autocomplete}
+      {list}
+      {placeholder}
       aria-invalid={invalid}
       aria-describedby={hint ? `${id}-hint` : undefined}
       autocapitalize="off"

@@ -28,6 +28,11 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.HandleFunc("POST /api/logout", s.logout)
 	mux.Handle("GET /api/me", s.authed(true, s.me))
 	mux.Handle("POST /api/me/password", s.authed(true, s.changePassword))
+
+	mux.Handle("GET /api/apps", s.authed(false, s.listApps))
+	mux.Handle("POST /api/apps", s.authed(false, s.createApp))
+	mux.Handle("PUT /api/apps/{id}", s.authed(false, s.updateApp))
+	mux.Handle("DELETE /api/apps/{id}", s.authed(false, s.deleteApp))
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusNotFound, map[string]string{"error": "not found"})
 	})
