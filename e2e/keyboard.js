@@ -140,6 +140,125 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   check('in the app list, arrows move between apps', second && (await page.evaluate(() => document.activeElement.matches('.preset'))));
   await page.keyboard.press('Escape');
 
+
+  // --- nothing may be out of reach: from the first control, the arrows alone get to every other one ---
+  const FOCUSABLE = 'a[href],button:not([disabled]),input:not([disabled]):not([type=hidden]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])';
+  async function reachesEverything(label) {
+    await page.waitForTimeout(300);
+    const names = await page.evaluate((sel) => {
+      document.querySelectorAll('[data-reach]').forEach((e) => e.removeAttribute('data-reach'));
+      const scope = document.querySelector('dialog[open]') || document;
+      const els = [...scope.querySelectorAll(sel)].filter((el) => {
+        if (el.closest('[data-nav-skip],[inert],[hidden]')) return false;
+        const r = el.getBoundingClientRect();
+        return r.width && r.height && getComputedStyle(el).visibility !== 'hidden';
+      });
+      els.forEach((el, i) => el.setAttribute('data-reach', i));
+      return els.map((el) => (el.getAttribute('aria-label') || el.labels?.[0]?.textContent || el.textContent || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 30));
+    }, FOCUSABLE);
+    const seen = new Set([0]);
+    const queue = [0];
+    while (queue.length) {
+      const i = queue.shift();
+      for (const k of ['ArrowDown', 'ArrowUp', 'ArrowRight', 'ArrowLeft']) {
+        await page.evaluate((i) => document.querySelector(`[data-reach="${i}"]`)?.focus(), i);
+        await page.keyboard.press(k);
+        const at = await page.evaluate(() => document.activeElement.getAttribute('data-reach'));
+        if (at !== null && !seen.has(+at)) { seen.add(+at); queue.push(+at); }
+      }
+    }
+    const missed = names.filter((_, i) => !seen.has(i));
+    check(label + ': every control is reachable with the arrows', missed.length === 0, 'out of reach: ' + missed.join(', '));
+  }
+
+  await page.goto(BASE + '/');
+  await page.waitForSelector('text=5 apps');
+  await reachesEverything('the dashboard');
+  await page.locator('a.open', { hasText: 'Alpha' }).first().focus();
+  await page.keyboard.press('e');
+  await page.getByRole('dialog').waitFor();
+  await reachesEverything('the app details');
+  await page.getByRole('switch', { name: /Check if this app is online/ }).click();
+  await reachesEverything('the app details with status checks on');
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Add app' }).first().click();
+  await page.getByText('Step 1 of 2').waitFor();
+  await page.getByRole('button', { name: /custom app/i }).click();
+  await page.getByLabel('Name', { exact: true }).waitFor();
+  await reachesEverything('the add-app form');
+  await page.keyboard.press('Escape');
+  for (const [path, label] of [['/settings', 'Account'], ['/settings/appearance', 'Appearance'], ['/settings/status', 'Status checks'], ['/settings/backup', 'Backup'], ['/settings/users', 'Users']]) {
+    await page.goto(BASE + path);
+    await page.waitForSelector('main h1');
+    await reachesEverything('Settings, ' + label);
+  }
+  await page.getByRole('button', { name: 'Add user' }).click();
+  await page.getByRole('dialog').waitFor();
+  await reachesEverything('the add-user dialog');
+  await page.keyboard.press('Escape');
+
+  // the caret keeps the arrows until it reaches the end of the text, then they move on
+  await page.goto(BASE + '/');
+  await page.waitForSelector('text=5 apps');
+  await page.keyboard.press('/');
+  await page.keyboard.type('abc');
+  await page.keyboard.press('ArrowLeft');
+  check('in a text field, an arrow still moves the caret', await page.evaluate(() => document.activeElement.matches('input[type=text]') && document.activeElement.selectionStart === 2), await focused());
+  await page.keyboard.press('ArrowRight');
+  await page.keyboard.press('ArrowRight');
+  check('...and at the end of the text, ArrowRight leaves the field', await page.evaluate(() => !document.activeElement.matches('input[type=text]')), await focused());
+  await page.keyboard.press('ArrowLeft');
+  check('...and ArrowLeft comes back', await page.evaluate(() => document.activeElement.matches('input[type=text]')), await focused());
+  await page.keyboard.press('Escape');
+
+  // from the tiles, the controls on the right of the top bar are one Up (or two) away
+  await page.locator('a.open', { hasText: 'Alpha' }).first().focus();
+  let top = false;
+  for (let i = 0; i < 3 && !top; i++) { await press('ArrowUp'); top = await page.evaluate(() => document.activeElement.closest('.bar') !== null); }
+  check('ArrowUp from the tiles reaches the top bar', top, await focused());
+  for (let i = 0; i < 4 && (await focused()) !== 'Settings'; i++) await press('ArrowRight');
+  check('...and the arrows get to Settings', (await focused()) === 'Settings', await focused());
+
+  // radio buttons: arrows choose within the group, and also lead out of it
+  await page.goto(BASE + '/settings/appearance');
+  await page.waitForSelector('main h1');
+  await page.getByRole('radio', { name: /Dracula/ }).focus();
+  const group = await page.evaluate(() => document.activeElement.name);
+  await press('ArrowRight');
+  check('in Appearance, an arrow on a theme chooses the next one', await page.evaluate(() => document.activeElement.type === 'radio' && document.activeElement.checked), await focused());
+  await press('ArrowDown', 8);
+  check('...and the arrows lead out of the group instead of wrapping inside it', await page.evaluate((g) => document.activeElement.name !== g, group), await focused());
+
+  // focus is never left with nothing: after adding, after deleting, and after changing page
+  await page.goto(BASE + '/');
+  await page.waitForSelector('text=5 apps');
+  await page.getByRole('button', { name: 'Add app' }).first().focus();
+  await page.keyboard.press('Enter');
+  await page.getByRole('button', { name: /custom app/i }).click();
+  await page.getByLabel('Name', { exact: true }).fill('Foxtrot');
+  await page.getByLabel('Address').first().fill('foxtrot.lan');
+  await page.keyboard.press('Enter');
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  await page.waitForTimeout(300);
+  check('after adding an app, focus is back where it started', (await focused()).includes('Add app'), await focused());
+  await page.locator('a.open', { hasText: 'Foxtrot' }).first().focus();
+  await page.keyboard.press('e');
+  await page.getByRole('dialog').waitFor();
+  await page.getByRole('button', { name: 'Delete' }).click();
+  await page.getByRole('button', { name: 'Delete' }).last().click();
+  await page.getByRole('dialog').waitFor({ state: 'detached' });
+  await page.waitForTimeout(300);
+  check('after deleting an app, focus moves to a neighbouring tile', await page.evaluate(() => document.activeElement.matches('a.open')), await focused());
+  await page.goto(BASE + '/settings');
+  await page.waitForSelector('main h1');
+  await page.evaluate(() => document.activeElement?.blur());
+  await press('ArrowDown');
+  check('with nothing focused, an arrow enters the page (Settings: the section list)', (await focused()) === 'Account', await focused());
+  await page.goto(BASE + '/');
+  await page.waitForSelector('text=5 apps');
+  await press('ArrowDown');
+  check('with nothing focused, an arrow enters the page (dashboard: the tiles)', await page.evaluate(() => document.activeElement.matches('a.open')), await focused());
+
   await browser.close();
   check('no page errors', errors.length === 0, errors.join(' | '));
   console.log(failed ? `\n${failed} FAILED` : '\nALL PASSED');

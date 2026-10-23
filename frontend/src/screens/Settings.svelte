@@ -36,7 +36,7 @@
 <Topbar current="settings" />
 
 <div class="layout">
-  <nav aria-label="Settings sections">
+  <nav aria-label="Settings sections" data-nav-start>
     <a href="/settings" use:link aria-current={section === 'account' ? 'page' : undefined}>Account</a>
     <a href="/settings/appearance" use:link aria-current={section === 'appearance' ? 'page' : undefined}>Appearance</a>
     <a href="/settings/status" use:link aria-current={section === 'status' ? 'page' : undefined}>Status checks</a>
