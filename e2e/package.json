@@ -4,6 +4,7 @@
   "description": "Browser checks that run against a running Bifrost.",
   "scripts": { "a11y": "node a11y.js",
     "flows": "node flows.js",
-    "backup": "node backup.js" },
+    "backup": "node backup.js",
+    "views": "node views.js" },
   "devDependencies": { "axe-core": "4.10.2", "playwright": "^1.50.0" }
 }

@@ -17,7 +17,7 @@
   }
 </script>
 
-<div class="tile" class:editing data-sortable-item>
+<div class="tile" class:editing data-sortable-item data-app-id={app.id}>
   <a
     class="open"
     href={app.url}

@@ -81,6 +81,33 @@ class Apps {
     const next = [...this.items];
     slots.forEach((slot, k) => (next[slot] = inCategory[k]));
 
+    await this.commitOrder(next);
+  }
+
+  /**
+   * Moves the app at index `from` of the whole dashboard to index `to`, and
+   * saves the order. This is the move for the single list that is not split
+   * by category.
+   */
+  async moveAll(from: number, to: number) {
+    if (from === to || from < 0 || to < 0 || from >= this.items.length || to >= this.items.length) return;
+    const next = [...this.items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    await this.commitOrder(next);
+  }
+
+  /** Moves an app one place earlier (-1) or later (+1) within its category. */
+  moveBy(app: AppItem, delta: -1 | 1) {
+    const group = this.groups.find((g) => g.name === app.category);
+    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
+    if (index < 0) return Promise.resolve();
+    return this.move(app.category, index, index + delta);
+  }
+
+  /** Shows a new order straight away and saves it, putting the old one back if the server refuses. */
+  private async commitOrder(next: AppItem[]) {
     const before = this.items;
     this.items = next.map((a, i) => ({ ...a, position: i + 1 }));
     try {
@@ -91,14 +118,6 @@ class Apps {
       // Another window may have changed the list. Fetch it again.
       if (e instanceof ApiError && e.status === 409) await this.refresh();
     }
-  }
-
-  /** Moves an app one place earlier (-1) or later (+1) within its category. */
-  moveBy(app: AppItem, delta: -1 | 1) {
-    const group = this.groups.find((g) => g.name === app.category);
-    const index = group?.apps.findIndex((a) => a.id === app.id) ?? -1;
-    if (index < 0) return Promise.resolve();
-    return this.move(app.category, index, index + delta);
   }
 
   dismissError() {
