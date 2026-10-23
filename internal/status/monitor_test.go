@@ -202,3 +202,99 @@ func TestAShorterIntervalTakesEffectAtOnce(t *testing.T) {
 		t.Errorf("looks = %d, want a second look after 11 s", r.n)
 	}
 }
+
+type fakeHistory struct {
+	mu     sync.Mutex
+	saved  []store.HourCount
+	pruned []int64
+	fail   bool
+}
+
+func (f *fakeHistory) AddStatusCounts(_ context.Context, c []store.HourCount) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	if f.fail {
+		return context.DeadlineExceeded
+	}
+	f.saved = append(f.saved, c...)
+	return nil
+}
+
+func (f *fakeHistory) PruneStatusHours(_ context.Context, before int64) error {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.pruned = append(f.pruned, before)
+	return nil
+}
+
+func TestEveryLookIsCountedForTheHistoryBar(t *testing.T) {
+	r := newRig()
+	h := &fakeHistory{}
+	r.m.SetHistory(h)
+	r.src.set(target(7))
+
+	r.step(0) // hit
+	r.up = false
+	r.step(61 * time.Second) // miss
+	r.step(5 * time.Second)  // miss, now down
+	r.up = true
+	r.step(61 * time.Second) // hit
+
+	var pend, pendFails int64
+	for _, c := range r.m.Pending(7) {
+		pend += c.Checks
+		pendFails += c.Failures
+	}
+	if pend != 4 || pendFails != 2 {
+		t.Fatalf("pending = %+v", r.m.Pending(7))
+	}
+
+	r.m.Flush(context.Background())
+	if len(r.m.Pending(7)) != 0 {
+		t.Error("counts were not cleared after saving")
+	}
+	var checks, fails int64
+	for _, c := range h.saved {
+		checks += c.Checks
+		fails += c.Failures
+	}
+	if checks != 4 || fails != 2 || len(h.pruned) != 1 {
+		t.Errorf("saved %+v, pruned %v", h.saved, h.pruned)
+	}
+	if want := r.now.Unix()/3600 - keepHours; h.pruned[0] != want {
+		t.Errorf("pruned before %d, want %d", h.pruned[0], want)
+	}
+}
+
+func TestCountsAreKeptWhenSavingFails(t *testing.T) {
+	r := newRig()
+	h := &fakeHistory{fail: true}
+	r.m.SetHistory(h)
+	r.src.set(target(7))
+	r.step(0)
+	r.m.Flush(context.Background())
+	if got := r.m.Pending(7); len(got) != 1 || got[0].Checks != 1 {
+		t.Fatalf("after a failed save: %+v", got)
+	}
+	r.step(61 * time.Second)
+	h.mu.Lock()
+	h.fail = false
+	h.mu.Unlock()
+	r.m.Flush(context.Background())
+	var checks int64
+	for _, c := range h.saved {
+		checks += c.Checks
+	}
+	if checks != 2 || len(r.m.Pending(7)) != 0 {
+		t.Errorf("saved %+v pending %+v", h.saved, r.m.Pending(7))
+	}
+}
+
+func TestOwnsOnlyForTheRightUser(t *testing.T) {
+	r := newRig()
+	r.src.set(target(7))
+	r.step(0)
+	if !r.m.Owns(1, 7) || r.m.Owns(2, 7) || r.m.Owns(1, 8) {
+		t.Error("ownership is wrong")
+	}
+}

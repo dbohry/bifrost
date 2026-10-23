@@ -132,6 +132,27 @@ const close = (s) => new Promise((resolve) => { s.closeAllConnections?.(); s.clo
   check('the card stays inside the page', box.x >= 0 && box.x + box.width <= 1280, JSON.stringify(box));
   check('hovering the badge shows why and what was checked', text.includes('Answered with HTTP 500') && text.includes('http://127.0.0.1:19182'), text);
 
+  // the 24-hour bar
+  await card.locator('.bar').nth(23).waitFor();
+  check('the card has 24 hourly bars', (await card.locator('.bar').count()) === 24);
+  await page.waitForFunction((sel) => !document.querySelector(sel + ' .bar:last-child')?.classList.contains('none'), 'main .card:not([hidden])', { timeout: 8000 }).catch(() => {});
+  check('the current hour has data, and failures are filled in red', (await card.locator('.bar').last().evaluate((el) => !el.classList.contains('none') && !!el.querySelector('.fail'))));
+  check('hours with no data are empty', (await card.locator('.bar.none').count()) >= 20);
+  check('it says how much of the time the app was online', /\d+(\.\d)?% online/.test(await card.locator('.hist-head').textContent()), await card.locator('.hist-head').textContent());
+  // the mouse can travel from the badge onto the card and point at a bar
+  const lastBar = card.locator('.bar').last();
+  const bb = await lastBar.boundingBox();
+  const from = await badge('Fussy').boundingBox();
+  await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+  await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2, { steps: 8 });
+  await page.waitForTimeout(400);
+  check('the card stays while the mouse moves onto it', await card.isVisible());
+  const tipText = await lastBar.evaluate((el) => getComputedStyle(el, '::after').content);
+  check('pointing at a bar says what happened that hour', /checks failed/.test(tipText), tipText);
+  await page.mouse.move(5, 5);
+  await page.waitForTimeout(500);
+  check('the card goes when the mouse leaves', !(await card.isVisible()));
+
   // keyboard focus shows it too, since a keyboard has no hover
   await page.mouse.move(5, 5);
   await tile('Fussy').locator('a.open').focus();

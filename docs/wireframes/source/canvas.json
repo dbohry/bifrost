@@ -29,7 +29,8 @@
     "StatusDashboard.dc.html": {"expand": "fill", "h": 800, "title": "23 · Status checks: dashboard (dark, with hover card)", "w": 1280, "x": 0, "y": 11700},
     "StatusPhone.dc.html": {"h": 844, "title": "24 · Status checks: phone", "w": 390, "x": 1360, "y": 11700},
     "StatusDialog.dc.html": {"expand": "fill", "h": 900, "title": "25 · Status checks: app details", "w": 1280, "x": 0, "y": 12680},
-    "StatusStates.dc.html": {"expand": "fill", "h": 1280, "title": "26 · Status checks: states, rules and settings", "w": 1280, "x": 1360, "y": 12680}
+    "StatusStates.dc.html": {"expand": "fill", "h": 1280, "title": "26 · Status checks: states, rules and settings", "w": 1280, "x": 1360, "y": 12680},
+    "StatusHistory.dc.html": {"expand": "fill", "h": 1100, "title": "27 · Status checks: 24-hour history bar (proposal)", "w": 1280, "x": 0, "y": 14060}
   },
   "createdOnFiles": {"at": "2026-10-23T14:30:00Z", "v": 1},
   "designSystems": [],
@@ -49,7 +50,7 @@
     "PhoneLandscape.dc.html", "TabletLandscape.dc.html", "Logos.dc.html", "AppIcon.dc.html",
     "Login.dc.html", "LoginNord.dc.html", "LoginPhone.dc.html", "Users.dc.html",
     "FirstRun.dc.html", "FirstRunPhone.dc.html",
-    "StatusDashboard.dc.html", "StatusPhone.dc.html", "StatusDialog.dc.html", "StatusStates.dc.html"
+    "StatusDashboard.dc.html", "StatusPhone.dc.html", "StatusDialog.dc.html", "StatusStates.dc.html", "StatusHistory.dc.html"
   ],
   "pages": [],
   "title": "Bifrost Wireframes"

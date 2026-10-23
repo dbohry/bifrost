@@ -118,7 +118,7 @@ _Built._
 
 ## Status checks
 
-_Built, except two parts left out for now: the slow state and the summary line under the greeting. The boards still show both, and the first board's "Needs attention" filter became "Offline · N"._
+_Built, including the 24-hour bar, except two parts left out for now: the slow state and the summary line under the greeting. The boards still show both, and the first board's "Needs attention" filter became "Offline · N"._
 
 ### 23 · Status checks: dashboard (dark, with hover card)
 
@@ -135,3 +135,7 @@ _Built, except two parts left out for now: the slow state and the summary line u
 ### 26 · Status checks: states, rules and settings
 
 ![26 · Status checks: states, rules and settings](StatusStates.png)
+
+### 27 · Status checks: 24-hour history bar
+
+![27 · Status checks: 24-hour history bar](StatusHistory.png)

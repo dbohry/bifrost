@@ -206,3 +206,73 @@ func TestStatusChecksTravelInAnExport(t *testing.T) {
 		t.Errorf("after a round trip = %v", a)
 	}
 }
+
+func TestStatusHistoryHas24HourlyBars(t *testing.T) {
+	e := newEnv(t)
+	alex := e.browser()
+	alex.setup("alex", "correct-password")
+	r := alex.do("POST", "/api/apps", m{"name": "Nas", "url": "nas.lan", "checkEnabled": true})
+	mustStatus(t, r, 201)
+	id := int64(r.app()["id"].(float64))
+	path := "/api/status/" + strconv.FormatInt(id, 10) + "/history"
+
+	// no checks yet: 24 empty bars and no percentage
+	r = alex.do("GET", path, nil)
+	mustStatus(t, r, 200)
+	hours := r.json()["hours"].([]any)
+	if len(hours) != 24 || r.json()["uptime"] != nil {
+		t.Fatalf("empty history = %s", r.Body)
+	}
+
+	now := e.clock.Unix() / 3600
+	if err := e.s.store.AddStatusCounts(context.Background(), []store.HourCount{
+		{AppID: id, Hour: now - 23, Checks: 60, Failures: 0},
+		{AppID: id, Hour: now - 5, Checks: 60, Failures: 12},
+		{AppID: id, Hour: now - 24, Checks: 60, Failures: 60}, // too old to show
+	}); err != nil {
+		t.Fatal(err)
+	}
+	r = alex.do("GET", path, nil)
+	hours = r.json()["hours"].([]any)
+	first, mid, last := hours[0].(map[string]any), hours[18].(map[string]any), hours[23].(map[string]any)
+	if first["start"] != float64((now-23)*3600) || first["checks"] != float64(60) || mid["failures"] != float64(12) || last["start"] != float64(now*3600) || last["checks"] != float64(0) {
+		t.Errorf("hours = %v ... %v ... %v", first, mid, last)
+	}
+	// 120 checks, 12 failed: 90.0% passed. The hour that is too old is not counted.
+	if r.json()["uptime"] != float64(90) {
+		t.Errorf("uptime = %v", r.json()["uptime"])
+	}
+
+	// checks still waiting to be saved count too
+	e.s.monitor = status.NewMonitor(e.s.store, slog.New(slog.NewTextHandler(io.Discard, nil)))
+	e.s.monitor.SetCheck(func(context.Context, store.CheckTarget) status.Outcome { return status.Outcome{} })
+	if len(alex.do("GET", path, nil).json()["hours"].([]any)) != 24 {
+		t.Error("history broke with a fresh monitor")
+	}
+}
+
+func TestStatusHistoryBelongsToTheOwner(t *testing.T) {
+	e := newEnv(t)
+	alex := e.browser()
+	alex.setup("alex", "correct-password")
+	r := alex.do("POST", "/api/apps", m{"name": "Nas", "url": "nas.lan", "checkEnabled": true})
+	id := int64(r.app()["id"].(float64))
+	now := e.clock.Unix() / 3600
+	e.s.store.AddStatusCounts(context.Background(), []store.HourCount{{AppID: id, Hour: now, Checks: 10, Failures: 1}})
+
+	made := alex.do("POST", "/api/users", m{"username": "sam", "isAdmin": false})
+	temp := made.json()["temporaryPassword"].(string)
+	sam := e.browser()
+	sam.login("sam", temp, false)
+	mustStatus(t, sam.do("POST", "/api/me/password", m{"current": temp, "new": "sams-password-1"}), 204)
+	sam = e.browser()
+	sam.login("sam", "sams-password-1", false)
+
+	r = sam.do("GET", "/api/status/"+strconv.FormatInt(id, 10)+"/history", nil)
+	mustStatus(t, r, 200)
+	if r.json()["uptime"] != nil {
+		t.Errorf("Sam sees Alex's history: %s", r.Body)
+	}
+	mustStatus(t, alex.do("GET", "/api/status/abc/history", nil), 404)
+	mustStatus(t, e.browser().do("GET", "/api/status/1/history", nil), 401)
+}
