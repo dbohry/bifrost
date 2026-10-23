@@ -1,11 +1,10 @@
 name: CI
 
-# Pull requests and pushes to main run the lint, tests and size budget.
-# Publishing the image is the Release workflow's job.
+# Pull requests run the lint, tests and size budget. A merge to main does not run
+# them again, because the pull request already did. Publishing the image is the
+# Release workflow's job.
 on:
   pull_request:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
