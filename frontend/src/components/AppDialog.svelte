@@ -66,6 +66,7 @@
   let busy = $state(false);
   let confirmingDelete = $state(false);
   let touched = $state(false);
+  let tab = $state<'details' | 'status'>('details');
 
   const uid = $props.id();
 
@@ -109,7 +110,10 @@
   function submit(e: SubmitEvent) {
     e.preventDefault();
     touched = true;
-    if (name.trim() === '' || trimmed === '') return;
+    if (name.trim() === '' || trimmed === '') {
+      tab = 'details';
+      return;
+    }
     run(() =>
       onsave({
         name,
@@ -182,20 +186,19 @@
       </div>
     {/if}
 
-    <div class="preview" aria-hidden="true">
-      <AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} size={64} />
-      <div class="meta">
-        <span class="eyebrow">Preview</span>
-        <strong>{name.trim() || 'Untitled app'}</strong>
-        <span class="addr" class:empty={!trimmed}>{trimmed ? `${scheme}://${trimmed}` : 'No address yet'}</span>
-        <span class="chips">
-          <span class="chip">{category || 'Other'}</span>
-          {#if favourite}<span class="chip on">★ Favourite</span>{/if}
-        </span>
-      </div>
+    <div class="tabs" role="tablist" aria-label="App settings">
+      <button type="button" role="tab" id="{uid}-tab-details" aria-selected={tab === 'details'} aria-controls="{uid}-details" onclick={() => (tab = 'details')}>Details</button>
+      <button type="button" role="tab" id="{uid}-tab-status" aria-selected={tab === 'status'} aria-controls="{uid}-status" onclick={() => (tab = 'status')}>
+        Status check
+        <span class="badge" class:off={!checkEnabled}>{checkEnabled ? 'On' : 'Off'}</span>
+      </button>
     </div>
 
-    <Field label="Name" bind:value={name} invalid={nameInvalid} autocomplete="off" placeholder="Jellyfin" focusFirst />
+    <div class="panel" id="{uid}-details" role="tabpanel" aria-labelledby="{uid}-tab-details" hidden={tab !== 'details'}>
+    <div class="namerow">
+      <Field label="Name" bind:value={name} invalid={nameInvalid} autocomplete="off" placeholder="Jellyfin" focusFirst />
+      <AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} size={48} />
+    </div>
 
     <div class="field">
       <label for="{uid}-host">Address</label>
@@ -223,8 +226,6 @@
           Enter the address you open this app at, like jellyfin.home.lan:8096.
         {:else if picked && port}
           {picked.name} usually runs on port {port}. Use the address you open it at.
-        {:else}
-          The address you open this app at.
         {/if}
         {#if showPortHint}
           <button type="button" class="port" onclick={() => (host = `${trimmed.replace(/\/$/, '')}:${port}`)}>Add :{port}</button>
@@ -233,7 +234,7 @@
     </div>
 
     <div class="field" role="group" aria-labelledby="{uid}-cat">
-      <span class="label" id="{uid}-cat">Category <small>Pick one or create a new one</small></span>
+      <span class="label" id="{uid}-cat">Category <small>Optional</small></span>
       <div class="cats">
         {#each choices as c (c)}
           <button type="button" class="cat" aria-pressed={category === c} onclick={() => pickCategory(c)}>{c}</button>
@@ -253,63 +254,52 @@
           <button type="button" class="cat new" onclick={() => (creating = true)}>+ New</button>
         {/if}
       </div>
-      <span class="hint">Leave all unselected to file it under Other.</span>
     </div>
 
     <div class="opts" role="group" aria-label="Appearance and behaviour">
       {#if offered}
         <button type="button" class="opt" role="switch" aria-checked={useIcon} onclick={() => (useIcon = !useIcon)}>
-          <span class="mini"><AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} size={32} /></span>
-          <span class="text"><b>Show the app's logo</b><span>Off shows the first letter instead.</span></span>
+          <span class="text"><b>Show the app's logo</b></span>
           <span class="sw" aria-hidden="true"></span>
         </button>
       {/if}
       <button type="button" class="opt" role="switch" aria-checked={favourite} onclick={() => (favourite = !favourite)}>
-        <span class="mini glyph star">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3l2.7 5.6 6.1.8-4.5 4.2 1.1 6.1L12 16.8 6.6 19.7l1.1-6.1L3.2 9.4l6.1-.8z" /></svg>
-        </span>
-        <span class="text"><b>Pin to favourites</b><span>Shows it in the row at the top.</span></span>
+        <span class="text"><b>Pin to favourites</b></span>
         <span class="sw" aria-hidden="true"></span>
       </button>
       <button type="button" class="opt" role="switch" aria-checked={newTab} onclick={() => (newTab = !newTab)}>
-        <span class="mini glyph">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></svg>
-        </span>
-        <span class="text"><b>Open in a new tab</b><span>Keeps Bifrost open behind it.</span></span>
+        <span class="text"><b>Open in a new tab</b></span>
         <span class="sw" aria-hidden="true"></span>
       </button>
     </div>
-
-    <div class="opts" role="group" aria-label="Status">
-      <button type="button" class="opt" role="switch" aria-checked={checkEnabled} onclick={() => (checkEnabled = !checkEnabled)}>
-        <span class="mini glyph">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-8 4 16 3-8h4" /></svg>
-        </span>
-        <span class="text"><b>Check if this app is online</b><span>Shows a badge on its icon. Set how often in Settings.</span></span>
-        <span class="sw" aria-hidden="true"></span>
-      </button>
     </div>
 
-    {#if checkEnabled}
-      <section class="status" aria-label="Status check options">
+    <div class="panel" id="{uid}-status" role="tabpanel" aria-labelledby="{uid}-tab-status" hidden={tab !== 'status'}>
+      <div class="opts">
+        <button type="button" class="opt" role="switch" aria-checked={checkEnabled} onclick={() => (checkEnabled = !checkEnabled)}>
+          <span class="text"><b>Check if this app is online</b><span>Shows a badge on its icon. Set how often in Settings.</span></span>
+          <span class="sw" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      {#if checkEnabled}
         <Field
           label="Address to check (optional)"
           bind:value={checkUrl}
           autocomplete="off"
-          placeholder={trimmed ? `${scheme}://${trimmed}` : 'Same as the address above'}
-          hint="Leave empty to check the address above. The check runs on the machine that hosts Bifrost, so an address only that machine can reach works too."
+          placeholder={trimmed ? `${scheme}://${trimmed}` : 'Same as the address on Details'}
+          hint="Empty checks the address on Details. The check runs on the machine that hosts Bifrost, so an address only that machine can reach works too."
         />
-        <fieldset>
-          <legend>Counts as online when</legend>
-          <label class="choice" class:on={!checkStrict}>
-            <input type="radio" name="{uid}-rule" checked={!checkStrict} onchange={() => (checkStrict = false)} />
-            <span><strong>It answers at all</strong><br />Even a login page or an error page. Best for most apps.</span>
-          </label>
-          <label class="choice" class:on={checkStrict}>
-            <input type="radio" name="{uid}-rule" checked={checkStrict} onchange={() => (checkStrict = true)} />
-            <span><strong>It answers with success</strong><br />Only a normal page (HTTP 200 to 299) counts.</span>
-          </label>
-        </fieldset>
+        <div class="field" role="group" aria-labelledby="{uid}-rule">
+          <span class="label" id="{uid}-rule">Counts as online when</span>
+          <div class="seg">
+            <button type="button" aria-pressed={!checkStrict} onclick={() => (checkStrict = false)}>Any answer</button>
+            <button type="button" aria-pressed={checkStrict} onclick={() => (checkStrict = true)}>Success only</button>
+          </div>
+          <span class="hint">
+            {checkStrict ? 'Only a normal page (HTTP 200 to 299) counts.' : 'Even a login page or an error page counts. Best for most apps.'}
+          </span>
+        </div>
         <label class="check">
           <input type="checkbox" bind:checked={checkInsecure} />
           Trust a self-signed certificate
@@ -329,8 +319,8 @@
             {/if}
           </div>
         </div>
-      </section>
-    {/if}
+      {/if}
+    </div>
 
     <footer>
       {#if app && confirmingDelete}
@@ -397,68 +387,6 @@
     height: 4px;
     border-radius: 2px;
     background: var(--accent);
-  }
-
-  /* The tile as it will look on the dashboard. */
-  .preview {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 18px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%), var(--bg);
-  }
-  .meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-  }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-  }
-  .meta strong {
-    font-size: 19px;
-    line-height: 1.25;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .addr {
-    font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-    font-size: 12.5px;
-    color: var(--muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .addr.empty {
-    font-family: inherit;
-    font-style: italic;
-  }
-  .chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-  .chip {
-    padding: 3px 9px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    background: var(--surface);
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--muted);
-  }
-  .chip.on {
-    color: var(--accent);
-    border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
   }
 
   /* Address and category share the look of Field. */
@@ -622,8 +550,8 @@
     align-items: center;
     gap: 14px;
     width: 100%;
-    min-height: 60px;
-    padding: 10px 14px;
+    min-height: 48px;
+    padding: 6px 14px;
     border: 0;
     background: transparent;
     color: var(--text);
@@ -651,25 +579,6 @@
   .text span {
     font-size: 12.5px;
     color: var(--muted);
-  }
-  .mini {
-    flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    display: grid;
-    place-items: center;
-  }
-  .glyph {
-    border-radius: 10px;
-    background: var(--icon-bg);
-    color: var(--muted);
-  }
-  .glyph svg {
-    width: 20px;
-    height: 20px;
-  }
-  .opt[aria-checked='true'] .star {
-    color: var(--accent);
   }
   .sw {
     flex-shrink: 0;
@@ -699,53 +608,93 @@
     transform: translateX(18px);
   }
 
-  .status {
+  .tabs {
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    padding: 14px;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    gap: 4px;
+    margin: -6px 0 0;
+    border-bottom: 1px solid var(--border);
   }
-  .status fieldset {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    display: flex;
-    flex-direction: column;
+  .tabs button {
+    display: inline-flex;
+    align-items: center;
     gap: 8px;
-  }
-  .status legend {
-    padding: 0;
-    margin-bottom: 8px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-  .choice {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    min-height: 44px;
-    padding: 10px 12px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    font-size: 12px;
-    line-height: 1.4;
+    height: 44px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    background: transparent;
     color: var(--muted);
+    font: inherit;
+    font-weight: 600;
     cursor: pointer;
   }
-  .choice strong {
+  .tabs button[aria-selected='true'] {
     color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+  .tabs button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+  .badge {
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--ok) 18%, transparent);
+    color: var(--ok);
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge.off {
+    background: var(--icon-bg);
+    color: var(--muted);
+  }
+  .panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .panel[hidden] {
+    display: none;
+  }
+  .namerow {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .namerow :global(.field) {
+    flex: 1;
+    min-width: 0;
+  }
+  .seg {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+  }
+  .seg button {
+    height: 38px;
+    border: 0;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
     font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
   }
-  .choice.on {
-    border-color: var(--accent);
-    outline: 1px solid var(--accent);
+  .seg button[aria-pressed='true'] {
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: 0 0 0 1px var(--border);
   }
-  .choice input {
-    margin: 3px 0 0;
-    accent-color: var(--accent);
+  .seg button:focus-visible {
+    outline: 2px solid var(--accent);
   }
+
   .test {
     display: flex;
     flex-wrap: wrap;
@@ -781,6 +730,10 @@
   }
 
   footer {
+    position: sticky;
+    bottom: 0;
+    padding-top: 12px;
+    background: var(--surface);
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -798,10 +751,6 @@
     font-size: 14px;
   }
   @media (max-width: 440px) {
-    .preview {
-      padding: 14px;
-      gap: 14px;
-    }
     .buttons {
       flex: 1;
     }
