@@ -1,0 +1,36 @@
+[
+  {"id": "jellyfin", "name": "Jellyfin", "category": "Media", "port": 8096},
+  {"id": "plex", "name": "Plex", "category": "Media", "port": 32400},
+  {"id": "sonarr", "name": "Sonarr", "category": "Media", "port": 8989},
+  {"id": "radarr", "name": "Radarr", "category": "Media", "port": 7878},
+  {"id": "lidarr", "name": "Lidarr", "category": "Media", "port": 8686},
+  {"id": "prowlarr", "name": "Prowlarr", "category": "Media", "port": 9696},
+  {"id": "bazarr", "name": "Bazarr", "category": "Media", "port": 6767},
+  {"id": "overseerr", "name": "Overseerr", "category": "Media", "port": 5055},
+  {"id": "navidrome", "name": "Navidrome", "category": "Media", "port": 4533},
+  {"id": "audiobookshelf", "name": "Audiobookshelf", "category": "Media", "port": 13378},
+  {"id": "qbittorrent", "name": "qBittorrent", "category": "Media", "port": 8080},
+
+  {"id": "nextcloud", "name": "Nextcloud", "category": "Productivity", "port": 8080},
+  {"id": "paperless-ngx", "name": "Paperless-ngx", "category": "Productivity", "port": 8000},
+  {"id": "vaultwarden", "name": "Vaultwarden", "category": "Productivity", "port": 8080},
+  {"id": "immich", "name": "Immich", "category": "Productivity", "port": 2283},
+  {"id": "home-assistant", "name": "Home Assistant", "category": "Productivity", "port": 8123},
+  {"id": "syncthing", "name": "Syncthing", "category": "Productivity", "port": 8384},
+  {"id": "mealie", "name": "Mealie", "category": "Productivity", "port": 9925},
+  {"id": "linkding", "name": "Linkding", "category": "Productivity", "port": 9090},
+
+  {"id": "pi-hole", "name": "Pi-hole", "category": "Network", "port": 80},
+  {"id": "adguard-home", "name": "AdGuard Home", "category": "Network", "port": 3000},
+  {"id": "traefik", "name": "Traefik", "category": "Network", "port": 8080},
+  {"id": "nginx-proxy-manager", "name": "Nginx Proxy Manager", "category": "Network", "port": 81},
+
+  {"id": "grafana", "name": "Grafana", "category": "Monitoring", "port": 3000},
+  {"id": "uptime-kuma", "name": "Uptime Kuma", "category": "Monitoring", "port": 3001},
+  {"id": "portainer", "name": "Portainer", "category": "Monitoring", "port": 9000},
+  {"id": "netdata", "name": "Netdata", "category": "Monitoring", "port": 19999},
+
+  {"id": "gitea", "name": "Gitea", "category": "Development", "port": 3000},
+  {"id": "forgejo", "name": "Forgejo", "category": "Development", "port": 3000},
+  {"id": "woodpecker-ci", "name": "Woodpecker CI", "category": "Development", "port": 8000}
+]

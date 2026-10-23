@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { AppItem } from '../lib/api';
-  import { initial, tileColour } from '../lib/tile';
+  import AppIcon from './AppIcon.svelte';
 
   let {
     app,
@@ -17,7 +17,7 @@
     target={app.newTab ? '_blank' : undefined}
     rel="noopener noreferrer"
   >
-    <span class="icon" style:background={tileColour(app.id)} aria-hidden="true">{initial(app.name)}</span>
+    <AppIcon name={app.name} seed={app.id} icon={app.icon} />
     <span class="name">{app.name}</span>
   </a>
 
@@ -71,16 +71,6 @@
   .open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
-  }
-  .icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 14px;
-    display: grid;
-    place-items: center;
-    color: #fff;
-    font-size: 24px;
-    font-weight: 700;
   }
   .name {
     max-width: 100%;

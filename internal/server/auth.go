@@ -17,6 +17,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/dbohry/bifrost/internal/auth"
+	"github.com/dbohry/bifrost/internal/catalog"
 	"github.com/dbohry/bifrost/internal/store"
 	"github.com/dbohry/bifrost/internal/themes"
 )
@@ -54,7 +55,8 @@ type server struct {
 	version string
 	now     func() time.Time
 
-	themes []themes.Theme
+	themes  []themes.Theme
+	catalog *catalog.Catalog
 
 	loginByIP    *auth.Limiter
 	loginByUser  *auth.Limiter
@@ -74,8 +76,13 @@ func newServer(conn *sql.DB, version string) *server {
 	if err != nil {
 		panic(err) // the themes are built into the binary, and a test checks them
 	}
+	apps, err := catalog.Load()
+	if err != nil {
+		panic(err) // built into the binary, and a test checks it
+	}
 	return &server{
 		themes:       bundled,
+		catalog:      apps,
 		db:           conn,
 		store:        store.New(conn),
 		version:      version,

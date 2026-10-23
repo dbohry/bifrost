@@ -26,11 +26,13 @@ type appJSON struct {
 	Category  string `json:"category"`
 	Favourite bool   `json:"favourite"`
 	NewTab    bool   `json:"newTab"`
-	Position  int64  `json:"position"`
+	// Icon is the catalogue id of the app's icon, or "" for none.
+	Icon     string `json:"icon"`
+	Position int64  `json:"position"`
 }
 
 func toAppJSON(a store.App) appJSON {
-	return appJSON{ID: a.ID, Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Position: a.Position}
+	return appJSON{ID: a.ID, Name: a.Name, URL: a.URL, Category: a.Category, Favourite: a.Favourite, NewTab: a.NewTab, Icon: a.Icon, Position: a.Position}
 }
 
 // appBody is what the browser sends to add or change an app. newTab defaults
@@ -41,6 +43,7 @@ type appBody struct {
 	Category  string `json:"category"`
 	Favourite bool   `json:"favourite"`
 	NewTab    *bool  `json:"newTab"`
+	Icon      string `json:"icon"`
 }
 
 func (s *server) listApps(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
@@ -57,7 +60,7 @@ func (s *server) listApps(w http.ResponseWriter, r *http.Request, user store.Use
 }
 
 func (s *server) createApp(w http.ResponseWriter, r *http.Request, user store.User, _ store.Session) {
-	in, ok := readAppInput(w, r)
+	in, ok := s.readAppInput(w, r)
 	if !ok {
 		return
 	}
@@ -74,7 +77,7 @@ func (s *server) updateApp(w http.ResponseWriter, r *http.Request, user store.Us
 	if !ok {
 		return
 	}
-	in, ok := readAppInput(w, r)
+	in, ok := s.readAppInput(w, r)
 	if !ok {
 		return
 	}
@@ -140,12 +143,15 @@ func appID(w http.ResponseWriter, r *http.Request) (int64, bool) {
 	return id, true
 }
 
-func readAppInput(w http.ResponseWriter, r *http.Request) (store.AppInput, bool) {
+func (s *server) readAppInput(w http.ResponseWriter, r *http.Request) (store.AppInput, bool) {
 	var body appBody
 	if !decode(w, r, &body) {
 		return store.AppInput{}, false
 	}
 	in, msg := cleanApp(body)
+	if msg == "" && in.Icon != "" && !s.catalog.Has(in.Icon) {
+		msg = "That icon is not in the catalogue."
+	}
 	if msg != "" {
 		writeError(w, http.StatusBadRequest, msg)
 		return store.AppInput{}, false
@@ -181,7 +187,7 @@ func cleanApp(b appBody) (store.AppInput, string) {
 	if b.NewTab != nil {
 		newTab = *b.NewTab
 	}
-	return store.AppInput{Name: name, URL: address, Category: category, Favourite: b.Favourite, NewTab: newTab}, ""
+	return store.AppInput{Name: name, URL: address, Category: category, Favourite: b.Favourite, NewTab: newTab, Icon: strings.TrimSpace(b.Icon)}, ""
 }
 
 // cleanURL accepts http and https addresses only, so a tile can never be a

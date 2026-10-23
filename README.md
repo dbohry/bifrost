@@ -4,7 +4,7 @@ A lightweight, self-hosted application dashboard in the spirit of [Heimdall](htt
 
 ## Status
 
-Milestones 0 to 5 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo. The app catalogue and the rest are still to come. See the build order below.
+Milestones 0 to 6 are in place: the server runs, accounts work (first-run setup, sign in and out, sessions, adding and removing users, password resets), and you can add, edit, favourite, delete, search and reorder apps on your dashboard. You can also choose a theme and a logo, and add popular apps from a built-in list of 30. The rest of the polish is still to come. See the build order below.
 
 ## Running it
 
@@ -37,10 +37,11 @@ It prints a temporary password and signs that user out everywhere. They must cho
 ### Your dashboard
 
 - Each user has their own apps. Nothing is shared between users.
-- Add an app with a name, an address and a category. Type a new category name to create one, or leave it empty for "Other". A category typed in a different case from an existing one joins it.
+- **Add app** is two steps. Step 1 offers 30 popular self-hosted apps, each with its logo, which you can search or filter by category. Pick one and step 2 fills in its name and category, with a hint of the port it usually uses. You only add the address you open it at. Or choose **Custom app** to start from a blank form. Editing an app skips step 1.
+- A custom app has no preset to take a name from, so it starts blank. Add an app with a name, an address and a category. Type a new category name to create one, or leave it empty for "Other". A category typed in a different case from an existing one joins it.
 - Addresses without a scheme get `http://`. Only `http` and `https` are accepted, and addresses with a username or password in them are refused.
 - Starred apps also appear in a Favourites row at the top.
-- Tiles show the app's first letter on a coloured background.
+- Tiles show the app's logo if it came from the list, and otherwise its first letter on a coloured background. You can switch a logo off in the app's details.
 - Category tabs above the apps show one category at a time. **All** shows everything.
 - The search box filters your apps by name, category or address as you type. Press `/` to jump to it and Escape to clear it. Enter opens the best match, or searches the web with DuckDuckGo when nothing matches.
 - Drag a tile to change its place within its category. On a touch screen, press and hold first, so the page can still scroll. To move an app without dragging, open it with the pencil and use **Move earlier** or **Move later**. Dragging is off while a search is showing, and your order is saved.
@@ -84,6 +85,7 @@ Project layout:
 
 - `cmd/bifrost`: the binary and its subcommands (`serve`, `reset-password`, `healthcheck`, `version`)
 - `internal/config`, `internal/db`, `internal/store`, `internal/auth`, `internal/server`: configuration, SQLite with migrations, data access, passwords and rate limiting, HTTP handlers
+- `internal/catalog`: the built-in list of 30 apps (`catalog.json`) and their icons. A test checks that every entry has an icon and every icon is a plain, inert SVG with no scripts, event handlers or external links. The icons come from [dashboard-icons](https://github.com/homarr-labs/dashboard-icons) (Apache-2.0) and belong to their projects. See `internal/catalog/icons/NOTICE.md`
 - `internal/themes`: the colour themes. Each is a small JSON file in `internal/themes/bundled`, and a test fails if any theme is hard to read (text and secondary text 4.5:1, accent and status colours 3:1)
 - `frontend/src/theme.css` holds the two Bifrost themes for painting the page before a user's theme arrives. A test keeps it identical to the theme files, so change them together
 - `internal/webui`: embeds the built frontend
