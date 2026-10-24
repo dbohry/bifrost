@@ -249,6 +249,15 @@
     box-shadow: 0 10px 28px rgb(0 0 0 / 0.3);
     font-size: 12px;
   }
+  /*
+   * A touch screen never shows the card. Hidden by visibility alone it still
+   * widens the page where it hangs past the edge, so the page scrolls sideways.
+   */
+  @media (hover: none) {
+    .card {
+      display: none;
+    }
+  }
   @media (hover: hover) {
     .open:has(.status:hover) ~ .card,
     .open:focus-visible ~ .card,
