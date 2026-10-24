@@ -112,6 +112,16 @@ const check = (name, ok, extra = '') => { console.log((ok ? 'PASS ' : 'FAIL ') +
   check('on a phone the layout buttons are 44px', sizes.every(([w, h]) => w >= 44 && h >= 44), JSON.stringify(sizes));
   check('and the page does not scroll sideways', await p.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth));
   await p.screenshot({ path: process.env.SHOT || '/dev/null' }).catch(() => {});
+
+  // a tile with a status badge carries a hidden details card; it must not widen the page
+  // (a phone browser widens its layout to fit, so compare against the 390px it should have)
+  // three of them, so one lands in the right-hand column in either layout
+  for (const name of ['Foxtrot', 'Golf', 'Hotel'])
+    await p.evaluate((a) => fetch('/api/apps', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(a) }), { name, category: 'Z', url: BASE, checkEnabled: true });
+  await p.reload();
+  await p.waitForSelector('main .status', { timeout: 20000 });
+  const wide = await p.evaluate(() => document.documentElement.scrollWidth);
+  check('with status badges the page still does not scroll sideways', wide <= 390, String(wide));
   await phone.close();
 
   await browser.close();
