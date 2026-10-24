@@ -172,6 +172,12 @@
     text-decoration: none;
     border-radius: 14px;
   }
+  /* A small phone fits three tiles a row only with less padding. */
+  @media (max-width: 359px) {
+    .open {
+      padding: 20px 6px 16px;
+    }
+  }
   .open:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -348,11 +354,17 @@
     color: var(--text);
     overflow-wrap: anywhere;
   }
+  /* Up to two lines, so long names still read on a narrow phone tile. */
   .name {
     max-width: 100%;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-align: center;
     font-size: 14px;
     font-weight: 600;
   }

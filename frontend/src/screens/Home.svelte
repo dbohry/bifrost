@@ -413,6 +413,21 @@
   }
   /* On a phone the icons say enough, and the tabs need the room. */
   @media (max-width: 599px) {
+    /* The tabs get a full row of their own; the other controls go under them. */
+    .controls {
+      flex: 1 1 100%;
+      flex-wrap: wrap;
+    }
+    .controls :global(.tabs) {
+      order: -1;
+      flex: 1 1 100%;
+      /* Fade the right edge so a cut-off tab reads as "scroll for more". The padding lets the last tab scroll clear of it. */
+      padding-right: 32px;
+      mask-image: linear-gradient(to right, #000 calc(100% - 32px), transparent);
+    }
+    .edit-toggle {
+      margin-left: auto;
+    }
     .views button {
       width: 44px;
       height: 44px;
