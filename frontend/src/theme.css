@@ -75,6 +75,14 @@
   }
 }
 
+/*
+ * No double-tap zoom, so taps land at once and quick taps on a tile do not zoom
+ * the page. Pinch zoom stays: people who need larger text rely on it.
+ */
+html {
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   background: var(--bg);

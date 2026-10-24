@@ -153,4 +153,21 @@
       display: inline;
     }
   }
+  /* A phone on its side: every pixel of height counts, so Sign out is an icon again and the bar is slimmer. */
+  @media (max-height: 479px) {
+    .bar {
+      padding-top: calc(4px + var(--safe-top));
+      padding-bottom: 4px;
+    }
+    .out-icon {
+      display: block;
+    }
+    .signout .text {
+      display: none;
+    }
+    .actions :global(.button.signout) {
+      padding: 0;
+      width: 44px;
+    }
+  }
 </style>
