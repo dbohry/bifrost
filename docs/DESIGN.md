@@ -70,6 +70,7 @@ Why Bifrost is built the way it is, what is in it, and what comes later.
 - Responsive layouts for phone, tablet and desktop, in portrait and landscape.
 - Light and dark mode, with six bundled themes (Bifrost, Dracula, Nord, Gruvbox, Solarized Dark and Solarized Light), chosen per user.
 - Per-user logo choice: app icon (default), arches or spectrum.
+- Per-user page background: plain (default), glow and dots, rainbow bridge, quiet wash or blueprint grid.
 
 **Packaging**
 - Multi-architecture Docker image with a `/data` volume and a health check.

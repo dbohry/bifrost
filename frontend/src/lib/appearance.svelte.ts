@@ -1,4 +1,4 @@
-import { api, type Preferences, type Theme } from './api';
+import { api, type BackgroundKind, type Preferences, type Theme } from './api';
 import { setFavicon } from './favicon';
 
 const defaults: Preferences = {
@@ -6,13 +6,14 @@ const defaults: Preferences = {
   lightTheme: 'bifrost-light',
   darkTheme: 'bifrost-dark',
   logo: 'app',
+  background: 'plain',
 };
 
 // The last theme that was applied, kept in this browser so that reloading the
 // page paints the right colours straight away instead of flashing the default.
 const cacheKey = 'bifrost.theme';
 
-type Applied = { mode: 'light' | 'dark'; colors: Record<string, string> };
+type Applied = { mode: 'light' | 'dark'; colors: Record<string, string>; background?: BackgroundKind };
 
 /** `onAccent` becomes `--on-accent`. */
 const variable = (token: string) => '--' + token.replace(/[A-Z]/g, (c) => '-' + c.toLowerCase());
@@ -21,11 +22,15 @@ function paint(applied: Applied) {
   const root = document.documentElement;
   for (const [token, value] of Object.entries(applied.colors)) root.style.setProperty(variable(token), value);
   root.style.colorScheme = applied.mode;
+  // Plain is the absence of the attribute.
+  if (applied.background && applied.background !== 'plain') root.dataset.background = applied.background;
+  else delete root.dataset.background;
 }
 
 function unpaint() {
   const root = document.documentElement;
   root.removeAttribute('style');
+  delete root.dataset.background;
 }
 
 function remember(applied: Applied | null) {
@@ -119,7 +124,7 @@ class Appearance {
   private apply() {
     const theme = this.current;
     if (!theme) return;
-    const applied: Applied = { mode: theme.mode, colors: theme.colors };
+    const applied: Applied = { mode: theme.mode, colors: theme.colors, background: this.prefs.background };
     paint(applied);
     remember(applied);
     setFavicon(this.prefs.logo, theme.colors);

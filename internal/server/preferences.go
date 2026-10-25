@@ -9,8 +9,9 @@ import (
 )
 
 var (
-	modes = map[string]bool{"light": true, "dark": true, "system": true}
-	logos = map[string]bool{"app": true, "arches": true, "spectrum": true}
+	modes       = map[string]bool{"light": true, "dark": true, "system": true}
+	logos       = map[string]bool{"app": true, "arches": true, "spectrum": true}
+	backgrounds = map[string]bool{"plain": true, "glow": true, "bridge": true, "wash": true, "grid": true}
 )
 
 // defaultPreferences is what a user has until they change something: follow
@@ -20,6 +21,7 @@ var defaultPreferences = store.Preferences{
 	LightTheme: "bifrost-light",
 	DarkTheme:  "bifrost-dark",
 	Logo:       "app",
+	Background: "plain",
 }
 
 type preferencesJSON struct {
@@ -27,10 +29,11 @@ type preferencesJSON struct {
 	LightTheme string `json:"lightTheme"`
 	DarkTheme  string `json:"darkTheme"`
 	Logo       string `json:"logo"`
+	Background string `json:"background"`
 }
 
 func toPreferencesJSON(p store.Preferences) preferencesJSON {
-	return preferencesJSON{Mode: p.Mode, LightTheme: p.LightTheme, DarkTheme: p.DarkTheme, Logo: p.Logo}
+	return preferencesJSON{Mode: p.Mode, LightTheme: p.LightTheme, DarkTheme: p.DarkTheme, Logo: p.Logo, Background: p.Background}
 }
 
 // listThemes returns every theme. Themes are not secret, and the sign-in screen
@@ -84,12 +87,21 @@ func (s *server) setPreferences(w http.ResponseWriter, r *http.Request, user sto
 		writeError(w, http.StatusBadRequest, "Choose one of the dark themes for dark mode.")
 		return
 	}
+	// Clients from before backgrounds existed do not send one.
+	if in.Background == "" {
+		in.Background = defaultPreferences.Background
+	}
 	if !logos[in.Logo] {
 		writeError(w, http.StatusBadRequest, `Logo must be "app", "arches" or "spectrum".`)
 		return
 	}
 
-	p := store.Preferences{Mode: in.Mode, LightTheme: in.LightTheme, DarkTheme: in.DarkTheme, Logo: in.Logo}
+	if !backgrounds[in.Background] {
+		writeError(w, http.StatusBadRequest, `Background must be "plain", "glow", "bridge", "wash" or "grid".`)
+		return
+	}
+
+	p := store.Preferences{Mode: in.Mode, LightTheme: in.LightTheme, DarkTheme: in.DarkTheme, Logo: in.Logo, Background: in.Background}
 	if err := s.store.SetPreferences(r.Context(), user.ID, p); err != nil {
 		serverError(w, err)
 		return

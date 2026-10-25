@@ -36,14 +36,14 @@ func TestPreferencesDefaultsAndRoundTrip(t *testing.T) {
 
 	r := b.do("GET", "/api/preferences", nil)
 	mustStatus(t, r, 200)
-	want := map[string]any{"mode": "system", "lightTheme": "bifrost-light", "darkTheme": "bifrost-dark", "logo": "app"}
+	want := map[string]any{"mode": "system", "lightTheme": "bifrost-light", "darkTheme": "bifrost-dark", "logo": "app", "background": "plain"}
 	for k, v := range want {
 		if r.prefs()[k] != v {
 			t.Errorf("default %s = %v, want %v", k, r.prefs()[k], v)
 		}
 	}
 
-	save := m{"mode": "dark", "lightTheme": "solarized-light", "darkTheme": "dracula", "logo": "spectrum"}
+	save := m{"mode": "dark", "lightTheme": "solarized-light", "darkTheme": "dracula", "logo": "spectrum", "background": "bridge"}
 	r = b.do("PUT", "/api/preferences", save)
 	mustStatus(t, r, 200)
 	for k, v := range save {
@@ -78,6 +78,7 @@ func TestPreferencesAreValidated(t *testing.T) {
 		"unknown dark theme":            with("darkTheme", "nope"),
 		"a light theme as the dark one": with("darkTheme", "bifrost-light"),
 		"bad logo":                      with("logo", "star"),
+		"bad background":                with("background", "stripes"),
 		"empty":                         m{},
 		"css in a theme id":             with("darkTheme", "nord;}body{display:none"),
 	} {

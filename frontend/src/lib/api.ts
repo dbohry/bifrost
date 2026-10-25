@@ -15,6 +15,7 @@ export type Theme = {
 
 export type Mode = 'light' | 'dark' | 'system';
 export type LogoKind = 'app' | 'arches' | 'spectrum';
+export type BackgroundKind = 'plain' | 'glow' | 'bridge' | 'wash' | 'grid';
 
 /** How a user has set up the look of their dashboard. */
 export type Preferences = {
@@ -22,6 +23,7 @@ export type Preferences = {
   lightTheme: string;
   darkTheme: string;
   logo: LogoKind;
+  background: BackgroundKind;
 };
 
 /** A row on the Users screen. */

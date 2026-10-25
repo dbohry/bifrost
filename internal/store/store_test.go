@@ -277,7 +277,7 @@ func TestPreferences(t *testing.T) {
 		t.Fatalf("new user: err = %v, want ErrNotFound", err)
 	}
 
-	p := Preferences{Mode: "dark", LightTheme: "solarized-light", DarkTheme: "dracula", Logo: "spectrum"}
+	p := Preferences{Mode: "dark", LightTheme: "solarized-light", DarkTheme: "dracula", Logo: "spectrum", Background: "grid"}
 	if err := st.SetPreferences(ctx, alex.ID, p); err != nil {
 		t.Fatal(err)
 	}
@@ -286,7 +286,7 @@ func TestPreferences(t *testing.T) {
 	}
 
 	// Saving again replaces, and other users are untouched.
-	p2 := Preferences{Mode: "system", LightTheme: "bifrost-light", DarkTheme: "nord", Logo: "arches"}
+	p2 := Preferences{Mode: "system", LightTheme: "bifrost-light", DarkTheme: "nord", Logo: "arches", Background: "plain"}
 	if err := st.SetPreferences(ctx, alex.ID, p2); err != nil {
 		t.Fatal(err)
 	}
@@ -311,8 +311,9 @@ func TestPreferencesRefuseValuesOutsideTheirSets(t *testing.T) {
 	st := newStore(t)
 	u, _ := st.CreateFirstAdmin(ctx, "alex", "h", now)
 	for name, p := range map[string]Preferences{
-		"mode": {Mode: "sepia", LightTheme: "a", DarkTheme: "b", Logo: "app"},
-		"logo": {Mode: "dark", LightTheme: "a", DarkTheme: "b", Logo: "star"},
+		"mode":       {Mode: "sepia", LightTheme: "a", DarkTheme: "b", Logo: "app", Background: "plain"},
+		"logo":       {Mode: "dark", LightTheme: "a", DarkTheme: "b", Logo: "star", Background: "plain"},
+		"background": {Mode: "dark", LightTheme: "a", DarkTheme: "b", Logo: "app", Background: "stripes"},
 	} {
 		if err := st.SetPreferences(ctx, u.ID, p); err == nil {
 			t.Errorf("%s: expected the database to refuse it", name)
