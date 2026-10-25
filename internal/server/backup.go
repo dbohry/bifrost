@@ -146,10 +146,14 @@ func (s *server) importData(w http.ResponseWriter, r *http.Request, user store.U
 // validPreferences reports whether preferences name a known mode, logo and
 // themes of the right kind.
 func (s *server) validPreferences(in preferencesJSON) (store.Preferences, bool) {
+	// A file exported before backgrounds existed has none.
+	if in.Background == "" {
+		in.Background = defaultPreferences.Background
+	}
 	l, lok := s.theme(in.LightTheme)
 	d, dok := s.theme(in.DarkTheme)
-	if !modes[in.Mode] || !logos[in.Logo] || !lok || !dok || l.Mode != themes.Light || d.Mode != themes.Dark {
+	if !modes[in.Mode] || !logos[in.Logo] || !backgrounds[in.Background] || !lok || !dok || l.Mode != themes.Light || d.Mode != themes.Dark {
 		return store.Preferences{}, false
 	}
-	return store.Preferences{Mode: in.Mode, LightTheme: in.LightTheme, DarkTheme: in.DarkTheme, Logo: in.Logo}, true
+	return store.Preferences{Mode: in.Mode, LightTheme: in.LightTheme, DarkTheme: in.DarkTheme, Logo: in.Logo, Background: in.Background}, true
 }

@@ -1,7 +1,8 @@
 <script lang="ts">
+  import BackgroundSample from '../components/BackgroundSample.svelte';
   import Logo from '../components/Logo.svelte';
   import ThemePreview from '../components/ThemePreview.svelte';
-  import type { LogoKind, Mode, Theme } from '../lib/api';
+  import type { BackgroundKind, LogoKind, Mode, Theme } from '../lib/api';
   import { appearance } from '../lib/appearance.svelte';
 
   const modes: { value: Mode; label: string }[] = [
@@ -14,6 +15,14 @@
     { value: 'app', name: 'App icon', sub: 'Arches on a tile' },
     { value: 'arches', name: 'Arches', sub: 'Bare arches, one colour' },
     { value: 'spectrum', name: 'Spectrum', sub: 'Five-colour rainbow' },
+  ];
+
+  const backgrounds: { value: BackgroundKind; name: string; sub: string }[] = [
+    { value: 'plain', name: 'Plain', sub: 'Just the theme colour' },
+    { value: 'glow', name: 'Glow and dots', sub: 'Accent glows over a dot grid' },
+    { value: 'bridge', name: 'Rainbow bridge', sub: 'A soft spectrum arc' },
+    { value: 'wash', name: 'Quiet wash', sub: 'An accent tint fading down' },
+    { value: 'grid', name: 'Blueprint grid', sub: 'Thin square grid lines' },
   ];
 
   // The preview shows the theme in use, until you point at or pick another.
@@ -97,6 +106,27 @@
       {/if}
     </div>
   </div>
+
+  <fieldset class="group">
+    <legend>Background</legend>
+    <div class="backgrounds">
+      {#each backgrounds as b (b.value)}
+        <label class="bg-card" class:on={appearance.prefs.background === b.value}>
+          <input
+            type="radio"
+            name="background"
+            value={b.value}
+            checked={appearance.prefs.background === b.value}
+            onchange={() => appearance.save({ background: b.value })}
+          />
+          <BackgroundSample kind={b.value} />
+          <span class="name">{b.name}</span>
+          <span class="sub">{b.sub}</span>
+          {#if b.value === 'plain'}<span class="tag">Default</span>{/if}
+        </label>
+      {/each}
+    </div>
+  </fieldset>
 
   <fieldset class="group">
     <legend>Logo</legend>
@@ -257,12 +287,14 @@
     font-size: 14px;
   }
 
-  .logos {
+  .logos,
+  .backgrounds {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
   }
-  .logo-card {
+  .logo-card,
+  .bg-card {
     position: relative;
     flex: 1 1 150px;
     max-width: 200px;
@@ -278,15 +310,18 @@
     cursor: pointer;
     text-align: center;
   }
-  .logo-card.on {
+  .logo-card.on,
+  .bg-card.on {
     border-color: var(--accent);
   }
-  .logo-card .name {
+  .logo-card .name,
+  .bg-card .name {
     margin-top: 4px;
     font-size: 14px;
     font-weight: 600;
   }
-  .logo-card .sub {
+  .logo-card .sub,
+  .bg-card .sub {
     font-size: 12px;
     color: var(--muted);
   }
