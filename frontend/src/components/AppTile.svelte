@@ -74,7 +74,7 @@
     onfocus={reveal}
   >
     <span class="icon-wrap">
-      <AppIcon name={app.name} seed={app.id} icon={app.icon} />
+      <AppIcon name={app.name} seed={app.id} icon={app.icon} siteUrl={app.url} />
       {#if result}
         <span class="status {result.state}" role="img" aria-label={label} onmouseenter={reveal}>{down ? '×' : ''}</span>
       {/if}
