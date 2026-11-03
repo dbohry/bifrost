@@ -61,6 +61,7 @@ type server struct {
 
 	monitor      *status.Monitor
 	testByUser   *auth.Limiter
+	favicons     faviconCache
 	loginByIP    *auth.Limiter
 	loginByUser  *auth.Limiter
 	passwordByID *auth.Limiter

@@ -48,6 +48,9 @@ export type CatalogEntry = {
 /** The address of a catalogue icon. */
 export const iconUrl = (id: string) => `/api/catalog/icons/${encodeURIComponent(id)}.svg`;
 
+/** The favicon the server finds at an app's address; a 404 means the site has none. */
+export const faviconUrl = (address: string) => `/api/favicon?url=${encodeURIComponent(address)}`;
+
 /** An app tile on a user's dashboard. */
 export type AppItem = {
   id: number;

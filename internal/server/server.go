@@ -58,6 +58,7 @@ func (s *server) routes(assets fs.FS) http.Handler {
 	mux.Handle("GET /api/status/settings", s.authed(false, s.getStatusSettings))
 	mux.Handle("PUT /api/status/settings", s.authed(false, s.setStatusSettings))
 	mux.Handle("POST /api/status/test", s.authed(false, s.testStatus))
+	mux.Handle("GET /api/favicon", s.authed(false, s.siteFavicon))
 	mux.Handle("GET /api/export", s.authed(false, s.exportData))
 	mux.Handle("POST /api/import", s.authed(false, s.importData))
 	mux.HandleFunc("/api/", func(w http.ResponseWriter, r *http.Request) {

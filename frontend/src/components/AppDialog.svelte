@@ -55,6 +55,14 @@
   let useIcon = $state(offered !== '');
 
   // A preset knows the port its app usually uses, which helps with the address.
+  // With no catalogue logo, look for the site's own favicon once the address has settled.
+  let lookup = $state(start?.url ?? '');
+  $effect(() => {
+    const address = trimmed ? `${scheme}://${trimmed}` : '';
+    const t = setTimeout(() => (lookup = address), 600);
+    return () => clearTimeout(t);
+  });
+
   const port = picked && picked.port !== 80 ? picked.port : null;
 
   // Choices are the user's categories, plus the preset's if it is a new one.
@@ -197,7 +205,7 @@
     <div class="panel" id="{uid}-details" role="tabpanel" aria-labelledby="{uid}-tab-details" hidden={tab !== 'details'}>
     <div class="namerow">
       <Field label="Name" bind:value={name} invalid={nameInvalid} autocomplete="off" placeholder="Jellyfin" focusFirst />
-      <AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} size={48} />
+      <AppIcon name={name || '?'} seed={app?.id ?? 0} icon={useIcon ? offered : ''} siteUrl={offered ? '' : lookup} size={48} />
     </div>
 
     <div class="field">

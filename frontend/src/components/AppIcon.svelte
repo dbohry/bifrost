@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { iconUrl } from '../lib/api';
+  import { faviconUrl, iconUrl } from '../lib/api';
   import { initial, tileColour } from '../lib/tile';
 
   type Props = {
@@ -9,20 +9,25 @@
     seed: number;
     /** The catalogue icon, or "" for the first letter. */
     icon?: string;
+    /** The app's address. With no catalogue icon, the site's own favicon is tried before the letter. */
+    siteUrl?: string;
     size?: number;
   };
 
-  let { name, seed, icon = '', size = 52 }: Props = $props();
+  let { name, seed, icon = '', siteUrl = '', size = 52 }: Props = $props();
 
   // If an icon cannot be loaded, show the letter instead of a broken picture.
   let broken = $state(false);
   $effect(() => {
     icon;
+    siteUrl;
     broken = false;
   });
+
+  const src = $derived(icon ? iconUrl(icon) : siteUrl ? faviconUrl(siteUrl) : '');
 </script>
 
-{#if icon && !broken}
+{#if src && !broken}
   <!-- Catalogue logos are drawn for light backgrounds, so they sit on a white tile in every theme. -->
   <span
     class="icon art"
@@ -31,7 +36,7 @@
     style:padding="{Math.round(size * 0.14)}px"
     aria-hidden="true"
   >
-    <img src={iconUrl(icon)} alt="" loading="lazy" decoding="async" draggable="false" onerror={() => (broken = true)} />
+    <img {src} alt="" loading="lazy" decoding="async" draggable="false" onerror={() => (broken = true)} />
   </span>
 {:else}
   <span
