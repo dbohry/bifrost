@@ -37,13 +37,13 @@
     <button
       class="button secondary signout"
       aria-label={`Sign out ${session.user?.username ?? ''}`.trim()}
+      title={`Sign out ${session.user?.username ?? ''}`.trim()}
       onclick={() => session.logout()}
     >
       <svg class="out-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M9 4H5v16h4" />
         <path d="M16 8l4 4-4 4M20 12H9" />
       </svg>
-      <span class="text" aria-hidden="true">Sign out<span class="who">&nbsp;({session.user?.username})</span></span>
     </button>
   </span>
 </header>
@@ -93,6 +93,7 @@
     font-size: 14px;
   }
   .icon-button {
+    box-sizing: border-box;
     width: 44px;
     height: 44px;
     border: 1px solid var(--border);
@@ -105,21 +106,20 @@
     border-color: var(--accent);
     color: var(--accent);
   }
-  .who {
-    display: none;
-  }
-  /* On a phone Sign out is just an icon, so the brand and buttons fit on one row. */
   .signout {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .signout .text {
-    display: none;
-  }
+  /* Add app, Settings and Sign out are three identical 44px icon squares. */
+  .actions :global(.button.add),
   .actions :global(.button.signout) {
     padding: 0;
     width: 44px;
+  }
+  .actions :global(.button.add) {
+    display: grid;
+    place-items: center;
   }
   /* The buttons live in the bottom bar here. BottomNav uses the same query. */
   @media (max-width: 599px) and (min-height: 480px) {
@@ -128,16 +128,6 @@
     }
   }
   @media (min-width: 640px) {
-    .out-icon {
-      display: none;
-    }
-    .signout .text {
-      display: inline;
-    }
-    .actions :global(.button.signout) {
-      padding: 0 16px;
-      width: auto;
-    }
     .bar {
       padding: calc(12px + var(--safe-top)) max(32px, var(--safe-right)) 12px max(32px, var(--safe-left));
       flex-wrap: nowrap;
@@ -149,25 +139,12 @@
       padding-bottom: 0;
       margin: 0 auto;
     }
-    .who {
-      display: inline;
-    }
   }
-  /* A phone on its side: every pixel of height counts, so Sign out is an icon again and the bar is slimmer. */
+  /* A phone on its side: every pixel of height counts, so the bar is slimmer. */
   @media (max-height: 479px) {
     .bar {
       padding-top: calc(4px + var(--safe-top));
       padding-bottom: 4px;
-    }
-    .out-icon {
-      display: block;
-    }
-    .signout .text {
-      display: none;
-    }
-    .actions :global(.button.signout) {
-      padding: 0;
-      width: 44px;
     }
   }
 </style>

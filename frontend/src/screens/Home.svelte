@@ -157,8 +157,8 @@
   {#snippet center()}
     <SearchBox bind:value={query} bind:input={searchInput} onenter={enter} />
   {/snippet}
-  <button class="button add" onclick={() => adding()}>
-    <span aria-hidden="true">+</span> Add app
+  <button class="button add" aria-label="Add app" title="Add app" onclick={() => adding()}>
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
   </button>
 </Topbar>
 
