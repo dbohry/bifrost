@@ -34,6 +34,10 @@
         <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
       </svg>
     </a>
+    <span class="user" aria-hidden="true">
+      <span class="avatar">{(session.user?.username ?? '?').charAt(0).toUpperCase()}</span>
+      <span class="name">{session.user?.username}</span>
+    </span>
     <button
       class="button secondary signout"
       aria-label={`Sign out ${session.user?.username ?? ''}`.trim()}
@@ -43,7 +47,7 @@
         <path d="M9 4H5v16h4" />
         <path d="M16 8l4 4-4 4M20 12H9" />
       </svg>
-      <span class="text" aria-hidden="true">Sign out<span class="who">&nbsp;({session.user?.username})</span></span>
+      <span class="text" aria-hidden="true">Sign out</span>
     </button>
   </span>
 </header>
@@ -101,12 +105,37 @@
     display: grid;
     place-items: center;
   }
-  .icon-button.active {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
-  .who {
+  .user {
     display: none;
+  }
+  .avatar {
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .name {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  /* Quiet secondary actions so "Add app" is the one obvious button. */
+  .icon-button,
+  .actions :global(.button.signout) {
+    border-color: transparent;
+    background: transparent;
+  }
+  .icon-button.active {
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .icon-button:hover,
+  .actions :global(.button.signout:hover) {
+    background: color-mix(in srgb, var(--text) 8%, transparent);
   }
   /* On a phone Sign out is just an icon, so the brand and buttons fit on one row. */
   .signout {
@@ -149,8 +178,13 @@
       padding-bottom: 0;
       margin: 0 auto;
     }
-    .who {
-      display: inline;
+    .user {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 8px;
+      padding-left: 16px;
+      border-left: 1px solid var(--border);
     }
   }
   /* A phone on its side: every pixel of height counts, so Sign out is an icon again and the bar is slimmer. */
