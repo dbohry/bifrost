@@ -34,20 +34,16 @@
         <path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4" />
       </svg>
     </a>
-    <span class="user" aria-hidden="true">
-      <span class="avatar">{(session.user?.username ?? '?').charAt(0).toUpperCase()}</span>
-      <span class="name">{session.user?.username}</span>
-    </span>
     <button
       class="button secondary signout"
       aria-label={`Sign out ${session.user?.username ?? ''}`.trim()}
+      title={`Sign out ${session.user?.username ?? ''}`.trim()}
       onclick={() => session.logout()}
     >
       <svg class="out-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M9 4H5v16h4" />
         <path d="M16 8l4 4-4 4M20 12H9" />
       </svg>
-      <span class="text" aria-hidden="true">Sign out</span>
     </button>
   </span>
 </header>
@@ -97,6 +93,7 @@
     font-size: 14px;
   }
   .icon-button {
+    box-sizing: border-box;
     width: 44px;
     height: 44px;
     border: 1px solid var(--border);
@@ -105,50 +102,24 @@
     display: grid;
     place-items: center;
   }
-  .user {
-    display: none;
-  }
-  .avatar {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--on-accent);
-    font-size: 13px;
-    font-weight: 700;
-  }
-  .name {
-    font-size: 14px;
-    color: var(--muted);
-  }
-  /* Quiet secondary actions so "Add app" is the one obvious button. */
-  .icon-button,
-  .actions :global(.button.signout) {
-    border-color: transparent;
-    background: transparent;
-  }
   .icon-button.active {
+    border-color: var(--accent);
     color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 14%, transparent);
   }
-  .icon-button:hover,
-  .actions :global(.button.signout:hover) {
-    background: color-mix(in srgb, var(--text) 8%, transparent);
-  }
-  /* On a phone Sign out is just an icon, so the brand and buttons fit on one row. */
   .signout {
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .signout .text {
-    display: none;
-  }
+  /* Add app, Settings and Sign out are three identical 44px icon squares. */
+  .actions :global(.button.add),
   .actions :global(.button.signout) {
     padding: 0;
     width: 44px;
+  }
+  .actions :global(.button.add) {
+    display: grid;
+    place-items: center;
   }
   /* The buttons live in the bottom bar here. BottomNav uses the same query. */
   @media (max-width: 599px) and (min-height: 480px) {
@@ -157,16 +128,6 @@
     }
   }
   @media (min-width: 640px) {
-    .out-icon {
-      display: none;
-    }
-    .signout .text {
-      display: inline;
-    }
-    .actions :global(.button.signout) {
-      padding: 0 16px;
-      width: auto;
-    }
     .bar {
       padding: calc(12px + var(--safe-top)) max(32px, var(--safe-right)) 12px max(32px, var(--safe-left));
       flex-wrap: nowrap;
@@ -178,30 +139,12 @@
       padding-bottom: 0;
       margin: 0 auto;
     }
-    .user {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      margin-left: 8px;
-      padding-left: 16px;
-      border-left: 1px solid var(--border);
-    }
   }
-  /* A phone on its side: every pixel of height counts, so Sign out is an icon again and the bar is slimmer. */
+  /* A phone on its side: every pixel of height counts, so the bar is slimmer. */
   @media (max-height: 479px) {
     .bar {
       padding-top: calc(4px + var(--safe-top));
       padding-bottom: 4px;
-    }
-    .out-icon {
-      display: block;
-    }
-    .signout .text {
-      display: none;
-    }
-    .actions :global(.button.signout) {
-      padding: 0;
-      width: 44px;
     }
   }
 </style>
