@@ -8,7 +8,7 @@ name: Release
 # git tag v1.1.0 && git push origin v1.1.0): that publishes exactly that version,
 # and the next merge counts on from it (1.1.1). Tags pushed by this workflow do not
 # start it again. It can also be started by hand. Merges that cannot affect the
-# image (docs, browser checks) are skipped.
+# image (docs, browser checks, deploy/ files) are skipped.
 on:
   push:
     branches: [main]
@@ -16,6 +16,7 @@ on:
       - '**.md'
       - 'docs/**'
       - 'e2e/**'
+      - 'deploy/**'
     tags: ['v*.*.*']
   workflow_dispatch:
 

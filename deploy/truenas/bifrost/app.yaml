@@ -1,0 +1,34 @@
+app_version: 1.0.2
+capabilities: []
+categories:
+- productivity
+changelog_url: https://github.com/dbohry/bifrost/tags
+date_added: '2026-11-08'
+description: A small, fast, self-hosted start page for your apps and services.
+home: https://github.com/dbohry/bifrost
+host_mounts: []
+icon: https://media.sys.truenas.net/apps/bifrost/icons/icon.svg
+keywords:
+- dashboard
+- startpage
+- homepage
+lib_version: 2.3.18
+lib_version_hash: ''
+maintainers:
+- email: dev@truenas.com
+  name: truenas
+  url: https://www.truenas.com/
+name: bifrost
+run_as_context:
+- description: Container [bifrost] can run as any non-root user and group.
+  gid: 568
+  group_name: Host group is [apps]
+  uid: 568
+  user_name: Host user is [apps]
+screenshots: []
+sources:
+- https://github.com/dbohry/bifrost
+- https://hub.docker.com/r/dbohry/bifrost
+title: Bifrost
+train: community
+version: 1.0.0
