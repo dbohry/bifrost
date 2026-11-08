@@ -4,9 +4,11 @@ name: Release
 # version (the patch number of the newest vX.Y.Z tag plus one; 1.0.0 when there is
 # none yet) and publishes it to Docker Hub as dbohry/bifrost:X.Y.Z, :X.Y, :X and
 # :latest. The commit is then tagged vX.Y.Z and Portainer is asked to redeploy.
-# To move to a new minor or major version, push that tag by hand (for example
-# v1.1.0); the next merge is then published as 1.1.1. It can also be started by hand.
-# Changes that cannot affect the image (docs, browser checks) are skipped.
+# To release a new minor or major version, push its tag by hand (for example
+# git tag v1.1.0 && git push origin v1.1.0): that publishes exactly that version,
+# and the next merge counts on from it (1.1.1). Tags pushed by this workflow do not
+# start it again. It can also be started by hand. Merges that cannot affect the
+# image (docs, browser checks) are skipped.
 on:
   push:
     branches: [main]
@@ -14,6 +16,7 @@ on:
       - '**.md'
       - 'docs/**'
       - 'e2e/**'
+    tags: ['v*.*.*']
   workflow_dispatch:
 
 permissions:
@@ -33,18 +36,28 @@ jobs:
           fetch-depth: 0 # the tags are needed to find the last version
       - name: Work out the next version
         run: |
-          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
-          if [ -z "$last" ]; then
-            next=1.0.0
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            # A tag pushed by hand: publish exactly that version.
+            next=${GITHUB_REF_NAME#v}
+            if ! [[ $next =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::Tag $GITHUB_REF_NAME is not vX.Y.Z"
+              exit 1
+            fi
+            echo "Version: $next (from tag $GITHUB_REF_NAME)"
           else
-            IFS=. read -r major minor patch <<< "${last#v}"
-            next="$major.$minor.$((patch + 1))"
+            last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+            if [ -z "$last" ]; then
+              next=1.0.0
+            else
+              IFS=. read -r major minor patch <<< "${last#v}"
+              next="$major.$minor.$((patch + 1))"
+            fi
+            echo "Version: $next (previous: ${last:-none})"
           fi
           IFS=. read -r major minor patch <<< "$next"
           echo "VERSION=$next" >> "$GITHUB_ENV"
           echo "VERSION_MINOR=$major.$minor" >> "$GITHUB_ENV"
           echo "VERSION_MAJOR=$major" >> "$GITHUB_ENV"
-          echo "Version: $next (previous: ${last:-none})"
       - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
       # Repository secrets: DOCKERHUB_USERNAME, and DOCKERHUB_TOKEN (an access token with
@@ -71,7 +84,9 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
       # Only after the image is published, so a failed build does not use up a version.
+      # A release started by a tag already has one.
       - name: Tag the release
+        if: github.ref_type != 'tag'
         run: |
           git tag "v$VERSION"
           git push origin "v$VERSION"
