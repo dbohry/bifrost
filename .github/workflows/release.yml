@@ -1,9 +1,12 @@
 name: Release
 
-# Every merge to main builds the image for amd64 and arm64 and publishes it to
-# Docker Hub as dbohry/bifrost:latest, then asks Portainer to redeploy it. It can
-# also be started by hand. Changes that cannot affect the image (docs, browser
-# checks) are skipped.
+# Every merge to main builds the image for amd64 and arm64, gives it the next
+# version (the patch number of the newest vX.Y.Z tag plus one; 1.0.0 when there is
+# none yet) and publishes it to Docker Hub as dbohry/bifrost:X.Y.Z, :X.Y, :X and
+# :latest. The commit is then tagged vX.Y.Z and Portainer is asked to redeploy.
+# To move to a new minor or major version, push that tag by hand (for example
+# v1.1.0); the next merge is then published as 1.1.1. It can also be started by hand.
+# Changes that cannot affect the image (docs, browser checks) are skipped.
 on:
   push:
     branches: [main]
@@ -14,7 +17,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write # to push the version tag
 
 # One publish at a time, and a newer merge waits instead of cancelling a running push.
 concurrency:
@@ -26,6 +29,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # the tags are needed to find the last version
+      - name: Work out the next version
+        run: |
+          last=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | head -n1)
+          if [ -z "$last" ]; then
+            next=1.0.0
+          else
+            IFS=. read -r major minor patch <<< "${last#v}"
+            next="$major.$minor.$((patch + 1))"
+          fi
+          IFS=. read -r major minor patch <<< "$next"
+          echo "VERSION=$next" >> "$GITHUB_ENV"
+          echo "VERSION_MINOR=$major.$minor" >> "$GITHUB_ENV"
+          echo "VERSION_MAJOR=$major" >> "$GITHUB_ENV"
+          echo "Version: $next (previous: ${last:-none})"
       - uses: docker/setup-qemu-action@v4
       - uses: docker/setup-buildx-action@v4
       # Repository secrets: DOCKERHUB_USERNAME, and DOCKERHUB_TOKEN (an access token with
@@ -34,8 +53,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      # The version shown in the app: the commit this image was built from.
-      - run: echo "VERSION=main-${GITHUB_SHA::7}" >> "$GITHUB_ENV"
       - uses: docker/build-push-action@v7
         with:
           context: .
@@ -44,12 +61,20 @@ jobs:
           tags: |
             dbohry/bifrost:latest
             dbohry/bifrost:${{ env.VERSION }}
+            dbohry/bifrost:${{ env.VERSION_MINOR }}
+            dbohry/bifrost:${{ env.VERSION_MAJOR }}
           build-args: VERSION=${{ env.VERSION }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ env.VERSION }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+      # Only after the image is published, so a failed build does not use up a version.
+      - name: Tag the release
+        run: |
+          git tag "v$VERSION"
+          git push origin "v$VERSION"
 
   deploy:
     name: Deploy
