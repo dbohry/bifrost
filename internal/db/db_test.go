@@ -25,8 +25,8 @@ func TestOpenSetsPragmas(t *testing.T) {
 	if err := conn.QueryRow(`PRAGMA journal_mode`).Scan(&mode); err != nil {
 		t.Fatal(err)
 	}
-	if mode != "wal" {
-		t.Errorf("journal_mode = %q, want wal", mode)
+	if mode != "delete" {
+		t.Errorf("journal_mode = %q, want delete", mode)
 	}
 
 	var fk int
@@ -41,8 +41,8 @@ func TestOpenSetsPragmas(t *testing.T) {
 	if err := conn.QueryRow(`PRAGMA busy_timeout`).Scan(&timeout); err != nil {
 		t.Fatal(err)
 	}
-	if timeout != 5000 {
-		t.Errorf("busy_timeout = %d, want 5000", timeout)
+	if timeout != 10000 {
+		t.Errorf("busy_timeout = %d, want 10000", timeout)
 	}
 }
 

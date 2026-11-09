@@ -14,7 +14,7 @@ Why Bifrost is built the way it is, what is in it, and what comes later.
 | Layer | Choice |
 |---|---|
 | Backend | Go, built as one static binary |
-| Database | SQLite (WAL mode, pure-Go driver), stored in a `/data` volume |
+| Database | SQLite (rollback journal, safe on NFS; pure-Go driver), stored in a `/data` volume |
 | Frontend | Svelte 5 + Vite + TypeScript, as a single-page app (no SvelteKit) |
 | Styling | Plain CSS with theme variables, no UI component library |
 | Distribution | Docker only, multi-architecture (`amd64` and `arm64`) |
@@ -103,7 +103,7 @@ Each step ends with something that can be run and tried. Layouts are built mobil
 ### Risks to watch
 
 - Drag-and-drop on touch screens. Prototype it on a real phone in step 4.
-- SQLite allows one writer at a time. Use WAL mode and a busy timeout from the start.
+- SQLite allows one writer at a time. Use a busy timeout from the start. WAL mode is not used because it does not work on NFS.
 - The first-run endpoint must stop working as soon as the first admin exists.
 - Session cookies need the secure flags, requests that change data need protection against cross-site requests, and sign-in attempts should be rate limited.
 
