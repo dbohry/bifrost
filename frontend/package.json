@@ -10,11 +10,11 @@
     "size": "node scripts/check-bundle-size.mjs"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^7.3.1",
+    "@sveltejs/vite-plugin-svelte": "^7.3.2",
     "@tsconfig/svelte": "^5.0.9",
-    "@types/node": "^26.6.6",
+    "@types/node": "^26.6.7",
     "@types/sortablejs": "^1.15.9",
-    "svelte": "^5.57.3",
+    "svelte": "^5.59.1",
     "svelte-check": "^4.7.8",
     "typescript": "^6.0.3",
     "vite": "^8.3.8"
